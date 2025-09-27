@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'image_style.dart';
 import 'image_options.dart';
-import 'image_ratio.dart';
+import 'image_time.dart';
+import 'image_weather.dart';
 
 // 테마 프리셋 모델
 class ThemePreset {
@@ -10,7 +11,8 @@ class ThemePreset {
   final String description;
   final ImageStyle style;
   final AdvancedImageOptions? advancedOptions;
-  final ImageRatio ratio;
+  final ImageTime? time;
+  final ImageWeather? weather;
   final IconData icon;
   final Color primaryColor;
   final bool isPremium;
@@ -21,7 +23,8 @@ class ThemePreset {
     required this.description,
     required this.style,
     this.advancedOptions,
-    required this.ratio,
+    this.time,
+    this.weather,
     required this.icon,
     required this.primaryColor,
     this.isPremium = false,
@@ -35,7 +38,8 @@ class ThemePreset {
       'description': description,
       'style': style.name,
       'advancedOptions': advancedOptions?.toMap(),
-      'ratio': ratio.name,
+      'time': time?.name,
+      'weather': weather?.name,
       'isPremium': isPremium,
     };
   }
@@ -50,7 +54,8 @@ class ThemePreset {
       advancedOptions: map['advancedOptions'] != null
           ? AdvancedImageOptions.fromMap(map['advancedOptions'])
           : null,
-      ratio: ImageRatio.values.firstWhere((e) => e.name == map['ratio']),
+      time: map['time'] != null ? ImageTime.values.firstWhere((e) => e.name == map['time']) : null,
+      weather: map['weather'] != null ? ImageWeather.values.firstWhere((e) => e.name == map['weather']) : null,
       icon: Icons.palette, // 기본값
       primaryColor: Colors.blue, // 기본값
       isPremium: map['isPremium'] ?? false,
@@ -67,7 +72,8 @@ class ThemePresets {
       name: '자연스러운',
       description: '실사 스타일로 자연스러운 일상을 담아내세요',
       style: ImageStyle.realistic,
-      ratio: ImageRatio.landscape,
+      time: ImageTime.golden,
+      weather: ImageWeather.sunny,
       icon: Icons.nature,
       primaryColor: Colors.green,
       isPremium: false,
@@ -77,7 +83,8 @@ class ThemePresets {
       name: '몽환적인',
       description: '수채화 스타일로 꿈 같은 분위기를 연출하세요',
       style: ImageStyle.watercolor,
-      ratio: ImageRatio.square,
+      time: ImageTime.sunset,
+      weather: ImageWeather.cloudy,
       icon: Icons.cloud,
       primaryColor: Colors.purple,
       isPremium: false,
@@ -95,7 +102,8 @@ class ThemePresets {
         color: ColorOption.sepia,
         composition: CompositionOption.symmetrical,
       ),
-      ratio: ImageRatio.portrait,
+      time: ImageTime.golden,
+      weather: ImageWeather.cloudy,
       icon: Icons.camera_alt,
       primaryColor: Colors.brown,
       isPremium: true,
@@ -111,7 +119,8 @@ class ThemePresets {
         color: ColorOption.vibrant,
         composition: CompositionOption.ruleOfThirds,
       ),
-      ratio: ImageRatio.wide,
+      time: ImageTime.morning,
+      weather: ImageWeather.sunny,
       icon: Icons.star,
       primaryColor: Colors.pink,
       isPremium: true,
@@ -127,7 +136,8 @@ class ThemePresets {
         color: ColorOption.pastel,
         composition: CompositionOption.symmetrical,
       ),
-      ratio: ImageRatio.landscape,
+      time: ImageTime.noon,
+      weather: ImageWeather.sunny,
       icon: Icons.local_florist,
       primaryColor: Colors.blue,
       isPremium: true,
@@ -143,7 +153,8 @@ class ThemePresets {
         color: ColorOption.neonPop,
         composition: CompositionOption.closeUp,
       ),
-      ratio: ImageRatio.square,
+      time: ImageTime.night,
+      weather: ImageWeather.snowy,
       icon: Icons.videogame_asset,
       primaryColor: Colors.cyan,
       isPremium: true,
@@ -159,7 +170,8 @@ class ThemePresets {
         color: ColorOption.earthTone,
         composition: CompositionOption.symmetrical,
       ),
-      ratio: ImageRatio.portrait,
+      time: ImageTime.golden,
+      weather: ImageWeather.cloudy,
       icon: Icons.content_cut,
       primaryColor: Colors.orange,
       isPremium: true,
@@ -175,7 +187,8 @@ class ThemePresets {
         color: ColorOption.vibrant,
         composition: CompositionOption.closeUp,
       ),
-      ratio: ImageRatio.square,
+      time: ImageTime.night,
+      weather: ImageWeather.snowy,
       icon: Icons.child_care,
       primaryColor: Colors.amber,
       isPremium: true,

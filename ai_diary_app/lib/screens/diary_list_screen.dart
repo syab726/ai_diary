@@ -38,7 +38,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
         slivers: [
           // 상단 앱바
           SliverAppBar(
-            expandedHeight: 120,
+            expandedHeight: 56,
             floating: false,
             pinned: true,
             backgroundColor: Colors.white,
@@ -47,29 +47,16 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
             shadowColor: Colors.black.withOpacity(0.1),
             surfaceTintColor: Colors.white,
             automaticallyImplyLeading: false,
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                AppLocalizations.of(context).appTitle,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: const Color(0xFF2D3748),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              centerTitle: false,
-              titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
-              background: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
+            title: Text(
+              AppLocalizations.of(context).appTitle,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: const Color(0xFF2D3748),
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
             ),
+            centerTitle: false,
+            titleSpacing: 16,
             actions: [
               Container(
                 margin: const EdgeInsets.only(right: 4),
@@ -268,9 +255,10 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                           padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
                           child: Text(
                             monthKey,
-                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: const Color(0xFF2D3748),
+                              fontSize: 20,
                             ),
                           ),
                         ),

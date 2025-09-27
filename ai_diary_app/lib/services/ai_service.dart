@@ -8,7 +8,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import '../models/image_options.dart';
 import '../models/perspective_options.dart';
-import '../models/image_ratio.dart';
+import '../models/image_time.dart';
+import '../models/image_weather.dart';
 
 class AIService {
   static const String _geminiApiKey = 'AIzaSyB4sTKHWNsKq_k-X-jlm5l_9BCQC4eq-hc';
@@ -99,14 +100,15 @@ class AIService {
     }
   }
 
-  static Future<String> generateImagePrompt(String diaryContent, String emotion, List<String> keywords, String style, [AdvancedImageOptions? advancedOptions, PerspectiveOptions? perspectiveOptions, ImageRatio? imageRatio]) async {
+  static Future<String> generateImagePrompt(String diaryContent, String emotion, List<String> keywords, String style, [AdvancedImageOptions? advancedOptions, PerspectiveOptions? perspectiveOptions, ImageTime? imageTime, ImageWeather? imageWeather]) async {
     try {
       // 고급 옵션을 프롬프트 접미사로 변환
       final advancedSuffix = advancedOptions?.generatePromptSuffix() ?? '';
       // 시점 옵션을 프롬프트 접미사로 변환
       final perspectiveSuffix = perspectiveOptions?.getPromptSuffix() ?? '';
-      // 이미지 비율 정보
-      final ratioSuffix = imageRatio != null ? '이미지 비율: ${imageRatio.ratio} (${imageRatio.displayName})' : '';
+      // 시간과 날씨 정보
+      final timeSuffix = imageTime != null ? '시간: ${imageTime.displayName}' : '';
+      final weatherSuffix = imageWeather != null ? '날씨: ${imageWeather.displayName}' : '';
 
       final response = await _textModel.generateContent([
         Content.text('''다음 일기 내용을 바탕으로 이미지 생성 프롬프트를 만들어주세요.
@@ -118,12 +120,14 @@ class AIService {
 키워드: ${keywords.join(', ')}
 ${advancedSuffix.isNotEmpty ? '고급 옵션: $advancedSuffix' : ''}
 ${perspectiveSuffix.isNotEmpty ? '시점: $perspectiveSuffix' : ''}
-${ratioSuffix.isNotEmpty ? '이미지 비율: $ratioSuffix' : ''}
+${timeSuffix.isNotEmpty ? '시간: $timeSuffix' : ''}
+${weatherSuffix.isNotEmpty ? '날씨: $weatherSuffix' : ''}
 
 프롬프트는 영어로 작성하고, 일기의 감정과 내용을 잘 표현하는 따뜻하고 감성적인 이미지가 되도록 해주세요.
 ${advancedSuffix.isNotEmpty ? '고급 옵션에서 지정된 조명, 분위기, 색상, 구도 요소들을 반영해주세요.' : ''}
 ${perspectiveSuffix.isNotEmpty ? '시점 옵션에서 지정된 관점을 반영해주세요.' : ''}
-${ratioSuffix.isNotEmpty ? '지정된 이미지 비율 ${imageRatio!.ratio}에 맞춰서 이미지를 생성해주세요.' : ''}''')
+${timeSuffix.isNotEmpty ? '지정된 시간대 ${imageTime!.displayName}의 분위기를 반영해주세요.' : ''}
+${weatherSuffix.isNotEmpty ? '지정된 날씨 ${imageWeather!.displayName}의 느낌을 표현해주세요.' : ''}''')
       ]);
       
       return response.text?.trim() ?? 'A peaceful and emotional illustration';
@@ -133,13 +137,30 @@ ${ratioSuffix.isNotEmpty ? '지정된 이미지 비율 ${imageRatio!.ratio}에 �
     }
   }
 
-  static Future<String?> generateImage(String prompt, [ImageRatio? imageRatio]) async {
+  static Future<String?> generateImage(String prompt, [ImageTime? imageTime, ImageWeather? imageWeather]) async {
     try {
       print('=== Gemini Imagen API를 통한 이미지 생성 시작 ===');
       print('프롬프트: $prompt');
+      print('적용할 시간: ${imageTime != null ? imageTime.displayName : '기본값'}');
+      print('적용할 날씨: ${imageWeather != null ? imageWeather.displayName : '기본값'}');
 
       try {
         print('Gemini 2.5 Flash Image Preview 이미지 생성 시도...');
+
+        // 시간과 날씨에 따른 프롬프트 강화
+        String timePrompt = '';
+        if (imageTime != null) {
+          timePrompt = 'Time setting: ${imageTime.displayName}. ';
+        }
+
+        String weatherPrompt = '';
+        if (imageWeather != null) {
+          weatherPrompt = 'Weather: ${imageWeather.displayName}. ';
+        }
+
+        final enhancedPrompt = '$timePrompt$weatherPrompt$prompt. Ensure the image reflects the specified time and weather conditions.';
+
+        print('최종 강화된 프롬프트: $enhancedPrompt');
 
         final response = await http.post(
           Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=$_geminiApiKey'),
@@ -151,7 +172,7 @@ ${ratioSuffix.isNotEmpty ? '지정된 이미지 비율 ${imageRatio!.ratio}에 �
               {
                 'parts': [
                   {
-                    'text': 'Generate an image with aspect ratio ${imageRatio?.ratio ?? "1:1"}: $prompt'
+                    'text': enhancedPrompt
                   }
                 ]
               }
@@ -204,7 +225,12 @@ ${ratioSuffix.isNotEmpty ? '지정된 이미지 비율 ${imageRatio!.ratio}에 �
         print('Gemini Imagen API 호출 오류: $e');
       }
 
-      throw Exception('Gemini Imagen 이미지 생성 실패');
+      // Gemini API 실패시 폴백으로 Unsplash/Picsum 사용
+      print('폴백: Unsplash/Picsum 이미지 사용');
+      final smartKeywords = _generateSmartImageKeywords(prompt);
+      final fallbackImageUrl = _selectBestImageUrl(smartKeywords, prompt);
+      print('폴백 이미지 URL: $fallbackImageUrl');
+      return fallbackImageUrl;
 
     } catch (e) {
       print('*** 이미지 생성 실패 ***');
@@ -255,13 +281,18 @@ ${ratioSuffix.isNotEmpty ? '지정된 이미지 비율 ${imageRatio!.ratio}에 �
   
   static String _selectBestImageUrl(List<String> keywords, String prompt) {
     final searchTerm = keywords.join(',');
-    
+
+    // 기본 이미지 크기
+    String dimensions = '800x800';
+
+    print('선택된 이미지 크기: $dimensions');
+
     // 다양한 이미지 소스 중에서 선택
     final sources = [
-      'https://source.unsplash.com/800x600/?$searchTerm',
-      'https://picsum.photos/800/600?random=${DateTime.now().millisecondsSinceEpoch}',
+      'https://source.unsplash.com/$dimensions/?$searchTerm',
+      'https://picsum.photos/${dimensions.split('x')[0]}/${dimensions.split('x')[1]}?random=${DateTime.now().millisecondsSinceEpoch}',
     ];
-    
+
     // 프롬프트에 따라 더 적합한 소스 선택
     if (prompt.toLowerCase().contains('realistic') || prompt.toLowerCase().contains('photo')) {
       return sources[0]; // Unsplash (실제 사진)
@@ -294,11 +325,79 @@ ${ratioSuffix.isNotEmpty ? '지정된 이미지 비율 ${imageRatio!.ratio}에 �
     return keywords.isEmpty ? ['nature', 'peaceful'] : keywords.take(3).toList();
   }
 
-  static Future<Map<String, dynamic>> processEntry(String diaryContent, String style, [AdvancedImageOptions? advancedOptions, PerspectiveOptions? perspectiveOptions, ImageRatio? imageRatio]) async {
+  static Future<Map<String, dynamic>> autoConfigureOptions(String diaryContent) async {
+    try {
+      print('=== AI 자동 설정 시작 ===');
+      print('일기 내용: $diaryContent');
+
+      final response = await _textModel.generateContent([
+        Content.text('''다음 일기 내용을 분석해서 이미지 생성에 적합한 설정들을 추천해주세요.
+JSON 형태로 답변해주세요:
+
+{
+  "lighting": "natural|dramatic|warm|cool|sunset|night 중 하나",
+  "mood": "peaceful|energetic|mysterious|nostalgic|dreamy|melancholic 중 하나",
+  "color": "vibrant|pastel|monochrome|sepia|earthTone|neonPop 중 하나",
+  "composition": "closeUp|wideAngle|birdEye|lowAngle|symmetrical|ruleOfThirds 중 하나",
+  "time": "morning|afternoon|evening|night 중 하나",
+  "weather": "sunny|cloudy|rainy|snowy 중 하나"
+}
+
+일기 내용: $diaryContent
+
+일기의 분위기, 감정, 시간대, 날씨, 상황 등을 종합적으로 고려해서 가장 적합한 설정을 선택해주세요.''')
+      ]);
+
+      String responseText = response.text?.trim() ?? '';
+      print('AI 응답: $responseText');
+
+      // JSON 파싱 시도
+      try {
+        // 응답에서 JSON 부분만 추출
+        final jsonStart = responseText.indexOf('{');
+        final jsonEnd = responseText.lastIndexOf('}');
+        if (jsonStart != -1 && jsonEnd != -1) {
+          final jsonString = responseText.substring(jsonStart, jsonEnd + 1);
+          final Map<String, dynamic> aiOptions = jsonDecode(jsonString);
+
+          print('파싱된 AI 옵션: $aiOptions');
+          return aiOptions;
+        }
+      } catch (e) {
+        print('JSON 파싱 오류: $e');
+      }
+
+      // 파싱 실패시 기본값 반환
+      return {
+        'lighting': 'natural',
+        'mood': 'peaceful',
+        'color': 'vibrant',
+        'composition': 'wideAngle',
+        'time': 'afternoon',
+        'weather': 'sunny'
+      };
+    } catch (e) {
+      print('AI 자동 설정 오류: $e');
+      return {
+        'lighting': 'natural',
+        'mood': 'peaceful',
+        'color': 'vibrant',
+        'composition': 'wideAngle',
+        'time': 'afternoon',
+        'weather': 'sunny'
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> processEntry(String diaryContent, String style, [AdvancedImageOptions? advancedOptions, PerspectiveOptions? perspectiveOptions, ImageTime? imageTime, ImageWeather? imageWeather]) async {
     try {
       print('=== AI 처리 시작 ===');
       print('일기 내용: $diaryContent');
       print('스타일: $style');
+      print('시간 설정: ${imageTime != null ? imageTime.displayName : '기본값'}');
+      print('날씨 설정: ${imageWeather != null ? imageWeather.displayName : '기본값'}');
+      print('고급 옵션: ${advancedOptions != null ? '활성화' : '비활성화'}');
+      print('시점 옵션: ${perspectiveOptions != null ? '활성화' : '비활성화'}');
       
       // 병렬로 감정 분석과 키워드 추출 실행
       print('감정 분석 및 키워드 추출 시작...');
@@ -315,12 +414,12 @@ ${ratioSuffix.isNotEmpty ? '지정된 이미지 비율 ${imageRatio!.ratio}에 �
 
       // 이미지 프롬프트 생성
       print('이미지 프롬프트 생성 시작...');
-      final imagePrompt = await generateImagePrompt(diaryContent, emotion, keywords, style, advancedOptions, perspectiveOptions, imageRatio);
+      final imagePrompt = await generateImagePrompt(diaryContent, emotion, keywords, style, advancedOptions, perspectiveOptions, imageTime, imageWeather);
       print('이미지 프롬프트 결과: $imagePrompt');
       
       // 이미지 생성
       print('이미지 생성 시작...');
-      final imageUrl = await generateImage(imagePrompt, imageRatio);
+      final imageUrl = await generateImage(imagePrompt, imageTime, imageWeather);
       print('이미지 생성 완료. URL: $imageUrl');
 
       final result = {
@@ -337,11 +436,14 @@ ${ratioSuffix.isNotEmpty ? '지정된 이미지 비율 ${imageRatio!.ratio}에 �
     } catch (e, stackTrace) {
       print('AI 처리 오류: $e');
       print('스택 트레이스: $stackTrace');
+      // 기본 폴백 이미지 크기 설정
+      String fallbackDimensions = '400/400';
+
       return {
         'emotion': 'peaceful',
         'keywords': <String>[],
         'imagePrompt': 'A peaceful illustration',
-        'imageUrl': 'https://picsum.photos/400/300?random=error',
+        'imageUrl': 'https://picsum.photos/$fallbackDimensions?random=error',
       };
     }
   }

@@ -232,30 +232,77 @@ class AdvancedImageOptionsSelector extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            // "선택 안함" 옵션
-            _buildOptionChip(
-              '선택 안함',
-              selectedValue == null,
-              enabled,
-              () => enabled ? onChanged(null) : null,
+        const SizedBox(height: 12),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: enabled ? Colors.grey.shade300 : Colors.grey.shade200,
             ),
-            // 옵션들
-            ...options.map((option) {
-              final displayName = _getDisplayName(option);
-              final isSelected = selectedValue == option;
-              return _buildOptionChip(
-                displayName,
-                isSelected,
-                enabled,
-                () => enabled ? onChanged(option) : null,
-              );
-            }),
-          ],
+            borderRadius: BorderRadius.circular(8),
+            color: enabled ? Colors.white : Colors.grey.withOpacity(0.1),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<T?>(
+              value: selectedValue,
+              isExpanded: true,
+              icon: Icon(
+                Icons.arrow_drop_down,
+                color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
+              ),
+              items: [
+                // "선택 안함" 옵션
+                DropdownMenuItem<T?>(
+                  value: null,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.clear,
+                        size: 20,
+                        color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        '선택 안함',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: enabled ? Colors.grey.shade800 : Colors.grey.shade400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // 옵션들
+                ...options.map((option) {
+                  final displayName = _getDisplayName(option);
+                  return DropdownMenuItem<T?>(
+                    value: option,
+                    child: Row(
+                      children: [
+                        Icon(
+                          _getOptionIcon(option),
+                          size: 20,
+                          color: enabled ? _getOptionColor(option) : Colors.grey.shade400,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          displayName,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: enabled ? Colors.grey.shade800 : Colors.grey.shade400,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ],
+              onChanged: enabled ? (value) => onChanged(value) : null,
+            ),
+          ),
         ),
       ],
     );
@@ -269,38 +316,139 @@ class AdvancedImageOptionsSelector extends StatelessWidget {
     return option.toString();
   }
 
-  Widget _buildOptionChip(
-    String label,
-    bool isSelected,
-    bool isEnabled,
-    VoidCallback? onTap,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? (isEnabled ? Colors.orange.withOpacity(0.2) : Colors.grey.withOpacity(0.1))
-              : Colors.transparent,
-          border: Border.all(
-            color: isSelected
-                ? (isEnabled ? Colors.orange : Colors.grey)
-                : (isEnabled ? Colors.grey.shade300 : Colors.grey.shade200),
-          ),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-            color: isSelected
-                ? (isEnabled ? Colors.orange.shade700 : Colors.grey)
-                : (isEnabled ? Colors.grey.shade600 : Colors.grey.shade400),
-          ),
-        ),
-      ),
-    );
+  IconData _getOptionIcon(dynamic option) {
+    if (option is LightingOption) {
+      switch (option) {
+        case LightingOption.natural:
+          return Icons.wb_sunny;
+        case LightingOption.dramatic:
+          return Icons.theater_comedy;
+        case LightingOption.warm:
+          return Icons.wb_incandescent;
+        case LightingOption.cool:
+          return Icons.ac_unit;
+        case LightingOption.sunset:
+          return Icons.wb_shade;
+        case LightingOption.night:
+          return Icons.nights_stay;
+      }
+    }
+    if (option is MoodOption) {
+      switch (option) {
+        case MoodOption.peaceful:
+          return Icons.spa;
+        case MoodOption.energetic:
+          return Icons.flash_on;
+        case MoodOption.mysterious:
+          return Icons.psychology;
+        case MoodOption.nostalgic:
+          return Icons.history;
+        case MoodOption.dreamy:
+          return Icons.cloud;
+        case MoodOption.melancholic:
+          return Icons.sentiment_dissatisfied;
+      }
+    }
+    if (option is ColorOption) {
+      switch (option) {
+        case ColorOption.vibrant:
+          return Icons.color_lens;
+        case ColorOption.pastel:
+          return Icons.palette;
+        case ColorOption.monochrome:
+          return Icons.filter_b_and_w;
+        case ColorOption.sepia:
+          return Icons.photo_filter;
+        case ColorOption.earthTone:
+          return Icons.terrain;
+        case ColorOption.neonPop:
+          return Icons.electric_bolt;
+      }
+    }
+    if (option is CompositionOption) {
+      switch (option) {
+        case CompositionOption.closeUp:
+          return Icons.zoom_in;
+        case CompositionOption.wideAngle:
+          return Icons.zoom_out;
+        case CompositionOption.birdEye:
+          return Icons.flight;
+        case CompositionOption.lowAngle:
+          return Icons.arrow_upward;
+        case CompositionOption.symmetrical:
+          return Icons.balance;
+        case CompositionOption.ruleOfThirds:
+          return Icons.grid_on;
+      }
+    }
+    return Icons.tune;
+  }
+
+  Color _getOptionColor(dynamic option) {
+    if (option is LightingOption) {
+      switch (option) {
+        case LightingOption.natural:
+          return Colors.yellow;
+        case LightingOption.dramatic:
+          return Colors.red;
+        case LightingOption.warm:
+          return Colors.orange;
+        case LightingOption.cool:
+          return Colors.blue;
+        case LightingOption.sunset:
+          return Colors.deepOrange;
+        case LightingOption.night:
+          return Colors.indigo;
+      }
+    }
+    if (option is MoodOption) {
+      switch (option) {
+        case MoodOption.peaceful:
+          return Colors.green;
+        case MoodOption.energetic:
+          return Colors.yellow;
+        case MoodOption.mysterious:
+          return Colors.purple;
+        case MoodOption.nostalgic:
+          return Colors.brown;
+        case MoodOption.dreamy:
+          return Colors.pink;
+        case MoodOption.melancholic:
+          return Colors.grey;
+      }
+    }
+    if (option is ColorOption) {
+      switch (option) {
+        case ColorOption.vibrant:
+          return Colors.red;
+        case ColorOption.pastel:
+          return Colors.pink;
+        case ColorOption.monochrome:
+          return Colors.grey;
+        case ColorOption.sepia:
+          return Colors.brown;
+        case ColorOption.earthTone:
+          return Colors.green;
+        case ColorOption.neonPop:
+          return Colors.cyan;
+      }
+    }
+    if (option is CompositionOption) {
+      switch (option) {
+        case CompositionOption.closeUp:
+          return Colors.blue;
+        case CompositionOption.wideAngle:
+          return Colors.green;
+        case CompositionOption.birdEye:
+          return Colors.orange;
+        case CompositionOption.lowAngle:
+          return Colors.red;
+        case CompositionOption.symmetrical:
+          return Colors.purple;
+        case CompositionOption.ruleOfThirds:
+          return Colors.teal;
+      }
+    }
+    return Colors.orange;
   }
 }

@@ -5,7 +5,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../models/diary_entry.dart';
 import '../models/image_style.dart';
 import '../models/image_options.dart';
-import '../models/image_ratio.dart';
+import '../models/image_time.dart';
+import '../models/image_weather.dart';
+import '../models/image_season.dart';
 import '../models/perspective_options.dart';
 import '../services/ai_service.dart';
 import '../services/database_service.dart';
@@ -14,8 +16,8 @@ import '../providers/subscription_provider.dart';
 import '../providers/image_style_provider.dart';
 import '../widgets/image_viewer.dart';
 import '../widgets/tabbed_option_selector.dart';
-import '../l10n/app_localizations.dart';
 import '../providers/font_provider.dart';
+import '../providers/auto_advanced_settings_provider.dart';
 import '../models/font_family.dart';
 import 'dart:io';
 import 'dart:convert';
@@ -41,22 +43,21 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   bool _isGeneratingImage = false;
   String? _generatedImageUrl;
   DiaryEntry? _existingEntry;
-  bool _showAdvancedOptions = false;
   AdvancedImageOptions _advancedOptions = const AdvancedImageOptions();
-  ImageRatio _selectedRatio = ImageRatio.wide;
+  ImageTime _selectedTime = ImageTime.morning;
+  ImageWeather _selectedWeather = ImageWeather.sunny;
+  ImageSeason _selectedSeason = ImageSeason.spring;
   PerspectiveOptions _perspectiveOptions = const PerspectiveOptions();
   String? _selectedThemePresetId;
   FontFamily _selectedFont = FontFamily.notoSans;
+  ImageStyle _selectedImageStyle = ImageStyle.illustration;
+  bool _isAutoConfigEnabled = false;
 
 
   @override
   void initState() {
     super.initState();
     _loadExistingEntry();
-    // 수정 모드에서는 처음부터 고급 옵션을 표시
-    if (widget.existingDiaryId != null) {
-      _showAdvancedOptions = true;
-    }
   }
 
   @override
@@ -69,17 +70,26 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   Future<void> _loadExistingEntry() async {
     if (widget.existingDiaryId != null) {
       try {
+        print('DiaryCreateScreen: 기존 일기 ID로 로딩 시작: ${widget.existingDiaryId}');
         final entry = await DatabaseService.getDiaryById(widget.existingDiaryId!);
         if (entry != null) {
+          print('DiaryCreateScreen: 기존 일기 로딩 성공: ${entry.title}');
           setState(() {
             _existingEntry = entry;
             _titleController.text = entry.title;
             _contentController.text = entry.content;
             _generatedImageUrl = entry.generatedImageUrl;
-            _selectedFont = entry.fontFamily ?? FontFamily.notoSans;
+            _selectedFont = entry.fontFamily;
+            _selectedImageStyle = entry.imageStyle;
+            _selectedTime = entry.imageTime;
+            _selectedWeather = entry.imageWeather;
+            _selectedSeason = entry.imageSeason;
           });
+        } else {
+          print('DiaryCreateScreen: 기존 일기를 찾을 수 없음');
         }
       } catch (e) {
+        print('DiaryCreateScreen: 기존 일기 로딩 오류: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('일기를 불러오는데 실패했습니다: $e')),
@@ -90,6 +100,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   }
 
   bool get _isEditMode => _existingEntry != null;
+
 
   Future<void> _generateDiary() async {
     if (!_formKey.currentState!.validate()) return;
@@ -106,13 +117,19 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     try {
       final selectedStyle = ref.read(defaultImageStyleProvider);
 
+      AdvancedImageOptions effectiveAdvancedOptions = _advancedOptions;
+      ImageTime effectiveTime = _selectedTime;
+      ImageWeather effectiveWeather = _selectedWeather;
+
+
       // AI 서비스를 통한 이미지 생성
       final Map<String, dynamic> result = await AIService.processEntry(
         _contentController.text.trim(),
         selectedStyle.displayName,
-        subscription.isPremium ? _advancedOptions : null,
+        subscription.isPremium ? effectiveAdvancedOptions : null,
         _perspectiveOptions,
-        subscription.isPremium ? _selectedRatio : null,
+        subscription.isPremium ? effectiveTime : null,
+        subscription.isPremium ? effectiveWeather : null,
       );
 
       final imageUrl = result['imageUrl'] as String?;
@@ -131,11 +148,16 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         aiPrompt: aiPrompt,
         imageStyle: selectedStyle,
         fontFamily: _selectedFont,
+        imageTime: _selectedTime,
+        imageWeather: _selectedWeather,
+        imageSeason: _selectedSeason,
       );
 
       String diaryId;
       if (_existingEntry != null) {
         final updatedDiary = diary.copyWith(
+          id: _existingEntry!.id,
+          createdAt: _existingEntry!.createdAt,
           updatedAt: DateTime.now(),
         );
         await DatabaseService.updateDiary(updatedDiary);
@@ -195,6 +217,9 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
           aiPrompt: _existingEntry!.aiPrompt,
           imageStyle: _existingEntry!.imageStyle,
           fontFamily: _selectedFont,
+          imageTime: _existingEntry!.imageTime,
+          imageWeather: _existingEntry!.imageWeather,
+          imageSeason: _existingEntry!.imageSeason,
         );
         await DatabaseService.updateDiary(updatedDiary);
         diaryId = _existingEntry!.id;
@@ -210,6 +235,9 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
           aiPrompt: null,
           imageStyle: ImageStyle.realistic,
           fontFamily: _selectedFont,
+          imageTime: _selectedTime,
+          imageWeather: _selectedWeather,
+          imageSeason: _selectedSeason,
         );
         diaryId = await DatabaseService.insertDiary(diary);
       }
@@ -246,7 +274,6 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final subscription = ref.read(subscriptionProvider);
-    bool isSuccess = false;
 
     setState(() {
       _isLoading = true;
@@ -260,7 +287,8 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         style.displayName,
         subscription.isPremium ? advancedOptions : null,
         _perspectiveOptions,
-        subscription.isPremium ? _selectedRatio : null,
+        subscription.isPremium ? _selectedTime : null,
+        subscription.isPremium ? _selectedWeather : null,
       );
 
       final newImageUrl = result['imageUrl'] as String?;
@@ -287,10 +315,12 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
           imageStyle: style,
           fontFamily: _selectedFont,
           hasBeenRegenerated: true,
+          imageTime: _selectedTime,
+          imageWeather: _selectedWeather,
+          imageSeason: _selectedSeason,
         );
 
         await DatabaseService.updateDiary(updatedDiary);
-        isSuccess = true;
 
         // 프로바이더 업데이트
         ref.invalidate(diaryEntriesProvider);
@@ -361,28 +391,6 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     );
   }
 
-  void _showPremiumDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('프리미엄 기능'),
-        content: const Text('이 기능을 사용하려면 프리미엄 구독이 필요합니다.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('취소'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.go('/settings');
-            },
-            child: const Text('구독하기'),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildImageWidget(String imageUrl) {
     Widget imageWidget;
@@ -556,8 +564,11 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                 ],
               ),
             )
-          : SingleChildScrollView(
-              child: Column(
+          : Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 제목/내용 입력 영역
@@ -605,7 +616,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                                 vertical: 12,
                               ),
                             ),
-                            maxLines: 6,
+                            maxLines: 8,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return '내용을 입력해주세요';
@@ -636,171 +647,354 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                     ),
                   ),
 
-                  // 탭 옵션 영역
-                  Container(
-                    height: 400, // 고정 높이로 설정
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: TabbedOptionSelector(
-                      isPremium: subscription.isPremium,
-                      advancedOptions: _advancedOptions,
-                      onAdvancedOptionsChanged: (options) {
-                        setState(() {
-                          _advancedOptions = options;
-                        });
-                      },
-                      selectedRatio: _selectedRatio,
-                      onRatioChanged: (ratio) {
-                        setState(() {
-                          _selectedRatio = ratio;
-                        });
-                      },
-                      perspectiveOptions: _perspectiveOptions,
-                      onPerspectiveOptionsChanged: (options) {
-                        setState(() {
-                          _perspectiveOptions = options;
-                        });
-                      },
-                      selectedThemePresetId: _selectedThemePresetId,
-                      onThemePresetChanged: (presetId) {
-                        setState(() {
-                          _selectedThemePresetId = presetId;
-                        });
-                      },
-                      selectedFont: _selectedFont,
-                      onFontChanged: (font) {
-                        setState(() {
-                          _selectedFont = font;
-                        });
-                      },
-                    ),
+
+                  // 탭 옵션 영역 (조건부 표시)
+                  !_isEditMode || subscription.isPremium
+                      ? Container(
+                          height: 400,
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: TabbedOptionSelector(
+                            isPremium: subscription.isPremium,
+                            advancedOptions: _advancedOptions,
+                            onAdvancedOptionsChanged: (options) {
+                              setState(() {
+                                _advancedOptions = options;
+                              });
+                            },
+                            selectedTime: _selectedTime,
+                            onTimeChanged: (time) {
+                              setState(() {
+                                _selectedTime = time;
+                              });
+                            },
+                            selectedWeather: _selectedWeather,
+                            onWeatherChanged: (weather) {
+                              setState(() {
+                                _selectedWeather = weather;
+                              });
+                            },
+                            selectedSeason: _selectedSeason,
+                            onSeasonChanged: (season) {
+                              setState(() {
+                                _selectedSeason = season;
+                              });
+                            },
+                            perspectiveOptions: _perspectiveOptions,
+                            onPerspectiveOptionsChanged: (options) {
+                              setState(() {
+                                _perspectiveOptions = options;
+                              });
+                            },
+                            selectedThemePresetId: _selectedThemePresetId,
+                            onThemePresetChanged: (presetId) {
+                              setState(() {
+                                _selectedThemePresetId = presetId;
+                              });
+                            },
+                            isAutoConfigEnabled: ref.watch(autoAdvancedSettingsProvider),
+                            onAutoConfigChanged: (enabled) {
+                              ref.read(autoAdvancedSettingsProvider.notifier).setAutoAdvancedSettings(enabled);
+                            },
+                            onAutoConfigApply: _applyAutoAdvancedSettings,
+                          ),
+                        )
+                      : Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                          padding: const EdgeInsets.all(24.0),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.lock,
+                                  size: 48,
+                                  color: Colors.grey.shade600,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  '이미지 수정은 프리미엄에서만 제공',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey.shade700,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  '다양한 그림 스타일과 옵션을 사용하려면\n프리미엄으로 업그레이드하세요',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
-
-                  // 수정 모드 안내 메시지 (버튼 바로 위)
-                  if (_isEditMode) ...[
-                    const SizedBox(height: 16),
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.orange.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.orange.withOpacity(0.3)),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.info_outline, color: Colors.orange, size: 20),
-                          const SizedBox(width: 8),
-                          const Expanded(
-                            child: Text(
-                              '그림은 일기당 1회만 수정 가능합니다',
-                              style: TextStyle(
-                                color: Color(0xFFD69E2E),
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-
-                  // 버튼 영역
-                  Container(
-                  padding: const EdgeInsets.all(16.0),
-                  child: _isEditMode
-                    ? Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () => context.go('/detail/${_existingEntry!.id}'),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                side: const BorderSide(color: Colors.grey),
-                                foregroundColor: Colors.grey,
-                              ),
-                              child: const Text('취소'),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: _saveTextOnly,
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                side: const BorderSide(color: Color(0xFF38B2AC)),
-                                foregroundColor: const Color(0xFF38B2AC),
-                              ),
-                              child: const Text('일기만 수정'),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: FilledButton(
-                              onPressed: _isGeneratingImage
-                                  ? null
-                                  : () {
-                                      final selectedStyle = ref.read(defaultImageStyleProvider);
-                                      _regenerateImage(selectedStyle, _advancedOptions);
-                                    },
-                              style: FilledButton.styleFrom(
-                                backgroundColor: const Color(0xFF667EEA),
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                              ),
-                              child: _isGeneratingImage
-                                  ? const Text(
-                                      '이미지 생성중...',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    )
-                                  : const Text('그림+일기 수정'),
-                            ),
-                          ),
-                        ],
-                      )
-                    : Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () => context.go('/list'),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                side: const BorderSide(color: Colors.grey),
-                                foregroundColor: Colors.grey,
-                              ),
-                              child: const Text('취소'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            flex: 2,
-                            child: FilledButton(
-                              onPressed: _isGeneratingImage ? null : _generateDiary,
-                              style: FilledButton.styleFrom(
-                                backgroundColor: const Color(0xFF667EEA),
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                              ),
-                              child: _isGeneratingImage
-                                  ? const Text(
-                                      '이미지 생성중...',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    )
-                                  : const Text('AI 그림일기 생성'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
                 ),
               ),
+
+              // 버튼 영역 - 화면 하단에 고정
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border(
+                    top: BorderSide(color: Colors.grey.shade200),
+                  ),
+                ),
+                child: _isEditMode
+                  ? Consumer(
+                      builder: (context, ref, child) {
+                        final subscriptionNotifier = ref.watch(subscriptionProvider);
+                        final isPremium = subscriptionNotifier.isPremium;
+
+                        if (isPremium) {
+                          // 프리미엄 사용자: 3개 버튼 (취소/일기만 수정/그림+일기 수정)
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () => context.go('/detail/${_existingEntry!.id}'),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    side: const BorderSide(color: Colors.grey),
+                                    foregroundColor: Colors.grey,
+                                  ),
+                                  child: const Text('취소'),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: _saveTextOnly,
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    side: const BorderSide(color: Color(0xFF667EEA)),
+                                    foregroundColor: const Color(0xFF667EEA),
+                                  ),
+                                  child: const Text('일기만 수정'),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: FilledButton(
+                                  onPressed: _existingEntry?.hasBeenRegenerated == true
+                                      ? null
+                                      : (_isGeneratingImage ? null : () => _regenerateImage(_selectedImageStyle, _advancedOptions)),
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: _existingEntry?.hasBeenRegenerated == true
+                                        ? Colors.grey.shade400
+                                        : const Color(0xFF667EEA),
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                  ),
+                                  child: _isGeneratingImage
+                                      ? const Text(
+                                          '생성중...',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        )
+                                      : Text(
+                                          _existingEntry?.hasBeenRegenerated == true
+                                              ? '재생성 완료'
+                                              : '그림+일기 수정',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                            ],
+                          );
+                        } else {
+                          // 무료 사용자: 2개 버튼 (취소/수정)
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () => context.go('/detail/${_existingEntry!.id}'),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    side: const BorderSide(color: Colors.grey),
+                                    foregroundColor: Colors.grey,
+                                  ),
+                                  child: const Text('취소'),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                flex: 2,
+                                child: FilledButton(
+                                  onPressed: _saveTextOnly,
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: const Color(0xFF667EEA),
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                  ),
+                                  child: const Text('수정'),
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                      },
+                    )
+                  : Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => context.go('/list'),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              side: const BorderSide(color: Colors.grey),
+                              foregroundColor: Colors.grey,
+                            ),
+                            child: const Text('취소'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 2,
+                          child: FilledButton(
+                            onPressed: _isGeneratingImage ? null : _generateDiary,
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFF667EEA),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: _isGeneratingImage
+                                ? const Text(
+                                    '이미지 생성중...',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  )
+                                : const Text('AI 그림일기 생성'),
+                          ),
+                        ),
+                      ],
+                    ),
+              ),
+            ],
+          ),
     );
   }
+
+  // 고급옵션 자동설정 적용 (조명, 분위기, 색상, 구도만)
+  void _applyAutoAdvancedSettings() {
+    // 일기 내용을 분석해서 고급옵션 자동 설정
+    final content = _contentController.text.trim();
+
+    if (content.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('일기 내용을 먼저 작성해주세요'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // AI 분석 기반 고급옵션 설정 (조명, 분위기, 색상, 구도만)
+    setState(() {
+      _advancedOptions = AdvancedImageOptions(
+        // 조명 설정
+        lighting: _getAnalyzedLighting(content),
+        // 분위기 설정
+        mood: _getAnalyzedMood(content),
+        // 색상 설정
+        color: _getAnalyzedColor(content),
+        // 구도 설정
+        composition: _getAnalyzedComposition(content),
+      );
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('고급옵션이 자동으로 설정되었습니다 (조명, 분위기, 색상, 구도)'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  // 일기 내용을 분석해서 조명 설정
+  LightingOption _getAnalyzedLighting(String content) {
+    if (content.contains('밝') || content.contains('환하') || content.contains('햇빛')) {
+      return LightingOption.natural;
+    } else if (content.contains('어둡') || content.contains('밤') || content.contains('그늘')) {
+      return LightingOption.night;
+    } else if (content.contains('따뜻') || content.contains('포근') || content.contains('노을')) {
+      return LightingOption.warm;
+    } else if (content.contains('시원') || content.contains('차가')) {
+      return LightingOption.cool;
+    } else if (content.contains('석양') || content.contains('황혼')) {
+      return LightingOption.sunset;
+    }
+    return LightingOption.natural;
+  }
+
+  // 일기 내용을 분석해서 분위기 설정
+  MoodOption _getAnalyzedMood(String content) {
+    if (content.contains('평화') || content.contains('고요') || content.contains('차분')) {
+      return MoodOption.peaceful;
+    } else if (content.contains('행복') || content.contains('기쁘') || content.contains('즐거') || content.contains('설레') || content.contains('신나') || content.contains('활기')) {
+      return MoodOption.energetic;
+    } else if (content.contains('슬프') || content.contains('우울') || content.contains('힘들')) {
+      return MoodOption.melancholic;
+    } else if (content.contains('신비') || content.contains('이상')) {
+      return MoodOption.mysterious;
+    } else if (content.contains('꿈') || content.contains('환상')) {
+      return MoodOption.dreamy;
+    } else if (content.contains('추억') || content.contains('옛날')) {
+      return MoodOption.nostalgic;
+    }
+    return MoodOption.peaceful;
+  }
+
+  // 일기 내용을 분석해서 색상 설정
+  ColorOption _getAnalyzedColor(String content) {
+    if (content.contains('화려') || content.contains('선명') || content.contains('밝은색')) {
+      return ColorOption.vibrant;
+    } else if (content.contains('부드러') || content.contains('연한') || content.contains('파스텔')) {
+      return ColorOption.pastel;
+    } else if (content.contains('흑백') || content.contains('단색')) {
+      return ColorOption.monochrome;
+    } else if (content.contains('옛날') || content.contains('고전')) {
+      return ColorOption.sepia;
+    } else if (content.contains('자연') || content.contains('나무') || content.contains('풀') || content.contains('흙')) {
+      return ColorOption.earthTone;
+    } else if (content.contains('네온') || content.contains('전자') || content.contains('미래')) {
+      return ColorOption.neonPop;
+    }
+    return ColorOption.earthTone;
+  }
+
+  // 일기 내용을 분석해서 구도 설정
+  CompositionOption _getAnalyzedComposition(String content) {
+    if (content.contains('가까이') || content.contains('자세히') || content.contains('얼굴')) {
+      return CompositionOption.closeUp;
+    } else if (content.contains('풍경') || content.contains('경치') || content.contains('멀리') || content.contains('넓은')) {
+      return CompositionOption.wideAngle;
+    } else if (content.contains('위에서') || content.contains('내려다')) {
+      return CompositionOption.birdEye;
+    } else if (content.contains('아래에서') || content.contains('올려다')) {
+      return CompositionOption.lowAngle;
+    }
+    return CompositionOption.closeUp;
+  }
+
 }

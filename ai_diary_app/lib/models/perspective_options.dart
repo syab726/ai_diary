@@ -100,149 +100,165 @@ class PerspectiveOptionsSelector extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // 시점 선택
-        ...PerspectiveType.values.map((perspective) => Column(
-          children: [
-            _buildPerspectiveCard(perspective),
-            if (perspective == PerspectiveType.thirdPerson &&
-                options.perspective == PerspectiveType.thirdPerson) ...[
-              const SizedBox(height: 8),
-              _buildGenderSelector(),
-            ],
-            const SizedBox(height: 12),
-          ],
-        )),
-      ],
-    );
-  }
-
-  Widget _buildPerspectiveCard(PerspectiveType perspective) {
-    final isSelected = options.perspective == perspective;
-
-    return GestureDetector(
-      onTap: enabled ? () => _onPerspectiveChanged(perspective) : null,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected
-                ? (enabled ? const Color(0xFF667EEA) : Colors.grey)
-                : (enabled ? Colors.grey.shade300 : Colors.grey.shade200),
-            width: isSelected ? 2 : 1,
-          ),
-          color: isSelected
-              ? (enabled ? const Color(0xFF667EEA).withOpacity(0.1) : Colors.grey.withOpacity(0.1))
-              : Colors.white,
-        ),
-        child: Row(
+        Row(
           children: [
             Icon(
-              perspective == PerspectiveType.firstPerson ? Icons.visibility : Icons.person,
-              color: isSelected
-                  ? (enabled ? const Color(0xFF667EEA) : Colors.grey)
-                  : (enabled ? Colors.grey.shade600 : Colors.grey.shade400),
-              size: 20,
+              Icons.visibility,
+              size: 18,
+              color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    perspective.displayName,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: isSelected
-                          ? (enabled ? const Color(0xFF667EEA) : Colors.grey)
-                          : (enabled ? Colors.grey.shade700 : Colors.grey.shade400),
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    perspective.description,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
-                    ),
-                  ),
-                ],
+            const SizedBox(width: 8),
+            Text(
+              '시점',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: enabled ? Colors.grey.shade700 : Colors.grey.shade400,
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildGenderSelector() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '캐릭터 성별',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey.shade700,
+        const SizedBox(height: 12),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: enabled ? Colors.grey.shade300 : Colors.grey.shade200,
+            ),
+            borderRadius: BorderRadius.circular(8),
+            color: enabled ? Colors.white : Colors.grey.withOpacity(0.1),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<PerspectiveType>(
+              value: options.perspective,
+              isExpanded: true,
+              icon: Icon(
+                Icons.arrow_drop_down,
+                color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
+              ),
+              items: PerspectiveType.values.map((perspective) {
+                return DropdownMenuItem<PerspectiveType>(
+                  value: perspective,
+                  child: Row(
+                    children: [
+                      Icon(
+                        perspective == PerspectiveType.firstPerson ? Icons.visibility : Icons.person,
+                        size: 20,
+                        color: enabled ? const Color(0xFF667EEA) : Colors.grey.shade400,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              perspective.displayName,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: enabled ? Colors.grey.shade800 : Colors.grey.shade400,
+                              ),
+                            ),
+                            Text(
+                              perspective.description,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+              onChanged: enabled ? (perspective) {
+                if (perspective != null) {
+                  _onPerspectiveChanged(perspective);
+                }
+              } : null,
             ),
           ),
-          const SizedBox(height: 8),
+        ),
+
+        // 3인칭 선택 시 성별 선택 표시
+        if (options.perspective == PerspectiveType.thirdPerson) ...[
+          const SizedBox(height: 20),
           Row(
-            children: GenderType.values.map((gender) {
-              final isSelected = options.gender == gender;
-              return Expanded(
-                child: GestureDetector(
-                  onTap: enabled ? () => _onGenderChanged(gender) : null,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 2),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(6),
-                      color: isSelected
-                          ? (enabled ? const Color(0xFF667EEA) : Colors.grey)
-                          : (enabled ? Colors.white : Colors.grey.shade200),
-                      border: Border.all(
-                        color: isSelected
-                            ? (enabled ? const Color(0xFF667EEA) : Colors.grey)
-                            : Colors.grey.shade300,
-                      ),
-                    ),
-                    child: Column(
+            children: [
+              Icon(
+                Icons.person,
+                size: 18,
+                color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '캐릭터 성별',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: enabled ? Colors.grey.shade700 : Colors.grey.shade400,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: enabled ? Colors.grey.shade300 : Colors.grey.shade200,
+              ),
+              borderRadius: BorderRadius.circular(8),
+              color: enabled ? Colors.white : Colors.grey.withOpacity(0.1),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<GenderType>(
+                value: options.gender,
+                isExpanded: true,
+                icon: Icon(
+                  Icons.arrow_drop_down,
+                  color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
+                ),
+                items: GenderType.values.map((gender) {
+                  return DropdownMenuItem<GenderType>(
+                    value: gender,
+                    child: Row(
                       children: [
                         Text(
                           gender.icon,
-                          style: const TextStyle(fontSize: 16),
+                          style: const TextStyle(fontSize: 20),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(width: 12),
                         Text(
                           gender.displayName,
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: isSelected
-                                ? (enabled ? Colors.white : Colors.grey.shade400)
-                                : (enabled ? Colors.grey.shade700 : Colors.grey.shade400),
+                            color: enabled ? Colors.grey.shade800 : Colors.grey.shade400,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ),
-              );
-            }).toList(),
+                  );
+                }).toList(),
+                onChanged: enabled ? (gender) {
+                  if (gender != null) {
+                    _onGenderChanged(gender);
+                  }
+                } : null,
+              ),
+            ),
           ),
         ],
-      ),
+      ],
     );
   }
+
 
   void _onPerspectiveChanged(PerspectiveType perspective) {
     onChanged(options.copyWith(perspective: perspective));

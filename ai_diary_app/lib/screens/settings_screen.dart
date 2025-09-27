@@ -15,6 +15,7 @@ import '../providers/theme_provider.dart';
 import '../providers/image_style_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../providers/font_provider.dart';
+import '../providers/auto_advanced_settings_provider.dart';
 import '../models/font_family.dart';
 import 'image_guide_screen.dart';
 
@@ -94,6 +95,7 @@ class SettingsScreen extends ConsumerWidget {
             subtitle: AppLocalizations.of(context).aiImageGuideSubtitle,
             onTap: () => _navigateToImageGuide(context),
           ),
+          _buildAutoAdvancedSettingsTile(context, ref),
           // AI 분석 강도 - 실제 기능 구현 전까지 숨김
           // _buildSettingsTile(
           //   icon: Icons.tune,
@@ -127,12 +129,23 @@ class SettingsScreen extends ConsumerWidget {
           ),
           
           const SizedBox(height: 24),
-          
-          // 프리미엄 섹션
-          _buildSectionTitle(context, AppLocalizations.of(context).premium),
-          _buildPremiumTile(),
-          
-          const SizedBox(height: 16),
+
+          // 프리미엄 섹션 (프리미엄 사용자가 아닐 때만 표시)
+          Consumer(
+            builder: (context, ref, child) {
+              final subscription = ref.watch(subscriptionProvider);
+              if (!subscription.isPremium) {
+                return Column(
+                  children: [
+                    _buildSectionTitle(context, AppLocalizations.of(context).premium),
+                    _buildPremiumTile(),
+                    const SizedBox(height: 16),
+                  ],
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
           
           // 구독 상태 섹션
           _buildSectionTitle(context, AppLocalizations.of(context).subscriptionManagementTest),
@@ -1382,6 +1395,83 @@ class SettingsScreen extends ConsumerWidget {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => const ImageGuideScreen(),
+      ),
+    );
+  }
+
+  Widget _buildAutoAdvancedSettingsTile(BuildContext context, WidgetRef ref) {
+    final autoAdvancedSettings = ref.watch(autoAdvancedSettingsProvider);
+    final subscription = ref.watch(subscriptionProvider);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF667EEA).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Icon(
+            Icons.settings_suggest,
+            color: Color(0xFF667EEA),
+            size: 20,
+          ),
+        ),
+        title: const Text(
+          '고급설정 자동설정',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF2D3748),
+          ),
+        ),
+        subtitle: Text(
+          subscription.isPremium
+            ? '시간, 날씨, 계절 옵션을 자동으로 설정합니다'
+            : '프리미엄 전용 기능입니다',
+          style: const TextStyle(
+            color: Color(0xFF718096),
+            fontSize: 13,
+          ),
+        ),
+        trailing: subscription.isPremium
+          ? Switch(
+              value: autoAdvancedSettings,
+              onChanged: (value) {
+                ref.read(autoAdvancedSettingsProvider.notifier).setAutoAdvancedSettings(value);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(value ? '고급설정 자동설정이 활성화되었습니다' : '고급설정 자동설정이 비활성화되었습니다'),
+                    backgroundColor: value ? Colors.green : Colors.orange,
+                  ),
+                );
+              },
+              activeColor: const Color(0xFF667EEA),
+            )
+          : Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.amber,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Text(
+                '프리미엄',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        tileColor: Colors.white,
+        onTap: subscription.isPremium
+          ? () {
+              ref.read(autoAdvancedSettingsProvider.notifier).toggle();
+            }
+          : () => _showPremiumDialog(context),
       ),
     );
   }

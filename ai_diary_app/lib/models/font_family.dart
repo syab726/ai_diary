@@ -155,47 +155,123 @@ class FontFamilySelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final freeFont = FontFamily.notoSans;
-    final premiumFonts = FontFamily.values.where((font) => font.isPremium).toList();
+    final availableFonts = isPremium
+        ? FontFamily.values
+        : [FontFamily.notoSans]; // 무료 사용자는 기본체만
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '글꼴',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF2D3748),
-          ),
+        Row(
+          children: [
+            Icon(
+              Icons.font_download,
+              size: 18,
+              color: Colors.grey.shade600,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '글꼴',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade700,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 12),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade300),
+            borderRadius: BorderRadius.circular(8),
+            color: Colors.white,
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<FontFamily>(
+              value: selectedFont,
+              isExpanded: true,
+              icon: Icon(
+                Icons.arrow_drop_down,
+                color: Colors.grey.shade600,
+              ),
+              items: availableFonts.map((font) {
+                return DropdownMenuItem<FontFamily>(
+                  value: font,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.text_fields,
+                        size: 20,
+                        color: font.isPremium
+                            ? (isPremium ? Colors.amber : Colors.grey.shade400)
+                            : Colors.grey.shade600,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              font.displayName,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey.shade800,
+                              ),
+                            ),
+                            Text(
+                              '오늘 하루도 즐거운 일기를 써보세요',
+                              style: font.getTextStyle(
+                                fontSize: 11,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (font.isPremium && !isPremium)
+                        Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Colors.amber,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Icon(
+                            Icons.lock,
+                            color: Colors.white,
+                            size: 12,
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              }).toList(),
+              onChanged: (font) {
+                if (font != null) {
+                  if (font.isPremium && !isPremium) {
+                    _showPremiumDialog(context);
+                  } else {
+                    onFontChanged(font);
+                  }
+                }
+              },
+            ),
+          ),
+        ),
 
-        // 무료 글꼴 (시스템 기본체)
-        _buildFontOption(context, freeFont, false),
-
-        const SizedBox(height: 8),
-
-        // 프리미엄 글꼴들
-        if (isPremium) ...[
-          ...premiumFonts.map((font) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: _buildFontOption(context, font, false),
-          )),
-        ] else ...[
-          // 무료 사용자에게는 미리보기만 제공
-          ...premiumFonts.take(3).map((font) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: _buildFontOption(context, font, true),
-          )),
-
-          const SizedBox(height: 8),
+        // 무료 사용자를 위한 프리미엄 글꼴 미리보기 버튼
+        if (!isPremium) ...[
+          const SizedBox(height: 16),
           Container(
             width: double.infinity,
             child: OutlinedButton.icon(
               onPressed: () => _showPremiumFontsDialog(context),
               icon: const Icon(Icons.font_download, size: 20),
-              label: const Text('더 많은 글꼴'),
+              label: const Text('프리미엄 글꼴 보기'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF667EEA),
                 side: const BorderSide(color: Color(0xFF667EEA)),
@@ -208,95 +284,6 @@ class FontFamilySelector extends StatelessWidget {
     );
   }
 
-  Widget _buildFontOption(BuildContext context, FontFamily font, bool isLocked) {
-    final isSelected = font == selectedFont;
-
-    return Stack(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected
-                  ? const Color(0xFF667EEA)
-                  : const Color(0xFFE2E8F0),
-              width: isSelected ? 2 : 1,
-            ),
-            color: isLocked
-                ? Colors.grey.withOpacity(0.1)
-                : isSelected
-                    ? const Color(0xFF667EEA).withOpacity(0.1)
-                    : Colors.white,
-          ),
-          child: InkWell(
-            onTap: isLocked
-                ? () => _showPremiumDialog(context)
-                : () => onFontChanged(font),
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          font.displayName,
-                          style: TextStyle(
-                            color: isLocked
-                                ? Colors.grey
-                                : isSelected
-                                    ? const Color(0xFF667EEA)
-                                    : const Color(0xFF4A5568),
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '오늘 하루도 즐거운 일기를 써보세요',
-                          style: font.getTextStyle(
-                            fontSize: 14,
-                            color: isLocked
-                                ? Colors.grey.shade400
-                                : Colors.grey.shade600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (isSelected && !isLocked)
-                    Icon(
-                      Icons.check_circle,
-                      color: const Color(0xFF667EEA),
-                      size: 24,
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        if (isLocked)
-          Positioned(
-            right: 12,
-            top: 12,
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: Colors.amber,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.lock,
-                color: Colors.white,
-                size: 16,
-              ),
-            ),
-          ),
-      ],
-    );
-  }
 
   void _showPremiumDialog(BuildContext context) {
     showDialog(

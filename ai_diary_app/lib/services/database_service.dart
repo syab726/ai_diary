@@ -16,7 +16,7 @@ class DatabaseService {
     String path = join(await getDatabasesPath(), 'diary_app.db');
     return await openDatabase(
       path,
-      version: 3,
+      version: 5,
       onCreate: _createDb,
       onUpgrade: _upgradeDb,
     );
@@ -37,7 +37,10 @@ class DatabaseService {
         aiPrompt TEXT,
         imageStyle TEXT,
         hasBeenRegenerated INTEGER DEFAULT 0,
-        fontFamily TEXT
+        fontFamily TEXT,
+        imageTime TEXT,
+        imageWeather TEXT,
+        imageSeason TEXT
       )
     ''');
   }
@@ -50,6 +53,13 @@ class DatabaseService {
     }
     if (oldVersion < 3) {
       await db.execute('ALTER TABLE $tableName ADD COLUMN fontFamily TEXT');
+    }
+    if (oldVersion < 4) {
+      await db.execute('ALTER TABLE $tableName ADD COLUMN imageTime TEXT');
+      await db.execute('ALTER TABLE $tableName ADD COLUMN imageWeather TEXT');
+    }
+    if (oldVersion < 5) {
+      await db.execute('ALTER TABLE $tableName ADD COLUMN imageSeason TEXT');
     }
   }
 
@@ -69,7 +79,7 @@ class DatabaseService {
       columns: [
         'id', 'title', 'content', 'createdAt', 'updatedAt',
         'generatedImageUrl', 'emotion', 'keywords', 'aiPrompt',
-        'imageStyle', 'hasBeenRegenerated', 'fontFamily'
+        'imageStyle', 'hasBeenRegenerated', 'fontFamily', 'imageTime', 'imageWeather', 'imageSeason'
       ],
       orderBy: 'createdAt DESC',
     );
@@ -94,7 +104,7 @@ class DatabaseService {
       columns: [
         'id', 'title', 'content', 'createdAt', 'updatedAt',
         'generatedImageUrl', 'emotion', 'keywords', 'aiPrompt',
-        'imageStyle', 'hasBeenRegenerated', 'fontFamily'
+        'imageStyle', 'hasBeenRegenerated', 'fontFamily', 'imageTime', 'imageWeather', 'imageSeason'
       ],
       where: 'id = ?',
       whereArgs: [id],
@@ -132,7 +142,7 @@ class DatabaseService {
       columns: [
         'id', 'title', 'content', 'createdAt', 'updatedAt',
         'generatedImageUrl', 'emotion', 'keywords', 'aiPrompt',
-        'imageStyle', 'hasBeenRegenerated', 'fontFamily'
+        'imageStyle', 'hasBeenRegenerated', 'fontFamily', 'imageTime', 'imageWeather', 'imageSeason'
       ],
       where: 'title LIKE ? OR content LIKE ? OR keywords LIKE ?',
       whereArgs: ['%$query%', '%$query%', '%$query%'],
