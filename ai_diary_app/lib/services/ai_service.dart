@@ -447,4 +447,45 @@ JSON 형태로 답변해주세요:
       };
     }
   }
+
+  // 감정 인사이트 생성
+  static Future<String> generateEmotionInsight(List<Map<String, dynamic>> diaryEntries, String periodType) async {
+    try {
+      // 일기 내용 요약 준비
+      String diariesSummary = '';
+      for (var entry in diaryEntries) {
+        final date = entry['date'] as String;
+        final emotion = entry['emotion'] as String;
+        final keywords = entry['keywords'] as List<String>;
+        diariesSummary += '- 날짜: $date, 감정: $emotion, 키워드: ${keywords.join(', ')}\n';
+      }
+
+      String periodText = periodType == 'weekly' ? '주간' : periodType == 'monthly' ? '월간' : '전체 기간';
+
+      final prompt = '''
+당신은 친절하고 공감 능력이 뛰어난 심리 상담 전문가입니다.
+사용자의 $periodText 일기 데이터를 분석하여 감정 패턴과 인사이트를 제공해주세요.
+
+일기 데이터:
+$diariesSummary
+
+다음 지침을 따라 인사이트를 작성해주세요:
+1. 3-4문장으로 간결하게 작성
+2. 긍정적이고 공감적인 어조 사용
+3. 감정 패턴이나 변화에 대한 관찰 포함
+4. 실용적인 조언이나 격려의 메시지 포함
+5. 따뜻하고 친근한 말투 사용
+
+인사이트만 출력하고 다른 설명은 필요 없습니다.
+''';
+
+      final content = [Content.text(prompt)];
+      final response = await _textModel.generateContent(content);
+
+      return response.text ?? '이번 ${periodText}에는 다양한 감정을 경험하셨네요. 자신의 감정을 인식하고 기록하는 것만으로도 큰 의미가 있습니다.';
+    } catch (e) {
+      print('감정 인사이트 생성 오류: $e');
+      return '이번 기간 동안의 감정 여정을 함께 기록해주셔서 감사합니다.';
+    }
+  }
 }

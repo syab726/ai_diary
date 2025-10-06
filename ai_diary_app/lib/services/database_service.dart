@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/diary_entry.dart';
+import '../models/emotion_insight.dart';
 
 class DatabaseService {
   static Database? _database;
@@ -16,7 +17,7 @@ class DatabaseService {
     String path = join(await getDatabasesPath(), 'diary_app.db');
     return await openDatabase(
       path,
-      version: 5,
+      version: 6,
       onCreate: _createDb,
       onUpgrade: _upgradeDb,
     );
@@ -43,6 +44,17 @@ class DatabaseService {
         imageSeason TEXT
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE emotion_insights(
+        id TEXT PRIMARY KEY,
+        type TEXT NOT NULL,
+        insightText TEXT NOT NULL,
+        periodStart TEXT NOT NULL,
+        periodEnd TEXT NOT NULL,
+        createdAt TEXT NOT NULL
+      )
+    ''');
   }
 
   static Future<void> _upgradeDb(Database db, int oldVersion, int newVersion) async {
@@ -60,6 +72,18 @@ class DatabaseService {
     }
     if (oldVersion < 5) {
       await db.execute('ALTER TABLE $tableName ADD COLUMN imageSeason TEXT');
+    }
+    if (oldVersion < 6) {
+      await db.execute('''
+        CREATE TABLE emotion_insights(
+          id TEXT PRIMARY KEY,
+          type TEXT NOT NULL,
+          insightText TEXT NOT NULL,
+          periodStart TEXT NOT NULL,
+          periodEnd TEXT NOT NULL,
+          createdAt TEXT NOT NULL
+        )
+      ''');
     }
   }
 
@@ -157,5 +181,36 @@ class DatabaseService {
   static Future<int> deleteAllEntries() async {
     final db = await database;
     return await db.delete(tableName);
+  }
+
+  // Emotion Insight CRUD operations
+  static Future<void> insertInsight(EmotionInsight insight) async {
+    final db = await database;
+    await db.insert('emotion_insights', insight.toMap());
+  }
+
+  static Future<EmotionInsight?> getInsightByType(String type) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'emotion_insights',
+      where: 'type = ?',
+      whereArgs: [type],
+      orderBy: 'createdAt DESC',
+      limit: 1,
+    );
+
+    if (maps.isNotEmpty) {
+      return EmotionInsight.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  static Future<int> deleteInsight(String id) async {
+    final db = await database;
+    return await db.delete(
+      'emotion_insights',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 }
