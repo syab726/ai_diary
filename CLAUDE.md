@@ -31,6 +31,91 @@ ai_diary_app/
 ```
 
 
+## 🎯 중요한 개발 체크포인트
+
+### v1.0 - ArtDiary AI 완성버전 (2025-09-27)
+
+**주요 완료 기능:**
+1. ✅ **앱 이름 변경**: 'AI 그림일기' → 'ArtDiary AI'
+   - 모든 다국어 지원 (한국어, 일본어, 영어, 중국어, 라틴어)
+   - 앱바, 로그인 화면, 설정 등 전체 UI 적용
+
+2. ✅ **고급설정 자동설정 기능** (프리미엄 전용)
+   - 일기 내용 분석을 통한 조명, 분위기, 색상, 구도 자동 설정
+   - 시각적 구분을 위한 UI 디자인 개선
+   - 이미지 설정 탭 내 체크박스 배치
+
+3. ✅ **프리미엄 글꼴 기능**
+   - 10가지 일기앱용 프리미엄 글꼴 추가
+   - 무료/프리미엄 사용자 구분 적용
+   - FontProvider를 통한 글꼴 상태 관리
+
+4. ✅ **UI/UX 개선**
+   - 년도/월 헤더 폰트 크기 조정 (앱바와 동일한 20px)
+   - 고급옵션 자동설정 시각적 그룹핑
+   - 무료/프리미엄 사용자 접근 권한 정리
+
+**기술적 구현사항:**
+- Flutter/Dart 앱 구조
+- Riverpod 상태 관리
+- Gemini 2.5 Flash Image Preview API 연동
+- SharedPreferences 설정 저장
+- 다국어 지원 (AppLocalizations)
+
+**파일 구조:**
+```
+lib/
+├── l10n/app_localizations.dart      # 다국어 지원
+├── providers/
+│   ├── auto_advanced_settings_provider.dart  # 고급설정 자동설정
+│   └── font_provider.dart           # 글꼴 관리
+├── screens/
+│   ├── diary_create_screen.dart     # 일기 작성 화면
+│   ├── diary_list_screen.dart       # 일기 목록 화면
+│   └── settings_screen.dart         # 설정 화면
+└── widgets/
+    └── tabbed_option_selector.dart  # 이미지 옵션 선택 위젯
+```
+
+**다음 개발 예정:**
+- [ ] 앱스토어/플레이스토어 배포 준비
+- [ ] 프리미엄 구독 결제 시스템 연동
+- [ ] 클라우드 백업 기능
+- [ ] 성능 최적화
+
+### v1.1 - UX 개선 및 최적화 (2025-10-10)
+
+**주요 완료 기능:**
+1. ✅ **프로그레스 단계별 표시**
+   - AI 이미지 생성 중 단계별 메시지 표시
+   - 사진 분석 → 감정 분석 → 키워드 추출 → 프롬프트 생성 → AI 이미지 생성
+   - 사용자가 현재 진행 상황을 명확하게 파악 가능
+   - 파일: `lib/screens/diary_create_screen.dart:49, 121-150`
+
+2. ✅ **페이지 인디케이터 크기 증가**
+   - 일반 페이지: 8x8 → 10x10
+   - 현재 페이지: 8x8 → 12x12
+   - 이미지 갤러리 네비게이션 시인성 향상
+   - 파일: `lib/screens/diary_detail_screen.dart:815-816`
+
+3. 📋 **업그레이드 로드맵 작성**
+   - 즉시/단기/중기/장기 개선사항 분류
+   - 우선순위 및 상세 구현 계획 문서화
+   - 파일: `ai_diary_app/upgrade_todo.md`
+
+**기술적 구현사항:**
+- 단계별 setState를 통한 프로그레스 메시지 업데이트
+- Future.delayed를 사용한 부드러운 메시지 전환
+- 조건부 렌더링을 통한 동적 인디케이터 크기 변경
+
+**다음 개선 예정 (단기):**
+- [ ] 성능 최적화 (프레임 드롭 해결)
+- [ ] 일기 백업/복원 기능
+- [ ] 오류 처리 개선 및 재시도 로직
+- [ ] 캐시 삭제 기능
+
+---
+
 너는 항상 한국어로 대답해줘
 
 너는 MCP를 사용할 수 있어.
@@ -499,3 +584,55 @@ Shrimp Task Manager의 execute_task, verify_task, complete_task 도구를 사용
 29. 절대 지켜야할 사항 : 절대로 더미데이터 쓰지마
 
 **_ 중요사항: shrimp 작업은 함부로 삭제하지 말고, 삭제시 동의가 필요해. shrimp 작업 초기화는 함부로 진행하지 못해. 항상 동의를 받아야 해! _**
+
+## 중요한 Flutter 레이아웃 오류 방지 가이드
+
+### 치명적 오류: SingleChildScrollView 내부에서 Expanded 위젯 사용
+
+**오류 상황:**
+- SingleChildScrollView 내부의 Column에서 Expanded 위젯을 사용할 때 발생
+- RenderFlex children have non-zero flex but incoming height constraints are unbounded 오류 발생
+
+**원인:**
+- SingleChildScrollView는 자식 위젯에게 무제한 높이 제약을 제공
+- Expanded 위젯은 남은 공간을 모두 차지하려고 하는데, 무제한 공간에서는 어디까지 확장해야 할지 알 수 없음
+- 이로 인해 레이아웃 제약 충돌이 발생하여 앱이 정상적으로 렌더링되지 않음
+
+**해결 방법:**
+1. **Container + 고정 높이 사용**: Expanded 대신 Container(height: 고정값) 사용
+2. **Flexible 위젯 사용**: Expanded 대신 Flexible(fit: FlexFit.loose) 사용
+3. **Column 대신 다른 레이아웃 구조 검토**: 스크롤이 필요한 부분과 고정이 필요한 부분을 분리
+
+**예시 - 잘못된 코드:**
+```dart
+SingleChildScrollView(
+  child: Column(
+    children: [
+      SomeWidget(),
+      Expanded(  // 이것이 문제!
+        child: TabBarView(...),
+      ),
+    ],
+  ),
+)
+```
+
+**예시 - 올바른 코드:**
+```dart
+SingleChildScrollView(
+  child: Column(
+    children: [
+      SomeWidget(),
+      Container(  // 고정 높이 사용
+        height: 400,
+        child: TabBarView(...),
+      ),
+    ],
+  ),
+)
+```
+
+**주의사항:**
+- UI 수정 시 레이아웃 제약을 항상 고려할 것
+- Expanded 위젯 사용 전 부모 위젯의 제약 조건 확인 필수
+- 특히 스크롤 가능한 위젯 내부에서 flex 위젯 사용 시 주의

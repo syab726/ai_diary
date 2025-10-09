@@ -32,11 +32,19 @@ class DiaryDetailScreen extends ConsumerStatefulWidget {
 class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
   DiaryEntry? _diary;
   bool _isLoading = true;
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
 
   @override
   void initState() {
     super.initState();
     _loadDiary();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadDiary() async {
@@ -126,9 +134,7 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
               ),
             ),
             flexibleSpace: FlexibleSpaceBar(
-              background: _diary!.generatedImageUrl != null
-                  ? _buildImageWidget(_diary!.generatedImageUrl!)
-                  : _buildImagePlaceholder(),
+              background: _buildImageSection(),
             ),
             actions: [
               Container(
@@ -314,6 +320,25 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
         );
       } else {
         print('로컬 이미지 파일이 존재하지 않음: $filePath');
+        return _buildImagePlaceholder();
+      }
+    }
+    // 절대 경로인 경우 (file:// 접두사 없음)
+    else if (imageUrl.startsWith('/')) {
+      final file = File(imageUrl);
+
+      // 파일이 존재하는지 확인
+      if (file.existsSync()) {
+        imageWidget = Image.file(
+          file,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            print('로컬 이미지 로드 오류: $error');
+            return _buildImagePlaceholder();
+          },
+        );
+      } else {
+        print('로컬 이미지 파일이 존재하지 않음: $imageUrl');
         return _buildImagePlaceholder();
       }
     }
@@ -602,5 +627,204 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
     }
 
     return baseStyle;
+  }
+
+  // 이미지 섹션 (AI 이미지 + 사용자 사진 갤러리)
+  Widget _buildImageSection() {
+    if (_diary == null) return _buildImagePlaceholder();
+
+    print('=== _buildImageSection 호출 ===');
+    print('AI 이미지 URL: ${_diary!.generatedImageUrl}');
+    print('사용자 사진 개수: ${_diary!.userPhotos.length}');
+    print('사용자 사진 경로들: ${_diary!.userPhotos}');
+
+    // AI 이미지와 사용자 사진을 합친 전체 이미지 리스트
+    final List<Map<String, dynamic>> allImages = [];
+
+    // AI 생성 이미지 추가
+    if (_diary!.generatedImageUrl != null) {
+      allImages.add({
+        'url': _diary!.generatedImageUrl!,
+        'isAI': true,
+      });
+      print('AI 이미지 추가됨');
+    }
+
+    // 사용자 사진 추가
+    for (var photoPath in _diary!.userPhotos) {
+      allImages.add({
+        'url': photoPath,
+        'isAI': false,
+      });
+      print('사용자 사진 추가됨: $photoPath');
+    }
+
+    print('전체 이미지 개수: ${allImages.length}');
+
+    if (allImages.isEmpty) {
+      return _buildImagePlaceholder();
+    }
+
+    if (allImages.length == 1) {
+      return _buildImageWithBadge(allImages[0]['url'], allImages[0]['isAI']);
+    }
+
+    return _buildImageGallery(allImages);
+  }
+
+  // 배지가 있는 단일 이미지
+  Widget _buildImageWithBadge(String imageUrl, bool isAI) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        _buildImageWidget(imageUrl),
+        Positioned(
+          bottom: 16,
+          right: 12,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: isAI ? Colors.purple.withOpacity(0.95) : Colors.blue.withOpacity(0.95),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isAI ? Icons.auto_awesome : Icons.photo,
+                  size: 14,
+                  color: Colors.white,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  isAI ? 'AI 생성' : '내 사진',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // 가로 스크롤 갤러리 (PageView + 화살표 + 페이지 인디케이터)
+  Widget _buildImageGallery(List<Map<String, dynamic>> images) {
+    return Stack(
+      children: [
+        // 메인 이미지 페이지뷰
+        PageView.builder(
+          controller: _pageController,
+          itemCount: images.length,
+          onPageChanged: (index) {
+            setState(() {
+              _currentPage = index;
+            });
+          },
+          itemBuilder: (context, index) {
+            return _buildImageWithBadge(
+              images[index]['url'],
+              images[index]['isAI'],
+            );
+          },
+        ),
+
+        // 왼쪽 화살표
+        if (_currentPage > 0)
+          Positioned(
+            left: 16,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: GestureDetector(
+                onTap: () {
+                  _pageController.previousPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.chevron_left,
+                    color: Colors.white,
+                    size: 32,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+        // 오른쪽 화살표
+        if (_currentPage < images.length - 1)
+          Positioned(
+            right: 16,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: GestureDetector(
+                onTap: () {
+                  _pageController.nextPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.chevron_right,
+                    color: Colors.white,
+                    size: 32,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+        // 페이지 인디케이터 (이미지가 2개 이상일 때만 표시)
+        if (images.length > 1)
+          Positioned(
+            bottom: 16,
+            left: 0,
+            right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                images.length,
+                (index) => Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  width: _currentPage == index ? 12.0 : 10.0,
+                  height: _currentPage == index ? 12.0 : 10.0,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: _currentPage == index
+                        ? Colors.white
+                        : Colors.white.withOpacity(0.4),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
   }
 }
