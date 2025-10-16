@@ -10,6 +10,7 @@ import '../models/image_options.dart';
 import '../models/perspective_options.dart';
 import '../models/image_time.dart';
 import '../models/image_weather.dart';
+import '../models/image_season.dart';
 
 class AIService {
   static const String _geminiApiKey = 'AIzaSyB4sTKHWNsKq_k-X-jlm5l_9BCQC4eq-hc';
@@ -86,12 +87,12 @@ class AIService {
   static Future<List<String>> extractKeywords(String diaryContent) async {
     try {
       final response = await _textModel.generateContent([
-        Content.text('''다음 일기 내용에서 주요 키워드 5개를 추출해주세요. 
+        Content.text('''다음 일기 내용에서 주요 키워드 5개를 추출해주세요.
 쉼표로 구분하여 답변해주세요.
 
 일기 내용: $diaryContent''')
       ]);
-      
+
       String keywords = response.text?.trim() ?? '';
       return keywords.split(',').map((k) => k.trim()).where((k) => k.isNotEmpty).toList();
     } catch (e) {
@@ -100,7 +101,66 @@ class AIService {
     }
   }
 
-  static Future<String> generateImagePrompt(String diaryContent, String emotion, List<String> keywords, String style, [AdvancedImageOptions? advancedOptions, PerspectiveOptions? perspectiveOptions, ImageTime? imageTime, ImageWeather? imageWeather]) async {
+  // 사용자 업로드 사진 분석
+  static Future<String> analyzePhotos(List<String> photoPaths) async {
+    if (photoPaths.isEmpty) return '';
+
+    try {
+      print('=== 사진 분석 시작 ===');
+      print('분석할 사진 개수: ${photoPaths.length}');
+
+      // Vision 모델 사용
+      final visionModel = GenerativeModel(
+        model: 'gemini-2.0-flash-lite',
+        apiKey: _geminiApiKey,
+      );
+
+      // 최대 3장까지만 분석
+      final photosToAnalyze = photoPaths.take(3).toList();
+
+      final List<Part> parts = [];
+
+      // 사진 파일들을 읽어서 Parts로 변환
+      for (final photoPath in photosToAnalyze) {
+        try {
+          final file = File(photoPath);
+          if (await file.exists()) {
+            final bytes = await file.readAsBytes();
+            parts.add(DataPart('image/jpeg', bytes));
+            print('사진 로드 성공: $photoPath');
+          }
+        } catch (e) {
+          print('사진 로드 실패: $photoPath - $e');
+        }
+      }
+
+      if (parts.isEmpty) {
+        print('분석 가능한 사진이 없습니다');
+        return '';
+      }
+
+      // 분석 프롬프트 추가
+      parts.add(TextPart('''이 사진들을 분석해서 다음 정보를 추출해주세요:
+- 전체적인 분위기와 느낌
+- 주요 색감과 톤
+- 시간대 (아침, 낮, 저녁, 밤)
+- 장소와 환경 (실내/실외, 도시/자연 등)
+- 주요 피사체나 오브젝트
+
+2-3문장으로 간결하게 요약해주세요.'''));
+
+      final response = await visionModel.generateContent([Content.multi(parts)]);
+      final analysisResult = response.text?.trim() ?? '';
+
+      print('사진 분석 결과: $analysisResult');
+      return analysisResult;
+    } catch (e) {
+      print('사진 분석 오류: $e');
+      return '';
+    }
+  }
+
+  static Future<String> generateImagePrompt(String diaryContent, String emotion, List<String> keywords, String style, [AdvancedImageOptions? advancedOptions, PerspectiveOptions? perspectiveOptions, ImageTime? imageTime, ImageWeather? imageWeather, String? photoAnalysis]) async {
     try {
       // 고급 옵션을 프롬프트 접미사로 변환
       final advancedSuffix = advancedOptions?.generatePromptSuffix() ?? '';
@@ -109,6 +169,8 @@ class AIService {
       // 시간과 날씨 정보
       final timeSuffix = imageTime != null ? '시간: ${imageTime.displayName}' : '';
       final weatherSuffix = imageWeather != null ? '날씨: ${imageWeather.displayName}' : '';
+      // 사진 분석 결과
+      final photoSuffix = photoAnalysis != null && photoAnalysis.isNotEmpty ? '사진 분석: $photoAnalysis' : '';
 
       final response = await _textModel.generateContent([
         Content.text('''다음 일기 내용을 바탕으로 이미지 생성 프롬프트를 만들어주세요.
@@ -122,14 +184,16 @@ ${advancedSuffix.isNotEmpty ? '고급 옵션: $advancedSuffix' : ''}
 ${perspectiveSuffix.isNotEmpty ? '시점: $perspectiveSuffix' : ''}
 ${timeSuffix.isNotEmpty ? '시간: $timeSuffix' : ''}
 ${weatherSuffix.isNotEmpty ? '날씨: $weatherSuffix' : ''}
+${photoSuffix.isNotEmpty ? '사용자 업로드 사진 분석:\n$photoAnalysis\n\n위 사진의 분위기, 색감, 시간대, 장소를 참고해서 일관성 있는 이미지를 생성해주세요.' : ''}
 
 프롬프트는 영어로 작성하고, 일기의 감정과 내용을 잘 표현하는 따뜻하고 감성적인 이미지가 되도록 해주세요.
 ${advancedSuffix.isNotEmpty ? '고급 옵션에서 지정된 조명, 분위기, 색상, 구도 요소들을 반영해주세요.' : ''}
 ${perspectiveSuffix.isNotEmpty ? '시점 옵션에서 지정된 관점을 반영해주세요.' : ''}
 ${timeSuffix.isNotEmpty ? '지정된 시간대 ${imageTime!.displayName}의 분위기를 반영해주세요.' : ''}
-${weatherSuffix.isNotEmpty ? '지정된 날씨 ${imageWeather!.displayName}의 느낌을 표현해주세요.' : ''}''')
+${weatherSuffix.isNotEmpty ? '지정된 날씨 ${imageWeather!.displayName}의 느낌을 표현해주세요.' : ''}
+${photoSuffix.isNotEmpty ? '업로드된 사진의 스타일과 분위기를 최대한 반영해주세요.' : ''}''')
       ]);
-      
+
       return response.text?.trim() ?? 'A peaceful and emotional illustration';
     } catch (e) {
       log('이미지 프롬프트 생성 오류: $e');
@@ -389,7 +453,16 @@ JSON 형태로 답변해주세요:
     }
   }
 
-  static Future<Map<String, dynamic>> processEntry(String diaryContent, String style, [AdvancedImageOptions? advancedOptions, PerspectiveOptions? perspectiveOptions, ImageTime? imageTime, ImageWeather? imageWeather]) async {
+  static Future<Map<String, dynamic>> processEntry(
+    String diaryContent,
+    String style, [
+    AdvancedImageOptions? advancedOptions,
+    PerspectiveOptions? perspectiveOptions,
+    ImageTime? imageTime,
+    ImageWeather? imageWeather,
+    ImageSeason? imageSeason,
+    List<String>? userPhotos,
+  ]) async {
     try {
       print('=== AI 처리 시작 ===');
       print('일기 내용: $diaryContent');
@@ -398,7 +471,16 @@ JSON 형태로 답변해주세요:
       print('날씨 설정: ${imageWeather != null ? imageWeather.displayName : '기본값'}');
       print('고급 옵션: ${advancedOptions != null ? '활성화' : '비활성화'}');
       print('시점 옵션: ${perspectiveOptions != null ? '활성화' : '비활성화'}');
-      
+      print('사용자 사진: ${userPhotos != null && userPhotos.isNotEmpty ? '${userPhotos.length}장' : '없음'}');
+
+      // 사진 분석 (있으면)
+      String photoAnalysis = '';
+      if (userPhotos != null && userPhotos.isNotEmpty) {
+        print('사용자 업로드 사진 분석 시작...');
+        photoAnalysis = await analyzePhotos(userPhotos);
+        print('사진 분석 완료: $photoAnalysis');
+      }
+
       // 병렬로 감정 분석과 키워드 추출 실행
       print('감정 분석 및 키워드 추출 시작...');
       final futures = await Future.wait([
@@ -408,15 +490,25 @@ JSON 형태로 답변해주세요:
 
       final emotion = futures[0] as String;
       final keywords = futures[1] as List<String>;
-      
+
       print('감정 분석 결과: $emotion');
       print('키워드 추출 결과: $keywords');
 
-      // 이미지 프롬프트 생성
+      // 이미지 프롬프트 생성 (사진 분석 결과 포함)
       print('이미지 프롬프트 생성 시작...');
-      final imagePrompt = await generateImagePrompt(diaryContent, emotion, keywords, style, advancedOptions, perspectiveOptions, imageTime, imageWeather);
+      final imagePrompt = await generateImagePrompt(
+        diaryContent,
+        emotion,
+        keywords,
+        style,
+        advancedOptions,
+        perspectiveOptions,
+        imageTime,
+        imageWeather,
+        photoAnalysis.isNotEmpty ? photoAnalysis : null,
+      );
       print('이미지 프롬프트 결과: $imagePrompt');
-      
+
       // 이미지 생성
       print('이미지 생성 시작...');
       final imageUrl = await generateImage(imagePrompt, imageTime, imageWeather);
@@ -428,10 +520,10 @@ JSON 형태로 답변해주세요:
         'imagePrompt': imagePrompt,
         'imageUrl': imageUrl,
       };
-      
+
       print('=== AI 처리 완료 ===');
       print('최종 결과: $result');
-      
+
       return result;
     } catch (e, stackTrace) {
       print('AI 처리 오류: $e');

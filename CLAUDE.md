@@ -114,6 +114,64 @@ lib/
 - [ ] 오류 처리 개선 및 재시도 로직
 - [ ] 캐시 삭제 기능
 
+### v1.2 - 이미지 업로드 수정 및 데이터 백업/복원 기능 추가 (2025-10-17)
+
+**주요 완료 기능:**
+1. ✅ **이미지 업로드 기능 개선**
+   - 무료 사용자: 1장 업로드 가능
+   - 프리미엄 사용자: 3장 업로드 가능
+   - 사용자 사진 기반 AI 이미지 생성 지원
+   - 파일: `lib/screens/diary_create_screen.dart`, `lib/models/diary_entry.dart`
+
+2. ✅ **Google Drive 백업 및 복원 기능**
+   - Google Drive를 통한 클라우드 백업/복원
+   - 프리미엄 사용자: AI 생성 이미지 포함 전체 백업
+   - 무료 사용자: 텍스트 및 메타데이터 백업
+   - JSON 형식의 표준화된 백업 포맷
+   - 파일: `lib/services/google_drive_service.dart`, `lib/services/database_service.dart`
+
+3. ✅ **통계 기능 개선**
+   - "전체" 탭을 "연간" 탭으로 변경
+   - 연도 선택 기능 (이전/다음 년도 네비게이션)
+   - 연간 감정 인사이트 표시 (주요 감정, 작성 빈도, 감정 다양성)
+   - 연간 감정 분포 시각화
+   - AI 연간 분석 기능
+   - 파일: `lib/screens/emotion_stats_screen.dart`
+
+4. ✅ **데이터베이스 스키마 개선**
+   - userPhotos 필드 추가 (사용자 업로드 사진 저장)
+   - 백업/복원을 위한 exportToJson/importFromJson 메서드
+   - emotion_insights 테이블 추가 (AI 감정 분석 저장)
+   - 파일: `lib/services/database_service.dart`
+
+**기술적 구현사항:**
+- Google Drive API 연동 (googleapis 패키지)
+- Google Sign-In 인증 통합
+- SQLite 데이터베이스 버전 7로 업그레이드
+- JSON 기반 데이터 직렬화/역직렬화
+- Base64 인코딩을 통한 이미지 데이터 백업
+- 연간 통계를 위한 날짜 필터링 로직
+
+**파일 구조:**
+```
+lib/
+├── services/
+│   ├── google_drive_service.dart       # Google Drive 백업/복원
+│   └── database_service.dart          # DB CRUD + 백업/복원 메서드
+├── screens/
+│   ├── diary_create_screen.dart       # 이미지 업로드 개선
+│   ├── emotion_stats_screen.dart      # 연간 통계 탭
+│   └── settings_screen.dart           # 백업/복원 UI
+└── models/
+    └── diary_entry.dart               # userPhotos 필드 추가
+```
+
+**다음 개선 예정:**
+- [ ] 백업 자동화 (주기적 자동 백업)
+- [ ] 백업 이력 관리
+- [ ] 다른 클라우드 서비스 지원 (iCloud, Dropbox)
+- [ ] 백업 암호화
+
 ---
 
 너는 항상 한국어로 대답해줘

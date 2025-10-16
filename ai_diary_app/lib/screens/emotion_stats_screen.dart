@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/diary_provider.dart';
 import '../models/diary_entry.dart';
 import '../models/emotion_insight.dart';
@@ -20,6 +21,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
   late TabController _tabController;
   int _selectedWeek = 0; // 현재 주를 기준으로 0, -1, -2 (이전 주들)
   int _selectedMonth = 0; // 현재 월을 기준으로 0, -1, -2 (이전 월들)
+  int _selectedYear = 0; // 현재 년을 기준으로 0, -1, -2 (이전 년들)
 
   // 각 타입별 인사이트 상태
   Map<String, String?> _insights = {};
@@ -37,7 +39,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
     // 각 기간별로 인사이트 로드 및 자동 생성 확인
     await _checkAndGenerateWeeklyInsight();
     await _checkAndGenerateMonthlyInsight();
-    await _checkAndGenerateAllTimeInsight();
+    await _checkAndGenerateYearlyInsight();
   }
 
   // 현재 주차 기간 반환
@@ -54,6 +56,14 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
     final startOfMonth = DateTime(now.year, now.month, 1);
     final endOfMonth = DateTime(now.year, now.month + 1, 0);
     return {'start': startOfMonth, 'end': endOfMonth};
+  }
+
+  // 현재 년 기간 반환
+  Map<String, DateTime> _getCurrentYearPeriod() {
+    final now = DateTime.now();
+    final startOfYear = DateTime(now.year, 1, 1);
+    final endOfYear = DateTime(now.year, 12, 31, 23, 59, 59);
+    return {'start': startOfYear, 'end': endOfYear};
   }
 
   // 주간 인사이트 자동 생성 확인
@@ -94,21 +104,21 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
     }
   }
 
-  // 전체 기간 인사이트 자동 생성 확인
-  Future<void> _checkAndGenerateAllTimeInsight() async {
-    final insight = await DatabaseService.getInsightByType('all_time');
+  // 연간 인사이트 자동 생성 확인
+  Future<void> _checkAndGenerateYearlyInsight() async {
+    final yearPeriod = _getCurrentYearPeriod();
+    final insight = await DatabaseService.getInsightByType('yearly');
 
-    // 인사이트가 없거나, 7일 이상 지났다면 새로 생성
+    // 올해 인사이트가 없거나, 있는 인사이트가 작년 것이라면 새로 생성
     bool shouldGenerate = insight == null ||
-                         DateTime.now().difference(insight.createdAt).inDays >= 7;
+                         insight.periodEnd.isBefore(yearPeriod['start']!);
 
     if (shouldGenerate) {
-      final now = DateTime.now();
-      await _generateInsightForPeriod('all_time', DateTime(2000), now);
+      await _generateInsightForPeriod('yearly', yearPeriod['start']!, yearPeriod['end']!);
     } else if (mounted) {
       setState(() {
-        _insights['all_time'] = insight.insightText;
-        _lastGenerated['all_time'] = insight.createdAt;
+        _insights['yearly'] = insight.insightText;
+        _lastGenerated['yearly'] = insight.createdAt;
       });
     }
   }
@@ -200,6 +210,10 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/list'),
+        ),
         title: const Text(
           '감정 통계',
           style: TextStyle(
@@ -214,7 +228,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
           tabs: const [
             Tab(text: '주별'),
             Tab(text: '월별'),
-            Tab(text: '전체'),
+            Tab(text: '연간'),
           ],
           indicatorColor: const Color(0xFF667EEA),
           labelColor: const Color(0xFF667EEA),
@@ -232,7 +246,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
             children: [
               _buildWeeklyView(diaries),
               _buildMonthlyView(diaries),
-              _buildAllTimeView(diaries),
+              _buildYearlyView(diaries),
             ],
           );
         },
@@ -1188,50 +1202,26 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
     return _getWeekOfYear(lastDayOfYear);
   }
 
-  Widget _buildAllTimeView(List<DiaryEntry> diaries) {
-    if (diaries.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.insights_outlined,
-                size: 80,
-                color: Colors.grey,
-              ),
-              SizedBox(height: 16),
-              Text(
-                '아직 작성된 일기가 없습니다.',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey,
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                '일기를 작성하면 전체 감정 통계를 확인할 수 있습니다.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
+  Widget _buildYearlyView(List<DiaryEntry> diaries) {
+    final now = DateTime.now();
+    final selectedDate = DateTime(now.year + _selectedYear);
+    final startOfYear = DateTime(selectedDate.year, 1, 1);
+    final endOfYear = DateTime(selectedDate.year, 12, 31, 23, 59, 59);
+
+    final yearlyDiaries = diaries.where((diary) {
+      return diary.createdAt.isAfter(startOfYear.subtract(const Duration(days: 1))) &&
+             diary.createdAt.isBefore(endOfYear.add(const Duration(days: 1)));
+    }).toList();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          _buildAllTimeInsight(diaries),
+          _buildYearSelector(),
           const SizedBox(height: 24),
-          _buildAllTimeDetailedStats(diaries),
+          _buildYearlyInsight(yearlyDiaries, startOfYear, endOfYear),
+          const SizedBox(height: 24),
+          _buildYearlyDetailedStats(yearlyDiaries),
         ],
       ),
     );
@@ -1309,8 +1299,8 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
       case 'monthly':
         title = '월간 AI 감정 분석';
         break;
-      case 'all_time':
-        title = '전체 AI 감정 분석';
+      case 'yearly':
+        title = '연간 AI 감정 분석';
         break;
       default:
         title = 'AI 감정 분석';
@@ -1699,6 +1689,279 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
               const SizedBox(width: 12),
               const Text(
                 '전체 감정 분포',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2D3748),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          ...sortedEmotions.map((entry) {
+            final totalCount = sortedEmotions.fold<int>(0, (sum, e) => sum + e.value);
+            final percentage = totalCount > 0 ? (entry.value / totalCount * 100).round() : 0;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        entry.key,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF2D3748),
+                        ),
+                      ),
+                      Text(
+                        '${entry.value}회 ($percentage%)',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(
+                      value: totalCount > 0 ? entry.value / totalCount : 0.0,
+                      backgroundColor: Colors.grey.shade200,
+                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF764BA2)),
+                      minHeight: 8,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildYearSelector() {
+    final now = DateTime.now();
+    final selectedDate = DateTime(now.year + _selectedYear);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFF764BA2).withOpacity(0.1),
+            const Color(0xFF667EEA).withOpacity(0.1),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFF764BA2).withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            height: 48,
+            width: 48,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: IconButton(
+              onPressed: () {
+                setState(() {
+                  _selectedYear--;
+                });
+              },
+              icon: const Icon(Icons.chevron_left, color: Color(0xFF764BA2)),
+              padding: EdgeInsets.zero,
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.calendar_today_outlined,
+                      color: Color(0xFF764BA2), size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${selectedDate.year}년',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF2D3748),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Container(
+            height: 48,
+            width: 48,
+            decoration: BoxDecoration(
+              color: _selectedYear < 0 ? Colors.white : Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: _selectedYear < 0 ? [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ] : null,
+            ),
+            child: IconButton(
+              onPressed: _selectedYear < 0 ? () {
+                setState(() {
+                  _selectedYear++;
+                });
+              } : null,
+              icon: Icon(
+                Icons.chevron_right,
+                color: _selectedYear < 0 ? const Color(0xFF764BA2) : Colors.grey,
+              ),
+              padding: EdgeInsets.zero,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildYearlyInsight(List<DiaryEntry> diaries, DateTime startDate, DateTime endDate) {
+    final periodText = '${startDate.year}년';
+
+    if (diaries.isEmpty) {
+      return _buildEmptyInsight('$periodText\n이 기간에 작성된 일기가 없습니다.');
+    }
+
+    final emotions = diaries.map((d) => d.emotion).where((e) => e != null).cast<String>().toList();
+    final emotionCounts = <String, int>{};
+    for (final emotion in emotions) {
+      emotionCounts[emotion] = (emotionCounts[emotion] ?? 0) + 1;
+    }
+
+    final mostFrequentEmotion = emotionCounts.entries.reduce((a, b) => a.value > b.value ? a : b);
+    final avgEntriesPerMonth = diaries.length / 12;
+
+    return Column(
+      children: [
+        _buildInsightCard(
+          title: '연간 감정 인사이트 ($periodText)',
+          insights: [
+            InsightItem(
+              icon: Icons.favorite_outlined,
+              title: '주요 감정',
+              value: mostFrequentEmotion.key,
+              subtitle: '${mostFrequentEmotion.value}번 기록됨',
+              color: const Color(0xFF764BA2),
+            ),
+            InsightItem(
+              icon: Icons.edit_note_outlined,
+              title: '일기 작성 빈도',
+              value: '${diaries.length}편',
+              subtitle: '월 평균 ${avgEntriesPerMonth.toStringAsFixed(1)}편',
+              color: const Color(0xFF667EEA),
+            ),
+            InsightItem(
+              icon: Icons.palette_outlined,
+              title: '감정 다양성',
+              value: '${emotionCounts.length}가지',
+              subtitle: '한 해 동안 다양한 감정을 경험하셨어요',
+              color: const Color(0xFF00D4AA),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _buildAIInsightCard('yearly', diaries),
+      ],
+    );
+  }
+
+  Widget _buildYearlyDetailedStats(List<DiaryEntry> diaries) {
+    if (diaries.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final emotionCounts = <String, int>{};
+    for (final diary in diaries) {
+      if (diary.emotion != null && diary.emotion!.isNotEmpty) {
+        emotionCounts[diary.emotion!] = (emotionCounts[diary.emotion!] ?? 0) + 1;
+      }
+    }
+
+    if (emotionCounts.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final sortedEmotions = emotionCounts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF764BA2).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.bar_chart,
+                  color: Color(0xFF764BA2),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                '연간 감정 분포',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

@@ -1,7 +1,13 @@
+import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/diary_entry.dart';
 import '../models/emotion_insight.dart';
+import '../models/image_style.dart';
+import '../models/font_family.dart';
+import '../models/image_time.dart';
+import '../models/image_weather.dart';
+import '../models/image_season.dart';
 
 class DatabaseService {
   static Database? _database;
@@ -17,7 +23,7 @@ class DatabaseService {
     String path = join(await getDatabasesPath(), 'diary_app.db');
     return await openDatabase(
       path,
-      version: 6,
+      version: 7,
       onCreate: _createDb,
       onUpgrade: _upgradeDb,
     );
@@ -41,7 +47,8 @@ class DatabaseService {
         fontFamily TEXT,
         imageTime TEXT,
         imageWeather TEXT,
-        imageSeason TEXT
+        imageSeason TEXT,
+        userPhotos TEXT
       )
     ''');
 
@@ -85,6 +92,9 @@ class DatabaseService {
         )
       ''');
     }
+    if (oldVersion < 7) {
+      await db.execute('ALTER TABLE $tableName ADD COLUMN userPhotos TEXT');
+    }
   }
 
   static Future<String> insertDiary(DiaryEntry diary) async {
@@ -97,14 +107,9 @@ class DatabaseService {
     print('DatabaseService: getAllDiaries 호출됨');
     final db = await database;
 
-    // imageData 필드를 제외하고 조회 (너무 큰 base64 데이터로 인한 CursorWindow 오류 방지)
+    // 모든 필드 조회 (imageData 포함)
     final List<Map<String, dynamic>> maps = await db.query(
       tableName,
-      columns: [
-        'id', 'title', 'content', 'createdAt', 'updatedAt',
-        'generatedImageUrl', 'emotion', 'keywords', 'aiPrompt',
-        'imageStyle', 'hasBeenRegenerated', 'fontFamily', 'imageTime', 'imageWeather', 'imageSeason'
-      ],
       orderBy: 'createdAt DESC',
     );
 
@@ -125,11 +130,6 @@ class DatabaseService {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       tableName,
-      columns: [
-        'id', 'title', 'content', 'createdAt', 'updatedAt',
-        'generatedImageUrl', 'emotion', 'keywords', 'aiPrompt',
-        'imageStyle', 'hasBeenRegenerated', 'fontFamily', 'imageTime', 'imageWeather', 'imageSeason'
-      ],
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -163,11 +163,6 @@ class DatabaseService {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       tableName,
-      columns: [
-        'id', 'title', 'content', 'createdAt', 'updatedAt',
-        'generatedImageUrl', 'emotion', 'keywords', 'aiPrompt',
-        'imageStyle', 'hasBeenRegenerated', 'fontFamily', 'imageTime', 'imageWeather', 'imageSeason'
-      ],
       where: 'title LIKE ? OR content LIKE ? OR keywords LIKE ?',
       whereArgs: ['%$query%', '%$query%', '%$query%'],
       orderBy: 'createdAt DESC',
@@ -212,5 +207,186 @@ class DatabaseService {
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+
+  // 클라우드 백업용: 데이터를 JSON 문자열로 내보내기
+  static Future<String> exportToJson({bool isPremium = false}) async {
+    final diaries = await getAllDiaries();
+
+    final exportData = {
+      'version': '1.0',
+      'exportDate': DateTime.now().toIso8601String(),
+      'diaryCount': diaries.length,
+      'isPremium': isPremium,
+      'diaries': diaries.map((diary) {
+        final Map<String, dynamic> data = {
+          'id': diary.id,
+          'title': diary.title,
+          'content': diary.content,
+          'createdAt': diary.createdAt.toIso8601String(),
+          'updatedAt': diary.updatedAt?.toIso8601String(),
+          'emotion': diary.emotion,
+          'keywords': diary.keywords,
+          'imageStyle': diary.imageStyle.name,
+          'fontFamily': diary.fontFamily.name,
+          'imageTime': diary.imageTime.name,
+          'imageWeather': diary.imageWeather.name,
+          'imageSeason': diary.imageSeason.name,
+          'userPhotos': diary.userPhotos,
+        };
+
+        // 프리미엄 사용자만 AI 생성 이미지와 프롬프트 백업
+        if (isPremium) {
+          data['aiPrompt'] = diary.aiPrompt;
+          data['generatedImageUrl'] = diary.generatedImageUrl;
+          data['imageData'] = diary.imageData != null ? base64Encode(diary.imageData!) : null;
+          data['hasBeenRegenerated'] = diary.hasBeenRegenerated;
+        }
+
+        return data;
+      }).toList(),
+    };
+
+    return jsonEncode(exportData);
+  }
+
+  // 클라우드 복원용: JSON 문자열에서 데이터 가져오기
+  static Future<int> importFromJson(String jsonString) async {
+    try {
+      print('=== 데이터 복원 시작 ===');
+      final db = await database;
+
+      print('JSON 파싱 중...');
+      final data = jsonDecode(jsonString) as Map<String, dynamic>;
+      print('백업 버전: ${data['version']}');
+      print('백업 날짜: ${data['exportDate']}');
+      print('프리미엄 여부: ${data['isPremium']}');
+
+      final diaries = data['diaries'] as List<dynamic>;
+      print('복원할 일기 개수: ${diaries.length}');
+
+      // 기존 데이터 모두 삭제
+      print('기존 데이터 삭제 중...');
+      await db.delete(tableName);
+      print('✅ 기존 데이터 삭제 완료');
+
+      int importedCount = 0;
+      for (int i = 0; i < diaries.length; i++) {
+        final diaryData = diaries[i];
+        try {
+          print('\n--- 일기 ${i + 1}/${diaries.length} 복원 중 ---');
+          print('ID: ${diaryData['id']}');
+          print('제목: ${diaryData['title']}');
+
+          print('기본 필드 파싱 중...');
+          final id = diaryData['id'] as String;
+          final title = diaryData['title'] as String;
+          final content = diaryData['content'] as String;
+          final createdAt = DateTime.parse(diaryData['createdAt'] as String);
+          final updatedAt = diaryData['updatedAt'] != null
+              ? DateTime.parse(diaryData['updatedAt'] as String)
+              : null;
+
+          print('감정/키워드 파싱 중...');
+          final emotion = diaryData['emotion'] as String?;
+          final keywords = (diaryData['keywords'] as List<dynamic>?)?.cast<String>() ?? [];
+          print('키워드 개수: ${keywords.length}');
+
+          print('AI 관련 필드 파싱 중...');
+          final aiPrompt = diaryData['aiPrompt'] as String?;
+          final generatedImageUrl = diaryData['generatedImageUrl'] as String?;
+          final imageData = diaryData['imageData'] != null
+              ? base64Decode(diaryData['imageData'] as String)
+              : null;
+          final hasBeenRegenerated = diaryData['hasBeenRegenerated'] == true;
+
+          print('스타일 필드 파싱 중...');
+          final imageStyle = diaryData['imageStyle'] != null
+              ? ImageStyle.values.firstWhere(
+                  (style) => style.name == diaryData['imageStyle'],
+                  orElse: () => ImageStyle.illustration,
+                )
+              : ImageStyle.illustration;
+          print('이미지 스타일: ${imageStyle.name}');
+
+          final fontFamily = diaryData['fontFamily'] != null
+              ? FontFamily.values.firstWhere(
+                  (font) => font.name == diaryData['fontFamily'],
+                  orElse: () => FontFamily.notoSans,
+                )
+              : FontFamily.notoSans;
+          print('글꼴: ${fontFamily.name}');
+
+          print('이미지 옵션 파싱 중...');
+          final imageTime = diaryData['imageTime'] != null
+              ? ImageTime.values.firstWhere(
+                  (time) => time.name == diaryData['imageTime'],
+                  orElse: () => ImageTime.morning,
+                )
+              : ImageTime.morning;
+          print('시간: ${imageTime.name}');
+
+          final imageWeather = diaryData['imageWeather'] != null
+              ? ImageWeather.values.firstWhere(
+                  (weather) => weather.name == diaryData['imageWeather'],
+                  orElse: () => ImageWeather.sunny,
+                )
+              : ImageWeather.sunny;
+          print('날씨: ${imageWeather.name}');
+
+          final imageSeason = diaryData['imageSeason'] != null
+              ? ImageSeason.values.firstWhere(
+                  (season) => season.name == diaryData['imageSeason'],
+                  orElse: () => ImageSeason.spring,
+                )
+              : ImageSeason.spring;
+          print('계절: ${imageSeason.name}');
+
+          print('사용자 사진 파싱 중...');
+          final userPhotos = (diaryData['userPhotos'] as List<dynamic>?)?.cast<String>() ?? [];
+          print('사용자 사진 개수: ${userPhotos.length}');
+
+          print('DiaryEntry 객체 생성 중...');
+          final diary = DiaryEntry(
+            id: id,
+            title: title,
+            content: content,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            emotion: emotion,
+            keywords: keywords,
+            aiPrompt: aiPrompt,
+            generatedImageUrl: generatedImageUrl,
+            imageData: imageData,
+            imageStyle: imageStyle,
+            hasBeenRegenerated: hasBeenRegenerated,
+            fontFamily: fontFamily,
+            imageTime: imageTime,
+            imageWeather: imageWeather,
+            imageSeason: imageSeason,
+            userPhotos: userPhotos,
+          );
+
+          print('DB에 저장 중...');
+          await db.insert(tableName, diary.toMap());
+          importedCount++;
+          print('✅ 일기 ${i + 1} 복원 완료');
+        } catch (e, stackTrace) {
+          print('❌ 일기 ${i + 1} 복원 실패');
+          print('에러: $e');
+          print('스택 트레이스:\n$stackTrace');
+          print('일기 데이터: ${diaryData.toString()}');
+        }
+      }
+
+      print('\n=== 복원 완료 ===');
+      print('성공: $importedCount개 / 전체: ${diaries.length}개');
+      return importedCount;
+    } catch (e, stackTrace) {
+      print('❌ 데이터 복원 전체 실패');
+      print('에러: $e');
+      print('스택 트레이스:\n$stackTrace');
+      return 0;
+    }
   }
 }

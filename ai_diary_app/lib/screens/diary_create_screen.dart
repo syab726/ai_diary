@@ -21,6 +21,7 @@ import '../providers/auto_advanced_settings_provider.dart';
 import '../models/font_family.dart';
 import 'dart:io';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
@@ -157,7 +158,8 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         _perspectiveOptions,
         subscription.isPremium ? effectiveTime : null,
         subscription.isPremium ? effectiveWeather : null,
-        _selectedPhotos,
+        subscription.isPremium ? _selectedSeason : null,
+        subscription.isPremium && _selectedPhotos.isNotEmpty ? _selectedPhotos : null,
       );
 
       final imageUrl = result['imageUrl'] as String?;
@@ -165,12 +167,43 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
       final keywords = List<String>.from(result['keywords'] as List? ?? []);
       final aiPrompt = result['imagePrompt'] as String?;
 
+      // imageUrl에서 바이너리 데이터 추출
+      Uint8List? imageData;
+      if (imageUrl != null) {
+        try {
+          if (imageUrl.startsWith('file://')) {
+            // file:// 경로에서 파일 읽기
+            final filePath = imageUrl.replaceFirst('file://', '');
+            final file = File(filePath);
+            if (await file.exists()) {
+              imageData = await file.readAsBytes();
+              print('파일에서 이미지 데이터 로드 성공: ${imageData.length} bytes');
+            }
+          } else if (imageUrl.startsWith('data:image/')) {
+            // base64 데이터에서 디코드
+            final base64Data = imageUrl.split(',')[1];
+            imageData = base64Decode(base64Data);
+            print('base64에서 이미지 데이터 디코드 성공: ${imageData.length} bytes');
+          } else if (imageUrl.startsWith('/')) {
+            // 절대 경로에서 파일 읽기
+            final file = File(imageUrl);
+            if (await file.exists()) {
+              imageData = await file.readAsBytes();
+              print('절대경로 파일에서 이미지 데이터 로드 성공: ${imageData.length} bytes');
+            }
+          }
+        } catch (e) {
+          print('이미지 데이터 추출 오류: $e');
+        }
+      }
+
       final diary = DiaryEntry(
         title: _titleController.text.trim(),
         content: _contentController.text.trim(),
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         generatedImageUrl: imageUrl,
+        imageData: imageData,
         emotion: emotion,
         keywords: keywords,
         aiPrompt: aiPrompt,
@@ -345,13 +378,44 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         _perspectiveOptions,
         subscription.isPremium ? _selectedTime : null,
         subscription.isPremium ? _selectedWeather : null,
-        _selectedPhotos,
+        subscription.isPremium ? _selectedSeason : null,
+        subscription.isPremium && _selectedPhotos.isNotEmpty ? _selectedPhotos : null,
       );
 
       final newImageUrl = result['imageUrl'] as String?;
       final emotion = result['emotion'] as String?;
       final keywords = List<String>.from(result['keywords'] as List? ?? []);
       final aiPrompt = result['imagePrompt'] as String?;
+
+      // imageUrl에서 바이너리 데이터 추출
+      Uint8List? imageData;
+      if (newImageUrl != null) {
+        try {
+          if (newImageUrl.startsWith('file://')) {
+            // file:// 경로에서 파일 읽기
+            final filePath = newImageUrl.replaceFirst('file://', '');
+            final file = File(filePath);
+            if (await file.exists()) {
+              imageData = await file.readAsBytes();
+              print('파일에서 이미지 데이터 로드 성공: ${imageData.length} bytes');
+            }
+          } else if (newImageUrl.startsWith('data:image/')) {
+            // base64 데이터에서 디코드
+            final base64Data = newImageUrl.split(',')[1];
+            imageData = base64Decode(base64Data);
+            print('base64에서 이미지 데이터 디코드 성공: ${imageData.length} bytes');
+          } else if (newImageUrl.startsWith('/')) {
+            // 절대 경로에서 파일 읽기
+            final file = File(newImageUrl);
+            if (await file.exists()) {
+              imageData = await file.readAsBytes();
+              print('절대경로 파일에서 이미지 데이터 로드 성공: ${imageData.length} bytes');
+            }
+          }
+        } catch (e) {
+          print('이미지 데이터 추출 오류: $e');
+        }
+      }
 
       setState(() {
         _generatedImageUrl = newImageUrl;
@@ -366,6 +430,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
           createdAt: _existingEntry!.createdAt,
           updatedAt: DateTime.now(),
           generatedImageUrl: newImageUrl,
+          imageData: imageData,
           emotion: emotion,
           keywords: keywords,
           aiPrompt: aiPrompt,
@@ -747,14 +812,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                                 ),
                               ),
                               ElevatedButton.icon(
-                                onPressed: () {
-                                  final subscription = ref.read(subscriptionProvider);
-                                  if (subscription.isPremium) {
-                                    _pickPhotos();
-                                  } else {
-                                    _showPremiumDialog();
-                                  }
-                                },
+                                onPressed: _pickPhotos,
                                 icon: const Icon(Icons.add_photo_alternate, size: 18),
                                 label: const Text('사진 선택'),
                                 style: ElevatedButton.styleFrom(
@@ -796,6 +854,31 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                                       style: TextStyle(
                                         color: Colors.grey[600],
                                         fontSize: 14,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: subscription.isPremium
+                                            ? Colors.blue.withOpacity(0.1)
+                                            : Colors.orange.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        subscription.isPremium
+                                            ? '최대 3장까지 업로드 가능'
+                                            : '무료 버전: 1장만 선택 가능',
+                                        style: TextStyle(
+                                          color: subscription.isPremium
+                                              ? Colors.blue[700]
+                                              : Colors.orange[700],
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -1437,6 +1520,22 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     // 중복 호출 방지
     if (_isPickingImage) return;
 
+    final subscription = ref.read(subscriptionProvider);
+    final maxPhotos = subscription.isPremium ? 3 : 1;
+
+    // 이미 최대 개수만큼 선택했는지 확인
+    if (_selectedPhotos.length >= maxPhotos) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(subscription.isPremium
+            ? '최대 3장까지 선택할 수 있습니다'
+            : '무료 버전에서는 1장만 선택할 수 있습니다. 프리미엄으로 업그레이드하여 최대 3장까지 업로드하세요!'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isPickingImage = true;
     });
@@ -1444,9 +1543,24 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     try {
       final List<XFile> pickedFiles = await _imagePicker.pickMultiImage();
       if (pickedFiles.isNotEmpty) {
+        // 선택 가능한 개수 계산
+        final remainingSlots = maxPhotos - _selectedPhotos.length;
+        final filesToAdd = pickedFiles.take(remainingSlots).toList();
+
+        if (pickedFiles.length > remainingSlots) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(subscription.isPremium
+                ? '최대 ${maxPhotos}장까지만 선택할 수 있습니다. ${remainingSlots}장만 추가되었습니다'
+                : '무료 버전에서는 1장만 선택할 수 있습니다'),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+
         // 영구 저장소로 복사
         final List<String> permanentPaths = [];
-        for (final pickedFile in pickedFiles) {
+        for (final pickedFile in filesToAdd) {
           try {
             // 영구 디렉토리 가져오기
             final directory = await getApplicationDocumentsDirectory();

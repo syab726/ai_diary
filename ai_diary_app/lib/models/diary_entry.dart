@@ -24,6 +24,7 @@ class DiaryEntry {
   final ImageTime imageTime;
   final ImageWeather imageWeather;
   final ImageSeason imageSeason;
+  final List<String> userPhotos;  // 사용자가 업로드한 사진들의 경로
 
   DiaryEntry({
     String? id,
@@ -42,9 +43,11 @@ class DiaryEntry {
     this.imageTime = ImageTime.morning,
     this.imageWeather = ImageWeather.sunny,
     this.imageSeason = ImageSeason.spring,
+    List<String>? userPhotos,
   }) : id = id ?? const Uuid().v4(),
        createdAt = createdAt ?? DateTime.now().toLocal(),
-       keywords = keywords ?? [];
+       keywords = keywords ?? [],
+       userPhotos = userPhotos ?? [];
 
   DiaryEntry copyWith({
     String? id,
@@ -63,6 +66,7 @@ class DiaryEntry {
     ImageTime? imageTime,
     ImageWeather? imageWeather,
     ImageSeason? imageSeason,
+    List<String>? userPhotos,
   }) {
     return DiaryEntry(
       id: id ?? this.id,
@@ -81,6 +85,7 @@ class DiaryEntry {
       imageTime: imageTime ?? this.imageTime,
       imageWeather: imageWeather ?? this.imageWeather,
       imageSeason: imageSeason ?? this.imageSeason,
+      userPhotos: userPhotos ?? this.userPhotos,
     );
   }
 
@@ -102,6 +107,7 @@ class DiaryEntry {
       'imageTime': imageTime.name,
       'imageWeather': imageWeather.name,
       'imageSeason': imageSeason.name,
+      'userPhotos': userPhotos.join('|||'),  // 구분자로 연결
     };
   }
 
@@ -148,6 +154,9 @@ class DiaryEntry {
               orElse: () => ImageSeason.spring,
             )
           : ImageSeason.spring,
+      userPhotos: map['userPhotos'] != null && (map['userPhotos'] as String).isNotEmpty
+          ? (map['userPhotos'] as String).split('|||')
+          : [],
     );
   }
 }
