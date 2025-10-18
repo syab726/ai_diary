@@ -14,7 +14,9 @@ import 'screens/diary_create_screen.dart';
 import 'screens/diary_detail_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/emotion_stats_screen.dart';
 import 'providers/auth_provider.dart';
+import 'providers/auto_backup_provider.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/locale_provider.dart';
 import 'providers/theme_provider.dart';
@@ -64,10 +66,10 @@ class _FallbackCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupe
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Firebase 초기화 (개발용으로 주석 처리)
-  // await Firebase.initializeApp(
-  //   options: DefaultFirebaseOptions.currentPlatform,
-  // );
+  // Firebase 초기화
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   
   // 날짜 포맷 로케일 초기화 (웹 플랫폼 호환성)
   await initializeDateFormatting('ko_KR', null);
@@ -91,7 +93,10 @@ class MyApp extends ConsumerWidget {
     final appTheme = ref.watch(themeProvider);
     final fontSize = ref.watch(fontSizeProvider);
     final selectedFont = ref.watch(fontProvider);
-    
+
+    // 자동 백업 provider 초기화 (감시만 하면 자동으로 초기화됨)
+    ref.watch(autoBackupProvider);
+
     return MaterialApp.router(
       title: 'AI Diary App',
       locale: locale,
@@ -168,7 +173,7 @@ GoRouter _createRouter(WidgetRef ref) {
       }
       
       // 로그인이 필요한 페이지들
-      final protectedRoutes = ['/', '/list', '/calendar', '/create', '/edit', '/detail', '/settings'];
+      final protectedRoutes = ['/', '/list', '/calendar', '/create', '/edit', '/detail', '/settings', '/stats'];
       final isProtectedRoute = protectedRoutes.any((route) => 
         currentLocation?.startsWith(route) == true && currentLocation != '/login');
       
@@ -224,6 +229,11 @@ GoRouter _createRouter(WidgetRef ref) {
       path: '/settings',
       name: 'settings',
       builder: (context, state) => const SettingsScreen(),
+    ),
+    GoRoute(
+      path: '/stats',
+      name: 'stats',
+      builder: (context, state) => const EmotionStatsScreen(),
     ),
     GoRoute(
       path: '/login',

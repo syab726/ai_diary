@@ -9,6 +9,7 @@ import '../models/perspective_options.dart';
 import '../models/theme_preset.dart';
 import '../providers/image_style_provider.dart';
 import '../providers/theme_preset_provider.dart';
+import '../screens/premium_subscription_screen.dart';
 
 class TabbedOptionSelector extends ConsumerStatefulWidget {
   final bool isPremium;
@@ -52,373 +53,325 @@ class TabbedOptionSelector extends ConsumerStatefulWidget {
   ConsumerState<TabbedOptionSelector> createState() => _TabbedOptionSelectorState();
 }
 
-class _TabbedOptionSelectorState extends ConsumerState<TabbedOptionSelector>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
+class _TabbedOptionSelectorState extends ConsumerState<TabbedOptionSelector> {
   @override
   Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 기본 설정 섹션
+          _buildExpansionTile(
+            key: const ValueKey('basic_settings'),
+            icon: Icons.auto_awesome,
+            title: '기본 설정',
+            isLocked: false,
+            child: _buildBasicSettingsContent(),
+          ),
+
+          const SizedBox(height: 12),
+
+          // 이미지 설정 섹션
+          _buildExpansionTile(
+            key: const ValueKey('image_settings'),
+            icon: Icons.tune,
+            title: '이미지 설정',
+            isLocked: !widget.isPremium,
+            child: _buildImageSettingsContent(),
+          ),
+
+          const SizedBox(height: 12),
+
+          // 부가 기능 섹션
+          _buildExpansionTile(
+            key: const ValueKey('advanced_features'),
+            icon: Icons.settings,
+            title: '부가 기능',
+            isLocked: !widget.isPremium,
+            child: _buildAdvancedFeaturesContent(),
+          ),
+
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExpansionTile({
+    required Key key,
+    required IconData icon,
+    required String title,
+    required bool isLocked,
+    required Widget child,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          key: key,
+          initiallyExpanded: false,
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          childrenPadding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: isLocked ? Colors.grey.shade200 : const Color(0xFF667EEA).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              color: isLocked ? Colors.grey.shade400 : const Color(0xFF667EEA),
+              size: 24,
+            ),
+          ),
+          title: Row(
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: isLocked ? Colors.grey.shade400 : const Color(0xFF2D3748),
+                ),
+              ),
+              if (isLocked) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.amber,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.lock, color: Colors.white, size: 12),
+                      SizedBox(width: 4),
+                      Text(
+                        '프리미엄',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+          children: [child],
+        ),
+      ),
+    );
+  }
+
+  // 기본 설정 내용
+  Widget _buildBasicSettingsContent() {
+    final selectedPresetId = ref.watch(themePresetProvider);
+    final selectedStyle = ref.watch(defaultImageStyleProvider);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 탭 헤더
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.grey.shade50,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(12),
-              topRight: Radius.circular(12),
+        // 테마 프리셋 섹션
+        ThemePresetSelector(
+          selectedPresetId: selectedPresetId,
+          onPresetSelected: (preset) {
+            ref.read(themePresetProvider.notifier).selectPreset(preset.id);
+            ref.read(defaultImageStyleProvider.notifier).setStyle(preset.style);
+            if (widget.isPremium && preset.advancedOptions != null) {
+              widget.onAdvancedOptionsChanged(preset.advancedOptions!);
+            }
+            if (widget.isPremium && preset.time != null) {
+              widget.onTimeChanged(preset.time!);
+            }
+            if (widget.isPremium && preset.weather != null) {
+              widget.onWeatherChanged(preset.weather!);
+            }
+          },
+          isPremium: widget.isPremium,
+        ),
+      ],
+    );
+  }
+
+  // 이미지 설정 내용
+  Widget _buildImageSettingsContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 고급옵션 자동설정 섹션 (프리미엄 전용)
+        if (widget.isPremium) ...[
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.blue.shade200),
             ),
-            border: Border.all(color: Colors.grey.shade300),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Checkbox(
+                      value: widget.isAutoConfigEnabled,
+                      onChanged: (value) {
+                        widget.onAutoConfigChanged(value ?? false);
+                        if (value == true && widget.onAutoConfigApply != null) {
+                          widget.onAutoConfigApply!();
+                        }
+                      },
+                      activeColor: const Color(0xFF667EEA),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            '고급옵션 자동설정',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF2D3748),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '아래 네 가지 옵션을 일기 내용에 맞게 자동 설정합니다',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // 자동설정 대상 옵션들을 시각적으로 표시
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildAutoConfigIcon(Icons.wb_sunny, '조명'),
+                      _buildAutoConfigIcon(Icons.mood, '분위기'),
+                      _buildAutoConfigIcon(Icons.palette, '색상'),
+                      _buildAutoConfigIcon(Icons.photo_size_select_large, '구도'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          child: TabBar(
-            controller: _tabController,
-            tabs: [
-              _buildTab(Icons.auto_awesome, '기본 설정', 0),
-              _buildTab(Icons.tune, '이미지 설정', 1),
-              _buildTab(Icons.settings, '부가 기능', 2),
-            ],
-            labelColor: const Color(0xFF667EEA),
-            unselectedLabelColor: Colors.grey,
-            indicator: const BoxDecoration(),
-            dividerColor: Colors.transparent,
+          const SizedBox(height: 20),
+        ],
+
+        // 고급 이미지 옵션 섹션 (조명, 분위기, 색상, 구도)
+        Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: AdvancedImageOptionsSelector(
+            options: widget.advancedOptions,
+            onChanged: widget.onAdvancedOptionsChanged,
+            enabled: widget.isPremium,
           ),
         ),
 
-        // 탭 내용
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(12),
-                bottomRight: Radius.circular(12),
-              ),
-              border: Border.all(color: Colors.grey.shade300),
-            ),
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildBasicSettingsTab(),
-                _buildImageSettingsTab(),
-                _buildAdvancedFeaturesTab(),
-              ],
-            ),
+        const SizedBox(height: 24),
+
+        // 구분선
+        Container(
+          height: 1,
+          color: Colors.grey.shade300,
+          margin: const EdgeInsets.symmetric(horizontal: 8),
+        ),
+
+        const SizedBox(height: 24),
+
+        // 시간대/조명 설정 섹션
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: ImageTimeSelector(
+            selectedTime: widget.selectedTime,
+            onTimeChanged: widget.onTimeChanged,
+            enabled: widget.isPremium,
+          ),
+        ),
+
+        const SizedBox(height: 20),
+
+        // 날씨 설정 섹션
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: ImageWeatherSelector(
+            selectedWeather: widget.selectedWeather,
+            onWeatherChanged: widget.onWeatherChanged,
+            enabled: widget.isPremium,
+          ),
+        ),
+
+        const SizedBox(height: 20),
+
+        // 계절 설정 섹션
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: ImageSeasonSelector(
+            selectedSeason: widget.selectedSeason,
+            onSeasonChanged: widget.onSeasonChanged,
+            enabled: widget.isPremium,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildTab(IconData icon, String label, int index) {
-    final isLocked = !widget.isPremium && (index == 1 || index == 2);
-
-    return Tab(
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 18,
-                color: isLocked ? Colors.grey.shade400 : null,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: isLocked ? Colors.grey.shade400 : null,
-                ),
-              ),
-            ],
-          ),
-          if (isLocked)
-            Positioned(
-              right: 0,
-              top: 0,
-              child: Container(
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: Colors.amber,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Icon(
-                  Icons.lock,
-                  color: Colors.white,
-                  size: 12,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  // 기본 설정 탭 (프리셋 + 스타일)
-  Widget _buildBasicSettingsTab() {
-    final selectedPresetId = ref.watch(themePresetProvider);
-    final selectedStyle = ref.watch(defaultImageStyleProvider);
-
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 테마 프리셋 섹션
-            ThemePresetSelector(
-              selectedPresetId: selectedPresetId,
-              onPresetSelected: (preset) {
-                ref.read(themePresetProvider.notifier).selectPreset(preset.id);
-                ref.read(defaultImageStyleProvider.notifier).setStyle(preset.style);
-                if (widget.isPremium && preset.advancedOptions != null) {
-                  widget.onAdvancedOptionsChanged(preset.advancedOptions!);
-                }
-                if (widget.isPremium && preset.time != null) {
-                  widget.onTimeChanged(preset.time!);
-                }
-                if (widget.isPremium && preset.weather != null) {
-                  widget.onWeatherChanged(preset.weather!);
-                }
-              },
-              isPremium: widget.isPremium,
-            ),
-
-            if (!widget.isPremium) ...[
-              const SizedBox(height: 20),
-              _buildPremiumPromptCard(),
-            ],
-          ],
+  // 부가 기능 내용
+  Widget _buildAdvancedFeaturesContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 이미지 시점 섹션
+        PerspectiveOptionsSelector(
+          options: widget.perspectiveOptions,
+          onChanged: widget.onPerspectiveOptionsChanged,
+          enabled: widget.isPremium,
         ),
-      ),
-    );
-  }
-
-  // 이미지 설정 탭 (고급옵션 + 비율)
-  Widget _buildImageSettingsTab() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 고급옵션 자동설정 섹션
-            if (widget.isPremium) ...[
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blue.shade200),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: widget.isAutoConfigEnabled,
-                          onChanged: (value) {
-                            widget.onAutoConfigChanged(value ?? false);
-                            if (value == true && widget.onAutoConfigApply != null) {
-                              widget.onAutoConfigApply!();
-                            }
-                          },
-                          activeColor: const Color(0xFF667EEA),
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                '고급옵션 자동설정',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF2D3748),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '아래 네 가지 옵션을 일기 내용에 맞게 자동 설정합니다',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey.shade600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    // 자동설정 대상 옵션들을 시각적으로 표시
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _buildAutoConfigIcon(Icons.wb_sunny, '조명'),
-                          _buildAutoConfigIcon(Icons.mood, '분위기'),
-                          _buildAutoConfigIcon(Icons.palette, '색상'),
-                          _buildAutoConfigIcon(Icons.photo_size_select_large, '구도'),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-
-            // 고급 이미지 옵션 섹션 (조명, 분위기, 색상, 구도)
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                border: widget.isAutoConfigEnabled && widget.isPremium
-                    ? Border.all(color: Colors.blue.shade400, width: 2)
-                    : null,
-                color: widget.isAutoConfigEnabled && widget.isPremium
-                  ? Colors.blue.shade50
-                  : Colors.grey.shade50,
-                boxShadow: widget.isAutoConfigEnabled && widget.isPremium
-                    ? [
-                        BoxShadow(
-                          color: Colors.blue.shade200.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : [
-                        BoxShadow(
-                          color: Colors.grey.shade300.withOpacity(0.5),
-                          blurRadius: 4,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
-              ),
-              child: AdvancedImageOptionsSelector(
-                options: widget.advancedOptions,
-                onChanged: widget.onAdvancedOptionsChanged,
-                enabled: widget.isPremium,
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // 구분선
-            Container(
-              height: 1,
-              color: Colors.grey.shade300,
-              margin: const EdgeInsets.symmetric(horizontal: 8),
-            ),
-
-            const SizedBox(height: 24),
-
-            // 시간대/조명 설정 섹션
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: ImageTimeSelector(
-                selectedTime: widget.selectedTime,
-                onTimeChanged: widget.onTimeChanged,
-                enabled: widget.isPremium,
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // 날씨 설정 섹션
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: ImageWeatherSelector(
-                selectedWeather: widget.selectedWeather,
-                onWeatherChanged: widget.onWeatherChanged,
-                enabled: widget.isPremium,
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // 계절 설정 섹션
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: ImageSeasonSelector(
-                selectedSeason: widget.selectedSeason,
-                onSeasonChanged: widget.onSeasonChanged,
-              ),
-            ),
-
-            if (!widget.isPremium) ...[
-              const SizedBox(height: 20),
-              _buildPremiumPromptCard(),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  // 부가 기능 탭 (시점 + 글꼴)
-  Widget _buildAdvancedFeaturesTab() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 이미지 시점 섹션
-            PerspectiveOptionsSelector(
-              options: widget.perspectiveOptions,
-              onChanged: widget.onPerspectiveOptionsChanged,
-              enabled: true,
-            ),
-
-
-            if (!widget.isPremium) ...[
-              const SizedBox(height: 20),
-              _buildPremiumPromptCard(),
-            ],
-          ],
-        ),
-      ),
+      ],
     );
   }
 
@@ -476,9 +429,6 @@ class _TabbedOptionSelectorState extends ConsumerState<TabbedOptionSelector>
       ),
     );
   }
-
-
-
 
   void _showPremiumDialog(BuildContext context) {
     showDialog(
@@ -540,16 +490,17 @@ class _TabbedOptionSelectorState extends ConsumerState<TabbedOptionSelector>
           FilledButton(
             onPressed: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('설정 > 테스트 모드에서 프리미엄으로 전환할 수 있습니다'),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PremiumSubscriptionScreen(),
                 ),
               );
             },
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF667EEA),
+              backgroundColor: Colors.amber,
             ),
-            child: const Text('구독하기'),
+            child: const Text('프리미엄 구독하기'),
           ),
         ],
       ),

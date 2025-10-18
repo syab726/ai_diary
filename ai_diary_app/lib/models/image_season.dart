@@ -15,11 +15,13 @@ enum ImageSeason {
 class ImageSeasonSelector extends StatelessWidget {
   final ImageSeason selectedSeason;
   final ValueChanged<ImageSeason> onSeasonChanged;
+  final bool enabled;
 
   const ImageSeasonSelector({
     super.key,
     required this.selectedSeason,
     required this.onSeasonChanged,
+    this.enabled = true,
   });
 
   @override
@@ -32,7 +34,7 @@ class ImageSeasonSelector extends StatelessWidget {
             Icon(
               Icons.nature,
               size: 18,
-              color: Colors.grey.shade600,
+              color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
             ),
             const SizedBox(width: 8),
             Text(
@@ -40,7 +42,7 @@ class ImageSeasonSelector extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey.shade700,
+                color: enabled ? Colors.grey.shade700 : Colors.grey.shade400,
               ),
             ),
           ],
@@ -50,15 +52,20 @@ class ImageSeasonSelector extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
+            border: Border.all(
+              color: enabled ? Colors.grey.shade300 : Colors.grey.shade200,
+            ),
             borderRadius: BorderRadius.circular(8),
-            color: Colors.white,
+            color: enabled ? Colors.white : Colors.grey.withOpacity(0.1),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<ImageSeason>(
               value: selectedSeason,
               isExpanded: true,
-              icon: Icon(Icons.arrow_drop_down, color: Colors.grey.shade600),
+              icon: Icon(
+                Icons.arrow_drop_down,
+                color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
+              ),
               items: ImageSeason.values.map((season) {
                 return DropdownMenuItem<ImageSeason>(
                   value: season,
@@ -67,7 +74,7 @@ class ImageSeasonSelector extends StatelessWidget {
                       Icon(
                         _getSeasonIcon(season),
                         size: 20,
-                        color: _getSeasonColor(season),
+                        color: enabled ? _getSeasonColor(season) : Colors.grey.shade400,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -77,16 +84,17 @@ class ImageSeasonSelector extends StatelessWidget {
                           children: [
                             Text(
                               season.displayName,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
+                                color: enabled ? Colors.grey.shade800 : Colors.grey.shade400,
                               ),
                             ),
                             Text(
                               season.description,
                               style: TextStyle(
                                 fontSize: 11,
-                                color: Colors.grey.shade600,
+                                color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
                               ),
                             ),
                           ],
@@ -96,11 +104,11 @@ class ImageSeasonSelector extends StatelessWidget {
                   ),
                 );
               }).toList(),
-              onChanged: (season) {
+              onChanged: enabled ? (season) {
                 if (season != null) {
                   onSeasonChanged(season);
                 }
-              },
+              } : null,
             ),
           ),
         ),

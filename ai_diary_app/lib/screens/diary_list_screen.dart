@@ -95,6 +95,24 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                 ),
               ),
               Container(
+                margin: const EdgeInsets.only(right: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.bar_chart, color: Color(0xFF4A5568)),
+                  onPressed: () => context.go('/stats'),
+                ),
+              ),
+              Container(
                 margin: const EdgeInsets.only(right: 12),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -181,7 +199,17 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
               for (int i = 0; i < diaries.length; i++) {
                 print('일기 $i: 제목=${diaries[i].title}, 내용길이=${diaries[i].content.length}, 내용="${diaries[i].content}"');
               }
-              if (diaries.isEmpty) {
+
+              // 현재 월의 일기만 필터링
+              final now = DateTime.now();
+              final currentMonthDiaries = diaries.where((diary) {
+                return diary.createdAt.year == now.year &&
+                       diary.createdAt.month == now.month;
+              }).toList();
+
+              print('현재 월 일기 개수: ${currentMonthDiaries.length}');
+
+              if (currentMonthDiaries.isEmpty) {
                 return SliverFillRemaining(
                   child: Center(
                     child: Column(
@@ -229,7 +257,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
 
               // 월별로 그룹화
               final groupedDiaries = <String, List<DiaryEntry>>{};
-              for (final diary in diaries) {
+              for (final diary in currentMonthDiaries) {
                 final locale = Localizations.localeOf(context);
                 final dateFormat = locale.languageCode == 'ko' ? 'yyyy년 M월' :
                                   locale.languageCode == 'ja' ? 'yyyy年M月' :
@@ -287,6 +315,11 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
   }
 
   Widget _buildDiaryCard(DiaryEntry diary) {
+    print('=== _buildDiaryCard 호출: ${diary.title} ===');
+    print('imageData: ${diary.imageData != null ? "있음 (${diary.imageData!.length} bytes)" : "null"}');
+    print('generatedImageUrl: ${diary.generatedImageUrl}');
+    print('userPhotos: ${diary.userPhotos}');
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,

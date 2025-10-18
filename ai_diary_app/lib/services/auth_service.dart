@@ -88,26 +88,43 @@ class AuthService {
     }
   }
 
-  // 익명 로그인 (개발용)
+  // 익명 로그인 (Firebase 또는 로컬 Mock)
   static Future<MockUser?> signInAnonymously() async {
     try {
-      await Future.delayed(const Duration(milliseconds: 500)); // 로딩 시뮬레이션
+      // 실제 Firebase 익명 로그인 시도
+      final UserCredential userCredential = await _auth.signInAnonymously();
+      final user = userCredential.user;
+
+      if (user != null) {
+        _currentMockUser = MockUser(
+          uid: user.uid,
+          isAnonymous: true,
+        );
+        _authStateController.add(_currentMockUser);
+        print('✅ Firebase 익명 로그인 성공: ${user.uid}');
+        return _currentMockUser;
+      }
+      return null;
+    } catch (e) {
+      // Firebase 로그인 실패 시 로컬 Mock 사용 (개발용)
+      print('⚠️ Firebase 익명 로그인 실패, 로컬 Mock 사용: $e');
       _currentMockUser = MockUser(
-        uid: 'anonymous-${DateTime.now().millisecondsSinceEpoch}',
+        uid: 'local-mock-${DateTime.now().millisecondsSinceEpoch}',
         isAnonymous: true,
       );
       _authStateController.add(_currentMockUser);
       return _currentMockUser;
-    } catch (e) {
-      print('익명 로그인 오류: $e');
-      rethrow;
     }
   }
 
-  // 로그아웃 (개발용)
+  // 로그아웃 (실제 Firebase 로그아웃 포함)
   static Future<void> signOut() async {
     try {
-      await Future.delayed(const Duration(milliseconds: 200)); // 로딩 시뮬레이션
+      // 실제 Firebase 로그아웃
+      await _auth.signOut();
+      await _googleSignIn.signOut();
+
+      // Mock 상태도 초기화
       _currentMockUser = null;
       _authStateController.add(null);
     } catch (e) {

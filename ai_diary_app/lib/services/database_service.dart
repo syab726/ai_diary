@@ -107,9 +107,28 @@ class DatabaseService {
     print('DatabaseService: getAllDiaries 호출됨');
     final db = await database;
 
-    // 모든 필드 조회 (imageData 포함)
+    // imageData BLOB 필드를 제외하고 조회 (CursorWindow 크기 제한 방지)
     final List<Map<String, dynamic>> maps = await db.query(
       tableName,
+      columns: [
+        'id',
+        'title',
+        'content',
+        'createdAt',
+        'updatedAt',
+        'generatedImageUrl',
+        // 'imageData',  // BLOB 데이터 제외
+        'emotion',
+        'keywords',
+        'aiPrompt',
+        'imageStyle',
+        'hasBeenRegenerated',
+        'fontFamily',
+        'imageTime',
+        'imageWeather',
+        'imageSeason',
+        'userPhotos',
+      ],
       orderBy: 'createdAt DESC',
     );
 
@@ -128,8 +147,28 @@ class DatabaseService {
 
   static Future<DiaryEntry?> getDiaryById(String id) async {
     final db = await database;
+    // imageData BLOB 필드를 제외하고 조회 (CursorWindow 크기 제한 방지)
     final List<Map<String, dynamic>> maps = await db.query(
       tableName,
+      columns: [
+        'id',
+        'title',
+        'content',
+        'createdAt',
+        'updatedAt',
+        'generatedImageUrl',
+        // 'imageData',  // BLOB 데이터 제외
+        'emotion',
+        'keywords',
+        'aiPrompt',
+        'imageStyle',
+        'hasBeenRegenerated',
+        'fontFamily',
+        'imageTime',
+        'imageWeather',
+        'imageSeason',
+        'userPhotos',
+      ],
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -161,8 +200,28 @@ class DatabaseService {
 
   static Future<List<DiaryEntry>> searchDiaries(String query) async {
     final db = await database;
+    // imageData BLOB 필드를 제외하고 조회 (CursorWindow 크기 제한 방지)
     final List<Map<String, dynamic>> maps = await db.query(
       tableName,
+      columns: [
+        'id',
+        'title',
+        'content',
+        'createdAt',
+        'updatedAt',
+        'generatedImageUrl',
+        // 'imageData',  // BLOB 데이터 제외
+        'emotion',
+        'keywords',
+        'aiPrompt',
+        'imageStyle',
+        'hasBeenRegenerated',
+        'fontFamily',
+        'imageTime',
+        'imageWeather',
+        'imageSeason',
+        'userPhotos',
+      ],
       where: 'title LIKE ? OR content LIKE ? OR keywords LIKE ?',
       whereArgs: ['%$query%', '%$query%', '%$query%'],
       orderBy: 'createdAt DESC',
