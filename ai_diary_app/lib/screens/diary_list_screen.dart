@@ -158,10 +158,10 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
               ),
             ),
 
-          // 프리미엄 업그레이드 배너 (무료 사용자 + 5개 이상 일기)
+          // 프리미엄 업그레이드 배너 (무료 사용자 + 일기가 1개 이상)
           diariesAsync.maybeWhen(
             data: (diaries) {
-              if (!subscription.isPremium && diaries.length >= 5) {
+              if (!subscription.isPremium && diaries.isNotEmpty) {
                 return _buildPremiumUpgradeBanner();
               }
               return const SliverToBoxAdapter(child: SizedBox.shrink());
