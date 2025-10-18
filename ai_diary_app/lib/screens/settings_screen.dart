@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/subscription_provider.dart';
 import '../services/auth_service.dart';
+import '../services/free_user_service.dart';
 import 'settings/personalization_settings_screen.dart';
 import 'settings/ai_settings_screen.dart';
 import 'settings/backup_restore_screen.dart';
@@ -177,59 +178,90 @@ class SettingsScreen extends ConsumerWidget {
   Widget _buildPremiumTile(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF6B73FF), Color(0xFF764BA2)],
-          ),
-          borderRadius: BorderRadius.circular(12),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFFF97316).withOpacity(0.9),
+            const Color(0xFFEC4899).withOpacity(0.9),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        child: ListTile(
-          leading: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(
-              Icons.diamond,
-              color: Colors.white,
-              size: 20,
-            ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFF97316).withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
-          title: Text(
-            AppLocalizations.of(context).premiumUpgrade,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.workspace_premium,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '프리미엄 업그레이드',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      '광고 없이 무제한으로 사용하세요',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          subtitle: Text(
-            AppLocalizations.of(context).premiumUpgradeSubtitle,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 13,
-            ),
-          ),
-          trailing: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Text(
-              AppLocalizations.of(context).upgradeToPremium,
-              style: const TextStyle(
-                color: Color(0xFF6B73FF),
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => context.go('/premium-subscription'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: const Color(0xFFF97316),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              icon: const Icon(Icons.workspace_premium, size: 20),
+              label: const Text(
+                '프리미엄으로 무제한 생성',
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ),
-          onTap: () => _showPremiumDialog(context),
-        ),
+        ],
       ),
     );
   }
@@ -495,5 +527,17 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// 일일 진행 상황 데이터 가져오기
+  Future<Map<String, dynamic>> _getDailyProgress() async {
+    final freeUserService = FreeUserService();
+    final dailyCount = await freeUserService.getDailyAdCount();
+    final resetTime = freeUserService.getTimeUntilResetString();
+
+    return {
+      'count': dailyCount,
+      'resetTime': resetTime,
+    };
   }
 }

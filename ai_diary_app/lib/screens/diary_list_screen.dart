@@ -158,17 +158,6 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
               ),
             ),
 
-          // 일일 진행 상황 배너 (무료 사용자 + 5개 이상 일기)
-          diariesAsync.maybeWhen(
-            data: (diaries) {
-              if (!subscription.isPremium && diaries.length >= 5) {
-                return _buildDailyProgressBanner();
-              }
-              return const SliverToBoxAdapter(child: SizedBox.shrink());
-            },
-            orElse: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
-          ),
-
           // 일기 목록
           diariesAsync.when(
             loading: () => const SliverFillRemaining(

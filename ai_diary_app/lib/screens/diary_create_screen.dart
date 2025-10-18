@@ -118,14 +118,13 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
   /// ============== Phase 3: 하이브리드 프리미엄 모델 ==============
   ///
-  /// 무료 사용자: 5개 완전 무료 → 이후 매일 3개 (광고 시청 필요)
+  /// 무료 사용자: 5개 완전 무료 → 이후 광고 1번 시청 = 일기 1개
   /// 프리미엄 사용자: 무제한 생성
   Future<void> _generateDiary() async {
     // Step 1: 폼 검증
     if (!_formKey.currentState!.validate()) return;
 
     final subscription = ref.read(subscriptionProvider);
-    final freeUserService = FreeUserService();
 
     // Step 2: 프리미엄 사용자는 바로 생성
     if (subscription.isPremium) {
@@ -149,28 +148,12 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
       print('[하이브리드 모델] 안전을 위해 광고 경로로 진행');
     }
 
-    // Step 4: 6번째 일기부터는 일일 카운터 확인
-    int dailyAdCount;
-    try {
-      dailyAdCount = await freeUserService.getDailyAdCount();
-      print('[하이브리드 모델] 오늘 광고 시청 횟수: $dailyAdCount/3');
-    } catch (e) {
-      print('[하이브리드 모델] 카운터 확인 실패: $e');
-      _showAdFailedDialog();
-      return;
-    }
+    // Step 4: 6번째 일기부터는 광고 시청 필요 (하루 제한 없음)
+    print('[하이브리드 모델] 6번째 일기 이상 - 광고 시청 필요');
 
-    // Step 5: 일일 제한 도달 시 다이얼로그 표시
-    if (dailyAdCount >= 3) {
-      print('[하이브리드 모델] 일일 제한 도달 - 내일 00:00 리셋');
-      _showDailyLimitDialog();
-      return;
-    }
-
-    // Step 6: 광고 안내 다이얼로그 표시
+    // Step 5: 광고 안내 다이얼로그 표시
     final shouldShowAd = await _showAdExplanationDialog(
       isFirstTime: allDiaries.length == 5, // 6번째 일기인지 확인
-      dailyCount: dailyAdCount,
     );
 
     if (!shouldShowAd) {
@@ -178,7 +161,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
       return;
     }
 
-    // Step 7: 보상형 광고 표시
+    // Step 6: 보상형 광고 표시
     print('[하이브리드 모델] 보상형 광고 표시 시작');
     final adWatched = await AdService().showRewardedAd();
 
@@ -188,15 +171,8 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
       return;
     }
 
-    // 광고 시청 성공 - 카운터 증가
-    print('[하이브리드 모델] 광고 시청 완료 - 카운터 증가');
-    try {
-      final newCount = await freeUserService.incrementAdCount();
-      print('[하이브리드 모델] 업데이트된 카운터: $newCount/3');
-    } catch (e) {
-      print('[하이브리드 모델] 카운터 증가 실패 (계속 진행): $e');
-      // 카운터 증가 실패해도 일기 생성은 허용 (사용자가 광고를 시청했으므로)
-    }
+    // 광고 시청 성공
+    print('[하이브리드 모델] 광고 시청 완료');
 
     // 성공 애니메이션 표시
     _showAdCompletionAnimation();
@@ -2231,7 +2207,6 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   /// 광고 안내 다이얼로그 (첫 번째 또는 일반)
   Future<bool> _showAdExplanationDialog({
     required bool isFirstTime,
-    required int dailyCount,
   }) async {
     return await showDialog<bool>(
       context: context,
@@ -2289,9 +2264,9 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                 textAlign: TextAlign.center,
               ),
             ] else ...[
-              Text(
-                '오늘 $dailyCount/3개 생성했습니다',
-                style: const TextStyle(
+              const Text(
+                '광고를 보고 일기를 작성하세요',
+                style: TextStyle(
                   fontSize: 15,
                   color: Color(0xFF718096),
                 ),
@@ -2330,23 +2305,23 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
             const SizedBox(height: 16),
 
-            // 일일 할당량
+            // 무제한 생성 안내
             Container(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
+                color: Colors.green.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.calendar_today, size: 16, color: Colors.orange.shade700),
+                  Icon(Icons.all_inclusive, size: 16, color: Colors.green.shade700),
                   const SizedBox(width: 8),
                   Text(
-                    '매일 3개까지 무료 생성',
+                    '광고 시청으로 무제한 생성',
                     style: TextStyle(
                       fontSize: 13,
-                      color: Colors.orange.shade700,
+                      color: Colors.green.shade700,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
