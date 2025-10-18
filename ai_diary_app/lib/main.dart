@@ -6,8 +6,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
 import 'services/ai_service.dart';
+import 'services/ad_service.dart';
 import 'screens/calendar_screen.dart';
 import 'screens/diary_list_screen.dart';
 import 'screens/diary_create_screen.dart';
@@ -15,6 +17,7 @@ import 'screens/diary_detail_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/emotion_stats_screen.dart';
+import 'screens/premium_subscription_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/auto_backup_provider.dart';
 import 'l10n/app_localizations.dart';
@@ -65,18 +68,27 @@ class _FallbackCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupe
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+  // .env 파일 로드
+  await dotenv.load(fileName: ".env");
+
   // Firebase 초기화
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
+
+  // AdMob SDK 초기화
+  await AdService.initialize();
+
+  // 보상형 광고 미리 로드
+  AdService().loadRewardedAd();
+
   // 날짜 포맷 로케일 초기화 (웹 플랫폼 호환성)
   await initializeDateFormatting('ko_KR', null);
-  
+
   // AI 서비스 초기화
   AIService.initialize();
-  
+
   runApp(
     const ProviderScope(
       child: MyApp(),
@@ -173,7 +185,7 @@ GoRouter _createRouter(WidgetRef ref) {
       }
       
       // 로그인이 필요한 페이지들
-      final protectedRoutes = ['/', '/list', '/calendar', '/create', '/edit', '/detail', '/settings', '/stats'];
+      final protectedRoutes = ['/', '/list', '/calendar', '/create', '/edit', '/detail', '/settings', '/stats', '/premium-subscription'];
       final isProtectedRoute = protectedRoutes.any((route) => 
         currentLocation?.startsWith(route) == true && currentLocation != '/login');
       
@@ -234,6 +246,11 @@ GoRouter _createRouter(WidgetRef ref) {
       path: '/stats',
       name: 'stats',
       builder: (context, state) => const EmotionStatsScreen(),
+    ),
+    GoRoute(
+      path: '/premium-subscription',
+      name: 'premium-subscription',
+      builder: (context, state) => const PremiumSubscriptionScreen(),
     ),
     GoRoute(
       path: '/login',

@@ -924,7 +924,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                               const Icon(Icons.add_photo_alternate, size: 20, color: Color(0xFF667EEA)),
                               const SizedBox(width: 8),
                               const Text(
-                                '내 사진 (선택사항)',
+                                '사진 업로드',
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
