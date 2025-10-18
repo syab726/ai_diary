@@ -11,6 +11,8 @@ import '../models/image_season.dart';
 import '../models/perspective_options.dart';
 import '../services/ai_service.dart';
 import '../services/database_service.dart';
+import '../services/ad_service.dart';
+import '../services/free_user_service.dart';
 import '../providers/diary_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../providers/image_style_provider.dart';
@@ -113,12 +115,98 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   bool get _isEditMode => _existingEntry != null;
 
 
+  /// ============== Phase 3: 하이브리드 프리미엄 모델 ==============
+  ///
+  /// 무료 사용자: 5개 완전 무료 → 이후 매일 3개 (광고 시청 필요)
+  /// 프리미엄 사용자: 무제한 생성
   Future<void> _generateDiary() async {
+    // Step 1: 폼 검증
     if (!_formKey.currentState!.validate()) return;
 
     final subscription = ref.read(subscriptionProvider);
+    final freeUserService = FreeUserService();
 
-    print('=== _generateDiary 시작 ===');
+    // Step 2: 프리미엄 사용자는 바로 생성
+    if (subscription.isPremium) {
+      print('[하이브리드 모델] 프리미엄 사용자 - 광고 없이 바로 생성');
+      await _createDiary();
+      return;
+    }
+
+    // Step 3: 무료 사용자 - 최초 5개는 완전 무료
+    try {
+      final allDiaries = await DatabaseService.getAllDiaries();
+      if (allDiaries.length < 5) {
+        print('[하이브리드 모델] 최초 5개 무료 생성: ${allDiaries.length + 1}/5');
+        await _createDiary();
+        return;
+      }
+    } catch (e) {
+      print('[하이브리드 모델] 데이터베이스 오류 - 일기 개수 확인 실패: $e');
+      // 데이터베이스 오류 시 광고 시청 경로로 진행
+      print('[하이브리드 모델] 안전을 위해 광고 경로로 진행');
+    }
+
+    // Step 4: 6번째 일기부터는 일일 카운터 확인
+    int dailyAdCount;
+    try {
+      dailyAdCount = await freeUserService.getDailyAdCount();
+      print('[하이브리드 모델] 오늘 광고 시청 횟수: $dailyAdCount/3');
+    } catch (e) {
+      print('[하이브리드 모델] 카운터 확인 실패: $e');
+      _showAdFailedDialog();
+      return;
+    }
+
+    // Step 5: 일일 제한 도달 시 다이얼로그 표시
+    if (dailyAdCount >= 3) {
+      print('[하이브리드 모델] 일일 제한 도달 - 내일 00:00 리셋');
+      _showDailyLimitDialog();
+      return;
+    }
+
+    // Step 6: 광고 안내 다이얼로그 표시
+    final shouldShowAd = await _showAdExplanationDialog(
+      isFirstTime: allDiaries.length == 5, // 6번째 일기인지 확인
+      dailyCount: dailyAdCount,
+    );
+
+    if (!shouldShowAd) {
+      print('[하이브리드 모델] 사용자가 광고 시청 취소');
+      return;
+    }
+
+    // Step 7: 보상형 광고 표시
+    print('[하이브리드 모델] 보상형 광고 표시 시작');
+    final adWatched = await AdService().showRewardedAd();
+
+    if (!adWatched) {
+      print('[하이브리드 모델] 광고 로드 실패 또는 시청 중단');
+      _showAdFailedDialog();
+      return;
+    }
+
+    // 광고 시청 성공 - 카운터 증가
+    print('[하이브리드 모델] 광고 시청 완료 - 카운터 증가');
+    try {
+      final newCount = await freeUserService.incrementAdCount();
+      print('[하이브리드 모델] 업데이트된 카운터: $newCount/3');
+    } catch (e) {
+      print('[하이브리드 모델] 카운터 증가 실패 (계속 진행): $e');
+      // 카운터 증가 실패해도 일기 생성은 허용 (사용자가 광고를 시청했으므로)
+    }
+
+    // 성공 애니메이션 표시
+    _showAdCompletionAnimation();
+    await Future.delayed(const Duration(milliseconds: 800));
+
+    // 일기 생성 시작
+    await _createDiary();
+  }
+
+  /// 실제 일기 생성 로직 (프리미엄/무료 모두 사용)
+  Future<void> _createDiary() async {
+    print('=== _createDiary 시작 ===');
     setState(() {
       _isLoading = true;
       _isGeneratingImage = true;
@@ -127,6 +215,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     });
 
     try {
+      final subscription = ref.read(subscriptionProvider);
       final selectedStyle = ref.read(defaultImageStyleProvider);
 
       AdvancedImageOptions effectiveAdvancedOptions = _advancedOptions;
@@ -340,19 +429,26 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   }
 
 
-  // 선택한 스타일과 옵션으로 이미지 재생성
+  // 선택한 스타일과 옵션으로 이미지 재생성 (프리미엄 전용)
   Future<void> _regenerateImage(ImageStyle style, AdvancedImageOptions advancedOptions) async {
     if (!_formKey.currentState!.validate()) return;
 
     final subscription = ref.read(subscriptionProvider);
 
+    // 무료 사용자는 이미지 재생성 불가 - 프리미엄 안내
+    if (!subscription.isPremium) {
+      _showPremiumRegenerationDialog();
+      return;
+    }
+
+    // 프리미엄 사용자는 광고 없이 바로 재생성
     setState(() {
       _isLoading = true;
       _isGeneratingImage = true;
       _progressMessage = _selectedPhotos.isNotEmpty ? '사진 분석 중...' : '감정 분석 중...';
     });
 
-    try {
+    try{
       // 단계별 프로그레스 메시지 업데이트
       if (_selectedPhotos.isNotEmpty) {
         setState(() => _progressMessage = '사진 분위기 분석 중...');
@@ -716,10 +812,14 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
           : Column(
               children: [
                 Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                  child: Scrollbar(
+                    thumbVisibility: true,
+                    thickness: 6.0,
+                    radius: const Radius.circular(10),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                   // 제목/내용 입력 영역
                   Container(
                     padding: const EdgeInsets.all(16.0),
@@ -796,7 +896,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                   // 사진 업로드 영역 (수정 모드에서 무료 사용자는 숨김)
                   if (!_isEditMode || subscription.isPremium)
                     Container(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 8.0, bottom: 16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -993,7 +1093,6 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                   // 탭 옵션 영역 (조건부 표시)
                   !_isEditMode || subscription.isPremium
                       ? Container(
-                          height: 400,
                           padding: const EdgeInsets.symmetric(horizontal: 16.0),
                           child: TabbedOptionSelector(
                             isPremium: subscription.isPremium,
@@ -1084,6 +1183,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                   ),
                 ),
               ),
+            ),
 
               // 버튼 영역 - 화면 하단에 고정
               Container(
@@ -1515,6 +1615,350 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     );
   }
 
+  // 이미지 재생성 프리미엄 안내 다이얼로그
+  void _showPremiumRegenerationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.amber.shade400, Colors.orange.shade600],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.diamond,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                '프리미엄 전용 기능',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.auto_fix_high,
+                      color: Colors.orange.shade700,
+                      size: 32,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'AI 이미지 재생성',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange.shade900,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '프리미엄에서만 제공되는 기능입니다',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.orange.shade700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                '프리미엄 구독 시 혜택:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2D3748),
+                ),
+              ),
+              const SizedBox(height: 12),
+              _buildBenefitItem(
+                Icons.autorenew,
+                '무제한 이미지 재생성',
+                '원하는 그림이 나올 때까지 무제한 재생성',
+                Colors.blue,
+              ),
+              const SizedBox(height: 8),
+              _buildBenefitItem(
+                Icons.block,
+                '광고 없는 쾌적한 환경',
+                '모든 광고 제거로 집중된 일기 작성',
+                Colors.red,
+              ),
+              const SizedBox(height: 8),
+              _buildBenefitItem(
+                Icons.palette,
+                '다양한 아트 스타일',
+                '6가지 프리미엄 스타일로 매일 다른 느낌',
+                Colors.pink,
+              ),
+              const SizedBox(height: 8),
+              _buildBenefitItem(
+                Icons.tune,
+                '고급 이미지 제어',
+                '조명, 분위기, 색상, 구도 세밀 조정',
+                Colors.purple,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              '나중에',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+          FilledButton.icon(
+            onPressed: () {
+              Navigator.pop(context);
+              context.go('/settings');
+            },
+            icon: const Icon(Icons.diamond, size: 18),
+            label: const Text('프리미엄 알아보기'),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.amber,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 무료 사용자 5개 제한 안내 다이얼로그
+  void _showFreeLimitDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.orange.shade400, Colors.red.shade500],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.lock,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                '무료 버전 제한',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: Colors.orange.shade700,
+                      size: 32,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '일기 5개 작성 완료',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange.shade900,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '무료 버전에서는 최대 5개까지만 작성 가능합니다',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.orange.shade700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                '프리미엄으로 업그레이드하면:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2D3748),
+                ),
+              ),
+              const SizedBox(height: 12),
+              _buildBenefitItem(
+                Icons.all_inclusive,
+                '무제한 일기 작성',
+                '원하는 만큼 일기를 작성하고 추억을 기록하세요',
+                Colors.blue,
+              ),
+              const SizedBox(height: 8),
+              _buildBenefitItem(
+                Icons.block,
+                '광고 없는 쾌적한 환경',
+                '모든 광고 제거로 집중된 일기 작성',
+                Colors.red,
+              ),
+              const SizedBox(height: 8),
+              _buildBenefitItem(
+                Icons.palette,
+                '프리미엄 아트 스타일',
+                '6가지 추가 스타일로 매일 다른 느낌',
+                Colors.pink,
+              ),
+              const SizedBox(height: 8),
+              _buildBenefitItem(
+                Icons.tune,
+                '고급 이미지 제어',
+                '조명, 분위기, 색상, 구도 등 세밀 조정',
+                Colors.purple,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              '나중에',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+          FilledButton.icon(
+            onPressed: () {
+              Navigator.pop(context);
+              context.go('/settings');
+            },
+            icon: const Icon(Icons.diamond, size: 18),
+            label: const Text('프리미엄 알아보기'),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.amber,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 혜택 항목 위젯
+  Widget _buildBenefitItem(IconData icon, String title, String description, Color color) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            size: 18,
+            color: color,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF2D3748),
+                ),
+              ),
+              Text(
+                description,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   // 사진 선택
   Future<void> _pickPhotos() async {
     // 중복 호출 방지
@@ -1708,6 +2152,466 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
       ],
     );
   }
+
+  // ============== Phase 2: 하이브리드 모델 다이얼로그 ==============
+
+  /// 광고 안내 다이얼로그 (첫 번째 또는 일반)
+  Future<bool> _showAdExplanationDialog({
+    required bool isFirstTime,
+    required int dailyCount,
+  }) async {
+    return await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        contentPadding: const EdgeInsets.all(24),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 아이콘
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.purple.shade400, Colors.blue.shade500],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.stars,
+                size: 48,
+                color: Colors.white,
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // 제목
+            Text(
+              isFirstTime ? '축하합니다!' : '광고를 보고 계속 사용하세요',
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2D3748),
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 12),
+
+            // 설명
+            if (isFirstTime) ...[
+              const Text(
+                '5개의 일기를 작성하셨네요!\n이제 광고를 보고 무료로 계속 사용하세요',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Color(0xFF718096),
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ] else ...[
+              Text(
+                '오늘 $dailyCount/3개 생성했습니다',
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: Color(0xFF718096),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+
+            const SizedBox(height: 24),
+
+            // 혜택 카드
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.blue.withOpacity(0.3)),
+              ),
+              child: Column(
+                children: [
+                  _buildBenefitRow(
+                    icon: Icons.play_circle_outline,
+                    text: '30초 광고 시청',
+                    color: Colors.blue,
+                  ),
+                  const SizedBox(height: 8),
+                  const Icon(Icons.arrow_downward, color: Colors.grey, size: 20),
+                  const SizedBox(height: 8),
+                  _buildBenefitRow(
+                    icon: Icons.auto_stories,
+                    text: '일기 1개 생성',
+                    color: Colors.green,
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // 일일 할당량
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.calendar_today, size: 16, color: Colors.orange.shade700),
+                  const SizedBox(width: 8),
+                  Text(
+                    '매일 3개까지 무료 생성',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.orange.shade700,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text(
+              '나중에',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.pop(context, true),
+            icon: const Icon(Icons.play_arrow, size: 20),
+            label: const Text('광고 보기'),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.blue,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+          ),
+        ],
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+      ),
+    ) ?? false;
+  }
+
+  /// 일일 제한 다이얼로그
+  void _showDailyLimitDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        contentPadding: const EdgeInsets.all(24),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 아이콘
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.orange.shade400, Colors.orange.shade600],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.schedule,
+                size: 48,
+                color: Colors.white,
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            const Text(
+              '오늘의 무료 생성 완료!',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2D3748),
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 12),
+
+            const Text(
+              '오늘은 이미 3개를 생성하셨습니다.',
+              style: TextStyle(
+                fontSize: 15,
+                color: Color(0xFF718096),
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 20),
+
+            // 리셋 시간 표시
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.access_time, color: Colors.blue.shade700, size: 24),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        '내일 00:00에',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF718096),
+                        ),
+                      ),
+                      Text(
+                        '다시 3개 생성 가능',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            const Text(
+              '또는 지금 바로 무제한 사용하려면?',
+              style: TextStyle(
+                fontSize: 14,
+                color: Color(0xFF718096),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // 프리미엄 혜택
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.amber.shade50, Colors.orange.shade50],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.amber.shade200),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.diamond, color: Colors.amber.shade700, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        '프리미엄 혜택',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.amber.shade900,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _buildPremiumFeature(Icons.all_inclusive, '무제한 이미지 생성'),
+                  _buildPremiumFeature(Icons.block, '광고 완전 제거'),
+                  _buildPremiumFeature(Icons.palette, '프리미엄 스타일 12개'),
+                  _buildPremiumFeature(Icons.refresh, '무제한 재생성'),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              '나중에',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+          FilledButton.icon(
+            onPressed: () {
+              Navigator.pop(context);
+              context.go('/settings'); // 프리미엄 구독 화면으로
+            },
+            icon: const Icon(Icons.diamond, size: 18),
+            label: const Text('프리미엄 알아보기'),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.amber,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+          ),
+        ],
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+      ),
+    );
+  }
+
+  /// 광고 실패 다이얼로그
+  void _showAdFailedDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.error_outline, color: Colors.orange, size: 28),
+            SizedBox(width: 12),
+            Text(
+              '광고 시청 실패',
+              style: TextStyle(fontSize: 18),
+            ),
+          ],
+        ),
+        content: const Text(
+          '광고를 불러올 수 없거나 시청이 중단되었습니다.\n\n'
+          '네트워크 연결을 확인하고 다시 시도해주세요.',
+          style: TextStyle(fontSize: 15, height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 광고 시청 완료 애니메이션
+  void _showAdCompletionAnimation() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => WillPopScope(
+        onWillPop: () async => false,
+        child: Dialog(
+          backgroundColor: Colors.transparent,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(milliseconds: 800),
+            builder: (context, value, child) {
+              return Transform.scale(
+                scale: value,
+                child: Opacity(
+                  opacity: value,
+                  child: Container(
+                    padding: const EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.check_circle,
+                          size: 80,
+                          color: Colors.green.shade400,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          '광고 시청 완료!',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          '일기 생성을 시작합니다...',
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: Color(0xFF718096),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+            onEnd: () {
+              Navigator.pop(context);
+              // 일기 생성 시작
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 프리미엄 기능 항목 (일일 제한 다이얼로그용)
+  Widget _buildPremiumFeature(IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: Colors.amber.shade700),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF2D3748),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 혜택 행 (광고 안내 다이얼로그용)
+  Widget _buildBenefitRow({
+    required IconData icon,
+    required String text,
+    required Color color,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(icon, color: color, size: 20),
+        const SizedBox(width: 8),
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ============== 이미지 갤러리 위젯 ==============
 
   // 가로 스크롤 갤러리
   Widget _buildImageGallery(List<Map<String, dynamic>> images) {
