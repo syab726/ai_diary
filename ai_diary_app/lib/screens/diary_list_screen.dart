@@ -6,8 +6,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:io';
 import 'dart:convert';
 import '../providers/diary_provider.dart';
+import '../providers/subscription_provider.dart';
 import '../models/diary_entry.dart';
 import '../l10n/app_localizations.dart';
+import '../widgets/ad_banner_widget.dart';
+import '../services/free_user_service.dart';
+import '../services/database_service.dart';
 
 class DiaryListScreen extends ConsumerStatefulWidget {
   const DiaryListScreen({super.key});
@@ -30,11 +34,14 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
     print('DiaryListScreen: build() 호출됨');
     final diariesAsync = ref.watch(diaryEntriesProvider);
     final searchQuery = ref.watch(searchQueryProvider);
+    final subscription = ref.watch(subscriptionProvider);
     print('DiaryListScreen: diariesAsync 상태: ${diariesAsync.runtimeType}');
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
-      body: CustomScrollView(
+      body: Stack(
+        children: [
+          CustomScrollView(
         slivers: [
           // 상단 앱바
           SliverAppBar(
@@ -150,7 +157,18 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                 ),
               ),
             ),
-          
+
+          // 일일 진행 상황 배너 (무료 사용자 + 5개 이상 일기)
+          diariesAsync.maybeWhen(
+            data: (diaries) {
+              if (!subscription.isPremium && diaries.length >= 5) {
+                return _buildDailyProgressBanner();
+              }
+              return const SliverToBoxAdapter(child: SizedBox.shrink());
+            },
+            orElse: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
+          ),
+
           // 일기 목록
           diariesAsync.when(
             loading: () => const SliverFillRemaining(
@@ -304,6 +322,19 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
               );
             },
           ),
+          // 하단 여백 (배너 광고 높이만큼)
+          if (!subscription.isPremium)
+            const SliverPadding(padding: EdgeInsets.only(bottom: 60)),
+        ],
+      ),
+          // 무료 사용자만 배너 광고 표시
+          if (!subscription.isPremium)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: const AdBannerWidget(),
+            ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -628,5 +659,139 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
       default:
         return '보통';
     }
+  }
+
+  /// 일일 진행 상황 배너 위젯
+  Widget _buildDailyProgressBanner() {
+    return SliverToBoxAdapter(
+      child: FutureBuilder<Map<String, dynamic>>(
+        future: _getDailyProgress(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const SizedBox.shrink();
+          }
+
+          final data = snapshot.data!;
+          final dailyCount = data['count'] as int;
+          final resetTime = data['resetTime'] as String;
+
+          return Container(
+            margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  const Color(0xFFF97316).withOpacity(0.9),
+                  const Color(0xFFEC4899).withOpacity(0.9),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFF97316).withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.wb_sunny,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            '오늘의 무료 일기 생성',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '$resetTime 리셋',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.9),
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '$dailyCount/3',
+                        style: const TextStyle(
+                          color: Color(0xFFF97316),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => context.go('/premium-subscription'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFFF97316),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    icon: const Icon(Icons.workspace_premium, size: 20),
+                    label: const Text(
+                      '프리미엄으로 무제한 생성',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  /// 일일 진행 상황 데이터 가져오기
+  Future<Map<String, dynamic>> _getDailyProgress() async {
+    final freeUserService = FreeUserService();
+    final dailyCount = await freeUserService.getDailyAdCount();
+    final resetTime = freeUserService.getTimeUntilResetString();
+
+    return {
+      'count': dailyCount,
+      'resetTime': resetTime,
+    };
   }
 }

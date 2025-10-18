@@ -897,64 +897,81 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
                   // 사진 업로드 영역 (수정 모드에서 무료 사용자는 숨김)
                   if (!_isEditMode || subscription.isPremium)
-                    ExpansionTile(
-                      controller: _photoExpansionController,
-                      initiallyExpanded: false,
-                      tilePadding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      childrenPadding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
-                      title: Row(
-                        children: [
-                          const Icon(Icons.add_photo_alternate, size: 20, color: Color(0xFF667EEA)),
-                          const SizedBox(width: 8),
-                          const Text(
-                            '내 사진 (선택사항)',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF2D3748),
-                            ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: Theme(
+                        data: Theme.of(context).copyWith(
+                          dividerColor: Colors.transparent,
+                        ),
+                        child: ExpansionTile(
+                          controller: _photoExpansionController,
+                          initiallyExpanded: false,
+                          tilePadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                          childrenPadding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0, top: 8.0),
+                          collapsedShape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          if (_selectedPhotos.isNotEmpty) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF667EEA).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                '${_selectedPhotos.length}',
-                                style: const TextStyle(
-                                  fontSize: 12,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          title: Row(
+                            children: [
+                              const Icon(Icons.add_photo_alternate, size: 20, color: Color(0xFF667EEA)),
+                              const SizedBox(width: 8),
+                              const Text(
+                                '내 사진 (선택사항)',
+                                style: TextStyle(
+                                  fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF667EEA),
+                                  color: Color(0xFF2D3748),
                                 ),
                               ),
-                            ),
-                          ],
-                          const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: subscription.isPremium
-                                  ? Colors.blue.withOpacity(0.1)
-                                  : Colors.orange.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              subscription.isPremium ? '최대 3장' : '1장',
-                              style: TextStyle(
-                                color: subscription.isPremium
-                                    ? Colors.blue[700]
-                                    : Colors.orange[700],
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
+                              if (_selectedPhotos.isNotEmpty) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF667EEA).withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    '${_selectedPhotos.length}',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF667EEA),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                              const Spacer(),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: subscription.isPremium
+                                      ? Colors.blue.withOpacity(0.1)
+                                      : Colors.orange.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  subscription.isPremium ? '최대 3장' : '1장',
+                                  style: TextStyle(
+                                    color: subscription.isPremium
+                                        ? Colors.blue[700]
+                                        : Colors.orange[700],
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
-                      children: [
+                          children: [
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -1137,7 +1154,9 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                               ),
                           ],
                         ),
-                      ],
+                          ],
+                        ),
+                      ),
                     ),
 
                   // 탭 옵션 영역 (조건부 표시)
