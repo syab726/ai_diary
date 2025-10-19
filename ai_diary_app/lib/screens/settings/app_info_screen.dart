@@ -1,12 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../../l10n/app_localizations.dart';
 
-class AppInfoScreen extends ConsumerWidget {
+class AppInfoScreen extends ConsumerStatefulWidget {
   const AppInfoScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AppInfoScreen> createState() => _AppInfoScreenState();
+}
+
+class _AppInfoScreenState extends ConsumerState<AppInfoScreen> {
+  String _version = '1.0.0';
+  String _buildNumber = '1';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPackageInfo();
+  }
+
+  Future<void> _loadPackageInfo() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    setState(() {
+      _version = packageInfo.version;
+      _buildNumber = packageInfo.buildNumber;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
@@ -31,7 +54,7 @@ class AppInfoScreen extends ConsumerWidget {
           _buildSettingsTile(
             icon: Icons.info,
             title: AppLocalizations.of(context).appVersion,
-            subtitle: '${AppLocalizations.of(context).appName} v1.0.0',
+            subtitle: '${AppLocalizations.of(context).appName} v$_version (Build $_buildNumber)',
             onTap: () => _showAboutDialog(context),
           ),
           _buildSettingsTile(
@@ -103,7 +126,7 @@ class AppInfoScreen extends ConsumerWidget {
     showAboutDialog(
       context: context,
       applicationName: AppLocalizations.of(context).appName,
-      applicationVersion: '1.0.0',
+      applicationVersion: _version,
       applicationIcon: const Icon(Icons.auto_stories, size: 64),
       children: [
         Text(AppLocalizations.of(context).appDescription),

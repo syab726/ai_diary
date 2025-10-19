@@ -48,16 +48,25 @@ dependencies:
   http: ^1.2.2
   googleapis: ^13.2.0
   extension_google_sign_in_as_googleapis_auth: ^2.0.12
-  # Utils
+
   # Date & Time
   intl: ^0.20.2
+
   # Utils
   uuid: ^4.5.1
+  flutter_dotenv: ^5.1.0
+  url_launcher: ^6.3.1
+  package_info_plus: ^8.1.1
+
   # AI & Text Processing
   google_generative_ai: ^0.4.7
-  
-  # AI & Text Processing
   dart_openai: ^5.1.0
+
+  # Monetization
+  google_mobile_ads: ^5.2.0
+  in_app_purchase: ^3.2.0
+  in_app_purchase_android: ^0.4.0+6
+  in_app_purchase_storekit: ^0.3.21+1
 
 dev_dependencies:
   flutter_test:
@@ -66,7 +75,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  
+
   assets:
     - assets/images/
     - assets/icons/
+    - .env
