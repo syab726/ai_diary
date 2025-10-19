@@ -11,6 +11,7 @@ import '../models/perspective_options.dart';
 import '../models/image_time.dart';
 import '../models/image_weather.dart';
 import '../models/image_season.dart';
+import 'package:flutter/foundation.dart';
 
 class AIService {
   static const String _geminiApiKey = 'AIzaSyB4sTKHWNsKq_k-X-jlm5l_9BCQC4eq-hc';
@@ -37,10 +38,10 @@ class AIService {
       final file = File(filePath);
       await file.writeAsBytes(imageBytes);
 
-      print('이미지 파일 저장 완료: $filePath');
+      if (kDebugMode) print('이미지 파일 저장 완료: $filePath');
       return filePath;
     } catch (e) {
-      print('이미지 파일 저장 오류: $e');
+      if (kDebugMode) print('이미지 파일 저장 오류: $e');
       return '';
     }
   }
@@ -50,10 +51,10 @@ class AIService {
   static late GenerativeModel _imageModel;
   
   static void initialize() {
-    print('=== AI Service 초기화 ===');
-    print('텍스트 모델명: gemini-2.0-flash-lite');
-    print('이미지 생성 모델명: gemini-2.5-flash-image-preview');
-    print('API 키 설정됨: ${_geminiApiKey.substring(0, 10)}...');
+    if (kDebugMode) print('=== AI Service 초기화 ===');
+    if (kDebugMode) print('텍스트 모델명: gemini-2.0-flash-lite');
+    if (kDebugMode) print('이미지 생성 모델명: gemini-2.5-flash-image-preview');
+    if (kDebugMode) print('API 키 설정됨: ${_geminiApiKey.substring(0, 10)}...');
 
     _textModel = GenerativeModel(
       model: 'gemini-2.0-flash-lite',
@@ -64,7 +65,7 @@ class AIService {
       apiKey: _geminiApiKey
     );
 
-    print('모델 초기화 완료');
+    if (kDebugMode) print('모델 초기화 완료');
   }
 
   static Future<String> analyzeEmotion(String diaryContent) async {
@@ -106,8 +107,8 @@ class AIService {
     if (photoPaths.isEmpty) return '';
 
     try {
-      print('=== 사진 분석 시작 ===');
-      print('분석할 사진 개수: ${photoPaths.length}');
+      if (kDebugMode) print('=== 사진 분석 시작 ===');
+      if (kDebugMode) print('분석할 사진 개수: ${photoPaths.length}');
 
       // Vision 모델 사용
       final visionModel = GenerativeModel(
@@ -127,10 +128,10 @@ class AIService {
           if (await file.exists()) {
             final bytes = await file.readAsBytes();
             parts.add(DataPart('image/jpeg', bytes));
-            print('사진 로드 성공: $photoPath');
+            if (kDebugMode) print('사진 로드 성공: $photoPath');
           }
         } catch (e) {
-          print('사진 로드 실패: $photoPath - $e');
+          if (kDebugMode) print('사진 로드 실패: $photoPath - $e');
         }
       }
 
@@ -152,10 +153,10 @@ class AIService {
       final response = await visionModel.generateContent([Content.multi(parts)]);
       final analysisResult = response.text?.trim() ?? '';
 
-      print('사진 분석 결과: $analysisResult');
+      if (kDebugMode) print('사진 분석 결과: $analysisResult');
       return analysisResult;
     } catch (e) {
-      print('사진 분석 오류: $e');
+      if (kDebugMode) print('사진 분석 오류: $e');
       return '';
     }
   }
@@ -203,13 +204,13 @@ ${photoSuffix.isNotEmpty ? '업로드된 사진의 스타일과 분위기를 최
 
   static Future<String?> generateImage(String prompt, [ImageTime? imageTime, ImageWeather? imageWeather]) async {
     try {
-      print('=== Gemini Imagen API를 통한 이미지 생성 시작 ===');
-      print('프롬프트: $prompt');
-      print('적용할 시간: ${imageTime != null ? imageTime.displayName : '기본값'}');
-      print('적용할 날씨: ${imageWeather != null ? imageWeather.displayName : '기본값'}');
+      if (kDebugMode) print('=== Gemini Imagen API를 통한 이미지 생성 시작 ===');
+      if (kDebugMode) print('프롬프트: $prompt');
+      if (kDebugMode) print('적용할 시간: ${imageTime != null ? imageTime.displayName : '기본값'}');
+      if (kDebugMode) print('적용할 날씨: ${imageWeather != null ? imageWeather.displayName : '기본값'}');
 
       try {
-        print('Gemini 2.5 Flash Image Preview 이미지 생성 시도...');
+        if (kDebugMode) print('Gemini 2.5 Flash Image Preview 이미지 생성 시도...');
 
         // 시간과 날씨에 따른 프롬프트 강화
         String timePrompt = '';
@@ -224,7 +225,7 @@ ${photoSuffix.isNotEmpty ? '업로드된 사진의 스타일과 분위기를 최
 
         final enhancedPrompt = '$timePrompt$weatherPrompt$prompt. Ensure the image reflects the specified time and weather conditions.';
 
-        print('최종 강화된 프롬프트: $enhancedPrompt');
+        if (kDebugMode) print('최종 강화된 프롬프트: $enhancedPrompt');
 
         final response = await http.post(
           Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=$_geminiApiKey'),
@@ -250,8 +251,8 @@ ${photoSuffix.isNotEmpty ? '업로드된 사진의 스타일과 분위기를 최
           }),
         );
 
-        print('Gemini Imagen API 응답 상태: ${response.statusCode}');
-        print('Gemini Imagen API 응답 본문: ${response.body}');
+        if (kDebugMode) print('Gemini Imagen API 응답 상태: ${response.statusCode}');
+        if (kDebugMode) print('Gemini Imagen API 응답 본문: ${response.body}');
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
@@ -265,7 +266,7 @@ ${photoSuffix.isNotEmpty ? '업로드된 사진의 스타일과 분위기를 최
                   print('*** Gemini 2.5 Flash Image API 이미지 생성 성공! ***');
                   final imageData = part['inlineData']['data'];
                   final mimeType = part['inlineData']['mimeType'] ?? 'image/png';
-                  print('이미지 데이터 크기: ${imageData.length} characters');
+                  if (kDebugMode) print('이미지 데이터 크기: ${imageData.length} characters');
 
                   // 이미지를 파일로 저장
                   final filePath = await _saveImageToFile(imageData, mimeType);
@@ -273,7 +274,7 @@ ${photoSuffix.isNotEmpty ? '업로드된 사진의 스타일과 분위기를 최
                     print('파일 저장 성공, 경로 반환: $filePath');
                     return 'file://$filePath';
                   } else {
-                    print('파일 저장 실패, base64 데이터 반환');
+                    if (kDebugMode) print('파일 저장 실패, base64 데이터 반환');
                     return 'data:image/png;base64,$imageData';
                   }
                 }
@@ -281,24 +282,24 @@ ${photoSuffix.isNotEmpty ? '업로드된 사진의 스타일과 분위기를 최
             }
           }
         } else {
-          print('Gemini Imagen API 오류: ${response.statusCode} - ${response.body}');
+          if (kDebugMode) print('Gemini Imagen API 오류: ${response.statusCode} - ${response.body}');
         }
 
-        print('Gemini Imagen API에서 이미지를 생성하지 못함');
+        if (kDebugMode) print('Gemini Imagen API에서 이미지를 생성하지 못함');
       } catch (e) {
-        print('Gemini Imagen API 호출 오류: $e');
+        if (kDebugMode) print('Gemini Imagen API 호출 오류: $e');
       }
 
       // Gemini API 실패시 폴백으로 Unsplash/Picsum 사용
-      print('폴백: Unsplash/Picsum 이미지 사용');
+      if (kDebugMode) print('폴백: Unsplash/Picsum 이미지 사용');
       final smartKeywords = _generateSmartImageKeywords(prompt);
       final fallbackImageUrl = _selectBestImageUrl(smartKeywords, prompt);
-      print('폴백 이미지 URL: $fallbackImageUrl');
+      if (kDebugMode) print('폴백 이미지 URL: $fallbackImageUrl');
       return fallbackImageUrl;
 
     } catch (e) {
-      print('*** 이미지 생성 실패 ***');
-      print('오류: $e');
+      if (kDebugMode) print('*** 이미지 생성 실패 ***');
+      if (kDebugMode) print('오류: $e');
       rethrow;
     }
   }
@@ -349,7 +350,7 @@ ${photoSuffix.isNotEmpty ? '업로드된 사진의 스타일과 분위기를 최
     // 기본 이미지 크기
     String dimensions = '800x800';
 
-    print('선택된 이미지 크기: $dimensions');
+    if (kDebugMode) print('선택된 이미지 크기: $dimensions');
 
     // 다양한 이미지 소스 중에서 선택
     final sources = [
@@ -391,8 +392,8 @@ ${photoSuffix.isNotEmpty ? '업로드된 사진의 스타일과 분위기를 최
 
   static Future<Map<String, dynamic>> autoConfigureOptions(String diaryContent) async {
     try {
-      print('=== AI 자동 설정 시작 ===');
-      print('일기 내용: $diaryContent');
+      if (kDebugMode) print('=== AI 자동 설정 시작 ===');
+      if (kDebugMode) print('일기 내용: $diaryContent');
 
       final response = await _textModel.generateContent([
         Content.text('''다음 일기 내용을 분석해서 이미지 생성에 적합한 설정들을 추천해주세요.
@@ -413,7 +414,7 @@ JSON 형태로 답변해주세요:
       ]);
 
       String responseText = response.text?.trim() ?? '';
-      print('AI 응답: $responseText');
+      if (kDebugMode) print('AI 응답: $responseText');
 
       // JSON 파싱 시도
       try {
@@ -424,11 +425,11 @@ JSON 형태로 답변해주세요:
           final jsonString = responseText.substring(jsonStart, jsonEnd + 1);
           final Map<String, dynamic> aiOptions = jsonDecode(jsonString);
 
-          print('파싱된 AI 옵션: $aiOptions');
+          if (kDebugMode) print('파싱된 AI 옵션: $aiOptions');
           return aiOptions;
         }
       } catch (e) {
-        print('JSON 파싱 오류: $e');
+        if (kDebugMode) print('JSON 파싱 오류: $e');
       }
 
       // 파싱 실패시 기본값 반환
@@ -441,7 +442,7 @@ JSON 형태로 답변해주세요:
         'weather': 'sunny'
       };
     } catch (e) {
-      print('AI 자동 설정 오류: $e');
+      if (kDebugMode) print('AI 자동 설정 오류: $e');
       return {
         'lighting': 'natural',
         'mood': 'peaceful',
@@ -464,25 +465,25 @@ JSON 형태로 답변해주세요:
     List<String>? userPhotos,
   ]) async {
     try {
-      print('=== AI 처리 시작 ===');
-      print('일기 내용: $diaryContent');
-      print('스타일: $style');
-      print('시간 설정: ${imageTime != null ? imageTime.displayName : '기본값'}');
-      print('날씨 설정: ${imageWeather != null ? imageWeather.displayName : '기본값'}');
-      print('고급 옵션: ${advancedOptions != null ? '활성화' : '비활성화'}');
-      print('시점 옵션: ${perspectiveOptions != null ? '활성화' : '비활성화'}');
-      print('사용자 사진: ${userPhotos != null && userPhotos.isNotEmpty ? '${userPhotos.length}장' : '없음'}');
+      if (kDebugMode) print('=== AI 처리 시작 ===');
+      if (kDebugMode) print('일기 내용: $diaryContent');
+      if (kDebugMode) print('스타일: $style');
+      if (kDebugMode) print('시간 설정: ${imageTime != null ? imageTime.displayName : '기본값'}');
+      if (kDebugMode) print('날씨 설정: ${imageWeather != null ? imageWeather.displayName : '기본값'}');
+      if (kDebugMode) print('고급 옵션: ${advancedOptions != null ? '활성화' : '비활성화'}');
+      if (kDebugMode) print('시점 옵션: ${perspectiveOptions != null ? '활성화' : '비활성화'}');
+      if (kDebugMode) print('사용자 사진: ${userPhotos != null && userPhotos.isNotEmpty ? '${userPhotos.length}장' : '없음'}');
 
       // 사진 분석 (있으면)
       String photoAnalysis = '';
       if (userPhotos != null && userPhotos.isNotEmpty) {
         print('사용자 업로드 사진 분석 시작...');
         photoAnalysis = await analyzePhotos(userPhotos);
-        print('사진 분석 완료: $photoAnalysis');
+        if (kDebugMode) print('사진 분석 완료: $photoAnalysis');
       }
 
       // 병렬로 감정 분석과 키워드 추출 실행
-      print('감정 분석 및 키워드 추출 시작...');
+      if (kDebugMode) print('감정 분석 및 키워드 추출 시작...');
       final futures = await Future.wait([
         analyzeEmotion(diaryContent),
         extractKeywords(diaryContent),
@@ -491,11 +492,11 @@ JSON 형태로 답변해주세요:
       final emotion = futures[0] as String;
       final keywords = futures[1] as List<String>;
 
-      print('감정 분석 결과: $emotion');
-      print('키워드 추출 결과: $keywords');
+      if (kDebugMode) print('감정 분석 결과: $emotion');
+      if (kDebugMode) print('키워드 추출 결과: $keywords');
 
       // 이미지 프롬프트 생성 (사진 분석 결과 포함)
-      print('이미지 프롬프트 생성 시작...');
+      if (kDebugMode) print('이미지 프롬프트 생성 시작...');
       final imagePrompt = await generateImagePrompt(
         diaryContent,
         emotion,
@@ -507,12 +508,12 @@ JSON 형태로 답변해주세요:
         imageWeather,
         photoAnalysis.isNotEmpty ? photoAnalysis : null,
       );
-      print('이미지 프롬프트 결과: $imagePrompt');
+      if (kDebugMode) print('이미지 프롬프트 결과: $imagePrompt');
 
       // 이미지 생성
-      print('이미지 생성 시작...');
+      if (kDebugMode) print('이미지 생성 시작...');
       final imageUrl = await generateImage(imagePrompt, imageTime, imageWeather);
-      print('이미지 생성 완료. URL: $imageUrl');
+      if (kDebugMode) print('이미지 생성 완료. URL: $imageUrl');
 
       final result = {
         'emotion': emotion,
@@ -521,13 +522,13 @@ JSON 형태로 답변해주세요:
         'imageUrl': imageUrl,
       };
 
-      print('=== AI 처리 완료 ===');
-      print('최종 결과: $result');
+      if (kDebugMode) print('=== AI 처리 완료 ===');
+      if (kDebugMode) print('최종 결과: $result');
 
       return result;
     } catch (e, stackTrace) {
-      print('AI 처리 오류: $e');
-      print('스택 트레이스: $stackTrace');
+      if (kDebugMode) print('AI 처리 오류: $e');
+      if (kDebugMode) print('스택 트레이스: $stackTrace');
       // 기본 폴백 이미지 크기 설정
       String fallbackDimensions = '400/400';
 
@@ -576,7 +577,7 @@ $diariesSummary
 
       return response.text ?? '이번 ${periodText}에는 다양한 감정을 경험하셨네요. 자신의 감정을 인식하고 기록하는 것만으로도 큰 의미가 있습니다.';
     } catch (e) {
-      print('감정 인사이트 생성 오류: $e');
+      if (kDebugMode) print('감정 인사이트 생성 오류: $e');
       return '이번 기간 동안의 감정 여정을 함께 기록해주셔서 감사합니다.';
     }
   }

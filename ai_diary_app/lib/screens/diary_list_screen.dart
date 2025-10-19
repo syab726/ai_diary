@@ -12,6 +12,7 @@ import '../l10n/app_localizations.dart';
 import '../widgets/ad_banner_widget.dart';
 import '../services/free_user_service.dart';
 import '../services/database_service.dart';
+import 'package:flutter/foundation.dart';
 
 class DiaryListScreen extends ConsumerStatefulWidget {
   const DiaryListScreen({super.key});
@@ -31,11 +32,11 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print('DiaryListScreen: build() 호출됨');
+    if (kDebugMode) print('DiaryListScreen: build() 호출됨');
     final diariesAsync = ref.watch(diaryEntriesProvider);
     final searchQuery = ref.watch(searchQueryProvider);
     final subscription = ref.watch(subscriptionProvider);
-    print('DiaryListScreen: diariesAsync 상태: ${diariesAsync.runtimeType}');
+    if (kDebugMode) print('DiaryListScreen: diariesAsync 상태: ${diariesAsync.runtimeType}');
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -213,9 +214,9 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
               ),
             ),
             data: (diaries) {
-              print('DiaryListScreen: 가져온 일기 개수: ${diaries.length}');
+              if (kDebugMode) print('DiaryListScreen: 가져온 일기 개수: ${diaries.length}');
               for (int i = 0; i < diaries.length; i++) {
-                print('일기 $i: 제목=${diaries[i].title}, 내용길이=${diaries[i].content.length}, 내용="${diaries[i].content}"');
+                if (kDebugMode) print('일기 $i: 제목=${diaries[i].title}, 내용길이=${diaries[i].content.length}, 내용="${diaries[i].content}"');
               }
 
               // 현재 월의 일기만 필터링
@@ -225,7 +226,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                        diary.createdAt.month == now.month;
               }).toList();
 
-              print('현재 월 일기 개수: ${currentMonthDiaries.length}');
+              if (kDebugMode) print('현재 월 일기 개수: ${currentMonthDiaries.length}');
 
               if (currentMonthDiaries.isEmpty) {
                 return SliverFillRemaining(
@@ -346,10 +347,10 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
   }
 
   Widget _buildDiaryCard(DiaryEntry diary) {
-    print('=== _buildDiaryCard 호출: ${diary.title} ===');
-    print('imageData: ${diary.imageData != null ? "있음 (${diary.imageData!.length} bytes)" : "null"}');
-    print('generatedImageUrl: ${diary.generatedImageUrl}');
-    print('userPhotos: ${diary.userPhotos}');
+    if (kDebugMode) print('=== _buildDiaryCard 호출: ${diary.title} ===');
+    if (kDebugMode) print('imageData: ${diary.imageData != null ? "있음 (${diary.imageData!.length} bytes)" : "null"}');
+    if (kDebugMode) print('generatedImageUrl: ${diary.generatedImageUrl}');
+    if (kDebugMode) print('userPhotos: ${diary.userPhotos}');
 
     return Container(
       decoration: BoxDecoration(
@@ -422,12 +423,12 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
           file,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
-            print('로컬 이미지 로드 오류: $error');
+            if (kDebugMode) print('로컬 이미지 로드 오류: $error');
             return _buildImagePlaceholder();
           },
         );
       } else {
-        print('로컬 이미지 파일이 존재하지 않음: $filePath');
+        if (kDebugMode) print('로컬 이미지 파일이 존재하지 않음: $filePath');
         return _buildImagePlaceholder();
       }
     }
@@ -440,12 +441,12 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
           bytes,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
-            print('base64 이미지 로드 오류: $error');
+            if (kDebugMode) print('base64 이미지 로드 오류: $error');
             return _buildImagePlaceholder();
           },
         );
       } catch (e) {
-        print('base64 디코딩 오류: $e');
+        if (kDebugMode) print('base64 디코딩 오류: $e');
         return _buildImagePlaceholder();
       }
     }
@@ -459,14 +460,14 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
           child: const Center(child: CircularProgressIndicator()),
         ),
         errorWidget: (context, url, error) {
-          print('네트워크 이미지 로드 오류: $error');
+          if (kDebugMode) print('네트워크 이미지 로드 오류: $error');
           return _buildImagePlaceholder();
         },
       );
     }
     // 알 수 없는 형식
     else {
-      print('알 수 없는 이미지 URL 형식: $imageUrl');
+      if (kDebugMode) print('알 수 없는 이미지 URL 형식: $imageUrl');
       return _buildImagePlaceholder();
     }
   }

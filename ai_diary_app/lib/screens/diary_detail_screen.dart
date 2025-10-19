@@ -19,6 +19,7 @@ import '../models/font_family.dart';
 import '../providers/font_provider.dart';
 import '../providers/theme_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/foundation.dart';
 
 class DiaryDetailScreen extends ConsumerStatefulWidget {
   final String entryId;
@@ -117,7 +118,7 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
                     final date = uri.queryParameters['date'];
                     final diaryId = uri.queryParameters['diaryId'];
 
-                    print('Detail: URL 파라미터 - from: $from, date: $date, diaryId: $diaryId');
+                    if (kDebugMode) print('Detail: URL 파라미터 - from: $from, date: $date, diaryId: $diaryId');
 
                     if (from == 'calendar' && date != null && diaryId != null) {
                       print('Detail: 달력으로 이동 - /calendar?selectedDate=$date&selectedDiary=$diaryId');
@@ -126,7 +127,7 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
                       print('Detail: 달력으로 이동 (파라미터 없음)');
                       context.go('/calendar');
                     } else {
-                      print('Detail: 리스트로 이동');
+                      if (kDebugMode) print('Detail: 리스트로 이동');
                       context.go('/list');
                     }
                   }
@@ -314,12 +315,12 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
           file,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
-            print('로컬 이미지 로드 오류: $error');
+            if (kDebugMode) print('로컬 이미지 로드 오류: $error');
             return _buildImagePlaceholder();
           },
         );
       } else {
-        print('로컬 이미지 파일이 존재하지 않음: $filePath');
+        if (kDebugMode) print('로컬 이미지 파일이 존재하지 않음: $filePath');
         return _buildImagePlaceholder();
       }
     }
@@ -333,12 +334,12 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
           file,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
-            print('로컬 이미지 로드 오류: $error');
+            if (kDebugMode) print('로컬 이미지 로드 오류: $error');
             return _buildImagePlaceholder();
           },
         );
       } else {
-        print('로컬 이미지 파일이 존재하지 않음: $imageUrl');
+        if (kDebugMode) print('로컬 이미지 파일이 존재하지 않음: $imageUrl');
         return _buildImagePlaceholder();
       }
     }
@@ -351,12 +352,12 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
           bytes,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
-            print('base64 이미지 로드 오류: $error');
+            if (kDebugMode) print('base64 이미지 로드 오류: $error');
             return _buildImagePlaceholder();
           },
         );
       } catch (e) {
-        print('base64 디코딩 오류: $e');
+        if (kDebugMode) print('base64 디코딩 오류: $e');
         return _buildImagePlaceholder();
       }
     }
@@ -370,14 +371,14 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
           child: const Center(child: CircularProgressIndicator()),
         ),
         errorWidget: (context, url, error) {
-          print('네트워크 이미지 로드 오류: $error');
+          if (kDebugMode) print('네트워크 이미지 로드 오류: $error');
           return _buildImagePlaceholder();
         },
       );
     }
     // 알 수 없는 형식
     else {
-      print('알 수 없는 이미지 URL 형식: $imageUrl');
+      if (kDebugMode) print('알 수 없는 이미지 URL 형식: $imageUrl');
       return _buildImagePlaceholder();
     }
 
@@ -438,7 +439,7 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
           return;
         }
       } catch (e) {
-        print('이미지 공유 중 오류 발생: $e');
+        if (kDebugMode) print('이미지 공유 중 오류 발생: $e');
         // 이미지 공유 실패 시 텍스트만 공유
       }
     }
@@ -483,7 +484,7 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
       return XFile(tempFile.path);
 
     } catch (e) {
-      print('이미지 준비 중 오류 발생: $e');
+      if (kDebugMode) print('이미지 준비 중 오류 발생: $e');
       return null;
     }
   }
@@ -621,7 +622,7 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
           textStyle: baseStyle,
         );
       } catch (e) {
-        print('폰트 로드 실패: ${fontFamily.name}, 기본 폰트 사용');
+        if (kDebugMode) print('폰트 로드 실패: ${fontFamily.name}, 기본 폰트 사용');
         return baseStyle;
       }
     }
@@ -633,10 +634,10 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
   Widget _buildImageSection() {
     if (_diary == null) return _buildImagePlaceholder();
 
-    print('=== _buildImageSection 호출 ===');
-    print('AI 이미지 URL: ${_diary!.generatedImageUrl}');
-    print('사용자 사진 개수: ${_diary!.userPhotos.length}');
-    print('사용자 사진 경로들: ${_diary!.userPhotos}');
+    if (kDebugMode) print('=== _buildImageSection 호출 ===');
+    if (kDebugMode) print('AI 이미지 URL: ${_diary!.generatedImageUrl}');
+    if (kDebugMode) print('사용자 사진 개수: ${_diary!.userPhotos.length}');
+    if (kDebugMode) print('사용자 사진 경로들: ${_diary!.userPhotos}');
 
     // AI 이미지와 사용자 사진을 합친 전체 이미지 리스트
     final List<Map<String, dynamic>> allImages = [];
@@ -647,7 +648,7 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
         'url': _diary!.generatedImageUrl!,
         'isAI': true,
       });
-      print('AI 이미지 추가됨');
+      if (kDebugMode) print('AI 이미지 추가됨');
     }
 
     // 사용자 사진 추가
@@ -656,10 +657,10 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
         'url': photoPath,
         'isAI': false,
       });
-      print('사용자 사진 추가됨: $photoPath');
+      if (kDebugMode) print('사용자 사진 추가됨: $photoPath');
     }
 
-    print('전체 이미지 개수: ${allImages.length}');
+    if (kDebugMode) print('전체 이미지 개수: ${allImages.length}');
 
     if (allImages.isEmpty) {
       return _buildImagePlaceholder();

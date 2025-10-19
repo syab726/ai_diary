@@ -8,6 +8,7 @@ import '../models/font_family.dart';
 import '../models/image_time.dart';
 import '../models/image_weather.dart';
 import '../models/image_season.dart';
+import 'package:flutter/foundation.dart';
 
 class DatabaseService {
   static Database? _database;
@@ -104,7 +105,7 @@ class DatabaseService {
   }
 
   static Future<List<DiaryEntry>> getAllDiaries() async {
-    print('DatabaseService: getAllDiaries 호출됨');
+    if (kDebugMode) print('DatabaseService: getAllDiaries 호출됨');
     final db = await database;
 
     // imageData BLOB 필드를 제외하고 조회 (CursorWindow 크기 제한 방지)
@@ -132,16 +133,16 @@ class DatabaseService {
       orderBy: 'createdAt DESC',
     );
 
-    print('DatabaseService: 가져온 일기 개수: ${maps.length}');
+    if (kDebugMode) print('DatabaseService: 가져온 일기 개수: ${maps.length}');
     for (int i = 0; i < maps.length; i++) {
-      print('DatabaseService: 일기 $i - 제목: ${maps[i]['title']}, 내용길이: ${maps[i]['content']?.length ?? 0}');
+      if (kDebugMode) print('DatabaseService: 일기 $i - 제목: ${maps[i]['title']}, 내용길이: ${maps[i]['content']?.length ?? 0}');
     }
 
     final List<DiaryEntry> diaries = List.generate(maps.length, (i) {
       return DiaryEntry.fromMap(maps[i]);
     });
 
-    print('DatabaseService: DiaryEntry 객체 생성 완료: ${diaries.length}개');
+    if (kDebugMode) print('DatabaseService: DiaryEntry 객체 생성 완료: ${diaries.length}개');
     return diaries;
   }
 
@@ -312,32 +313,32 @@ class DatabaseService {
   // 클라우드 복원용: JSON 문자열에서 데이터 가져오기
   static Future<int> importFromJson(String jsonString) async {
     try {
-      print('=== 데이터 복원 시작 ===');
+      if (kDebugMode) print('=== 데이터 복원 시작 ===');
       final db = await database;
 
-      print('JSON 파싱 중...');
+      if (kDebugMode) print('JSON 파싱 중...');
       final data = jsonDecode(jsonString) as Map<String, dynamic>;
-      print('백업 버전: ${data['version']}');
-      print('백업 날짜: ${data['exportDate']}');
-      print('프리미엄 여부: ${data['isPremium']}');
+      if (kDebugMode) print('백업 버전: ${data['version']}');
+      if (kDebugMode) print('백업 날짜: ${data['exportDate']}');
+      if (kDebugMode) print('프리미엄 여부: ${data['isPremium']}');
 
       final diaries = data['diaries'] as List<dynamic>;
-      print('복원할 일기 개수: ${diaries.length}');
+      if (kDebugMode) print('복원할 일기 개수: ${diaries.length}');
 
       // 기존 데이터 모두 삭제
-      print('기존 데이터 삭제 중...');
+      if (kDebugMode) print('기존 데이터 삭제 중...');
       await db.delete(tableName);
-      print('✅ 기존 데이터 삭제 완료');
+      if (kDebugMode) print('✅ 기존 데이터 삭제 완료');
 
       int importedCount = 0;
       for (int i = 0; i < diaries.length; i++) {
         final diaryData = diaries[i];
         try {
-          print('\n--- 일기 ${i + 1}/${diaries.length} 복원 중 ---');
-          print('ID: ${diaryData['id']}');
-          print('제목: ${diaryData['title']}');
+          if (kDebugMode) print('\n--- 일기 ${i + 1}/${diaries.length} 복원 중 ---');
+          if (kDebugMode) print('ID: ${diaryData['id']}');
+          if (kDebugMode) print('제목: ${diaryData['title']}');
 
-          print('기본 필드 파싱 중...');
+          if (kDebugMode) print('기본 필드 파싱 중...');
           final id = diaryData['id'] as String;
           final title = diaryData['title'] as String;
           final content = diaryData['content'] as String;
@@ -346,12 +347,12 @@ class DatabaseService {
               ? DateTime.parse(diaryData['updatedAt'] as String)
               : null;
 
-          print('감정/키워드 파싱 중...');
+          if (kDebugMode) print('감정/키워드 파싱 중...');
           final emotion = diaryData['emotion'] as String?;
           final keywords = (diaryData['keywords'] as List<dynamic>?)?.cast<String>() ?? [];
-          print('키워드 개수: ${keywords.length}');
+          if (kDebugMode) print('키워드 개수: ${keywords.length}');
 
-          print('AI 관련 필드 파싱 중...');
+          if (kDebugMode) print('AI 관련 필드 파싱 중...');
           final aiPrompt = diaryData['aiPrompt'] as String?;
           final generatedImageUrl = diaryData['generatedImageUrl'] as String?;
           final imageData = diaryData['imageData'] != null
@@ -359,14 +360,14 @@ class DatabaseService {
               : null;
           final hasBeenRegenerated = diaryData['hasBeenRegenerated'] == true;
 
-          print('스타일 필드 파싱 중...');
+          if (kDebugMode) print('스타일 필드 파싱 중...');
           final imageStyle = diaryData['imageStyle'] != null
               ? ImageStyle.values.firstWhere(
                   (style) => style.name == diaryData['imageStyle'],
                   orElse: () => ImageStyle.illustration,
                 )
               : ImageStyle.illustration;
-          print('이미지 스타일: ${imageStyle.name}');
+          if (kDebugMode) print('이미지 스타일: ${imageStyle.name}');
 
           final fontFamily = diaryData['fontFamily'] != null
               ? FontFamily.values.firstWhere(
@@ -374,16 +375,16 @@ class DatabaseService {
                   orElse: () => FontFamily.notoSans,
                 )
               : FontFamily.notoSans;
-          print('글꼴: ${fontFamily.name}');
+          if (kDebugMode) print('글꼴: ${fontFamily.name}');
 
-          print('이미지 옵션 파싱 중...');
+          if (kDebugMode) print('이미지 옵션 파싱 중...');
           final imageTime = diaryData['imageTime'] != null
               ? ImageTime.values.firstWhere(
                   (time) => time.name == diaryData['imageTime'],
                   orElse: () => ImageTime.morning,
                 )
               : ImageTime.morning;
-          print('시간: ${imageTime.name}');
+          if (kDebugMode) print('시간: ${imageTime.name}');
 
           final imageWeather = diaryData['imageWeather'] != null
               ? ImageWeather.values.firstWhere(
@@ -391,7 +392,7 @@ class DatabaseService {
                   orElse: () => ImageWeather.sunny,
                 )
               : ImageWeather.sunny;
-          print('날씨: ${imageWeather.name}');
+          if (kDebugMode) print('날씨: ${imageWeather.name}');
 
           final imageSeason = diaryData['imageSeason'] != null
               ? ImageSeason.values.firstWhere(
@@ -399,13 +400,13 @@ class DatabaseService {
                   orElse: () => ImageSeason.spring,
                 )
               : ImageSeason.spring;
-          print('계절: ${imageSeason.name}');
+          if (kDebugMode) print('계절: ${imageSeason.name}');
 
-          print('사용자 사진 파싱 중...');
+          if (kDebugMode) print('사용자 사진 파싱 중...');
           final userPhotos = (diaryData['userPhotos'] as List<dynamic>?)?.cast<String>() ?? [];
-          print('사용자 사진 개수: ${userPhotos.length}');
+          if (kDebugMode) print('사용자 사진 개수: ${userPhotos.length}');
 
-          print('DiaryEntry 객체 생성 중...');
+          if (kDebugMode) print('DiaryEntry 객체 생성 중...');
           final diary = DiaryEntry(
             id: id,
             title: title,
@@ -426,25 +427,25 @@ class DatabaseService {
             userPhotos: userPhotos,
           );
 
-          print('DB에 저장 중...');
+          if (kDebugMode) print('DB에 저장 중...');
           await db.insert(tableName, diary.toMap());
           importedCount++;
-          print('✅ 일기 ${i + 1} 복원 완료');
+          if (kDebugMode) print('✅ 일기 ${i + 1} 복원 완료');
         } catch (e, stackTrace) {
-          print('❌ 일기 ${i + 1} 복원 실패');
-          print('에러: $e');
-          print('스택 트레이스:\n$stackTrace');
-          print('일기 데이터: ${diaryData.toString()}');
+          if (kDebugMode) print('❌ 일기 ${i + 1} 복원 실패');
+          if (kDebugMode) print('에러: $e');
+          if (kDebugMode) print('스택 트레이스:\n$stackTrace');
+          if (kDebugMode) print('일기 데이터: ${diaryData.toString()}');
         }
       }
 
-      print('\n=== 복원 완료 ===');
-      print('성공: $importedCount개 / 전체: ${diaries.length}개');
+      if (kDebugMode) print('\n=== 복원 완료 ===');
+      if (kDebugMode) print('성공: $importedCount개 / 전체: ${diaries.length}개');
       return importedCount;
     } catch (e, stackTrace) {
-      print('❌ 데이터 복원 전체 실패');
-      print('에러: $e');
-      print('스택 트레이스:\n$stackTrace');
+      if (kDebugMode) print('❌ 데이터 복원 전체 실패');
+      if (kDebugMode) print('에러: $e');
+      if (kDebugMode) print('스택 트레이스:\n$stackTrace');
       return 0;
     }
   }
