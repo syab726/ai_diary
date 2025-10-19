@@ -24,7 +24,7 @@ class DatabaseService {
     String path = join(await getDatabasesPath(), 'diary_app.db');
     return await openDatabase(
       path,
-      version: 7,
+      version: 8,
       onCreate: _createDb,
       onUpgrade: _upgradeDb,
     );
@@ -63,6 +63,27 @@ class DatabaseService {
         createdAt TEXT NOT NULL
       )
     ''');
+
+    // 성능 최적화를 위한 인덱스 생성
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_diary_entries_createdAt
+      ON $tableName(createdAt DESC)
+    ''');
+
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_diary_entries_emotion
+      ON $tableName(emotion)
+    ''');
+
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_emotion_insights_type
+      ON emotion_insights(type)
+    ''');
+
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_emotion_insights_createdAt
+      ON emotion_insights(createdAt DESC)
+    ''');
   }
 
   static Future<void> _upgradeDb(Database db, int oldVersion, int newVersion) async {
@@ -95,6 +116,28 @@ class DatabaseService {
     }
     if (oldVersion < 7) {
       await db.execute('ALTER TABLE $tableName ADD COLUMN userPhotos TEXT');
+    }
+    if (oldVersion < 8) {
+      // 성능 최적화를 위한 인덱스 추가
+      await db.execute('''
+        CREATE INDEX IF NOT EXISTS idx_diary_entries_createdAt
+        ON $tableName(createdAt DESC)
+      ''');
+
+      await db.execute('''
+        CREATE INDEX IF NOT EXISTS idx_diary_entries_emotion
+        ON $tableName(emotion)
+      ''');
+
+      await db.execute('''
+        CREATE INDEX IF NOT EXISTS idx_emotion_insights_type
+        ON emotion_insights(type)
+      ''');
+
+      await db.execute('''
+        CREATE INDEX IF NOT EXISTS idx_emotion_insights_createdAt
+        ON emotion_insights(createdAt DESC)
+      ''');
     }
   }
 
