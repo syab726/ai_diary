@@ -1168,105 +1168,121 @@ class BackupRestoreScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 클라우드 백업
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.cloud_upload,
-                  color: Colors.blue,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '클라우드 백업',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF2D3748),
-                        fontSize: 16,
-                      ),
+          InkWell(
+            onTap: subscription.isPremium
+                ? () => _showCloudBackupDialog(context)
+                : () => showPremiumRequiredDialog(context, featureName: '클라우드 백업'),
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subscription.isPremium
-                          ? 'Google Drive에 일기를 백업합니다'
-                          : '프리미엄 전용 기능',
-                      style: const TextStyle(
-                        color: Color(0xFF718096),
-                        fontSize: 13,
-                      ),
+                    child: const Icon(
+                      Icons.cloud_upload,
+                      color: Colors.blue,
+                      size: 20,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '클라우드 백업',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF2D3748),
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          subscription.isPremium
+                              ? 'Google Drive에 일기를 백업합니다'
+                              : '프리미엄 전용 기능',
+                          style: const TextStyle(
+                            color: Color(0xFF718096),
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: const Color(0xFF9CA3AF),
+                  ),
+                ],
               ),
-              if (subscription.isPremium)
-                IconButton(
-                  onPressed: () => _showCloudBackupDialog(context),
-                  icon: const Icon(Icons.arrow_forward_ios, size: 16),
-                  color: const Color(0xFF9CA3AF),
-                ),
-            ],
+            ),
           ),
 
           const SizedBox(height: 16),
 
           // 클라우드 복원
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.cloud_download,
-                  color: Colors.green,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '클라우드 복원',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF2D3748),
-                        fontSize: 16,
-                      ),
+          InkWell(
+            onTap: subscription.isPremium
+                ? () => _showCloudRestoreDialog(context)
+                : () => showPremiumRequiredDialog(context, featureName: '클라우드 복원'),
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subscription.isPremium
-                          ? 'Google Drive에서 일기를 복원합니다'
-                          : '프리미엄 전용 기능',
-                      style: const TextStyle(
-                        color: Color(0xFF718096),
-                        fontSize: 13,
-                      ),
+                    child: const Icon(
+                      Icons.cloud_download,
+                      color: Colors.green,
+                      size: 20,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '클라우드 복원',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF2D3748),
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          subscription.isPremium
+                              ? 'Google Drive에서 일기를 복원합니다'
+                              : '프리미엄 전용 기능',
+                          style: const TextStyle(
+                            color: Color(0xFF718096),
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: const Color(0xFF9CA3AF),
+                  ),
+                ],
               ),
-              if (subscription.isPremium)
-                IconButton(
-                  onPressed: () => _showCloudRestoreDialog(context),
-                  icon: const Icon(Icons.arrow_forward_ios, size: 16),
-                  color: const Color(0xFF9CA3AF),
-                ),
-            ],
+            ),
           ),
 
           // 무료 사용자 안내 (공통)
