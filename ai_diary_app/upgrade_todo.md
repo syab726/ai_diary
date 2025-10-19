@@ -47,6 +47,84 @@
   - Isolate 사용 검토
 **우선순위:** 높음
 
+### 4-1. AI 이미지 생성 비동기 처리 및 큐 시스템 (신규)
+**현재 문제:**
+- 유저가 몰릴 경우 Gemini API IPM(Images Per Minute) 한도 초과 가능
+- 동기적 처리로 인한 앱 응답성 저하
+- 실패 시 재시도 메커니즘 부재
+- 생성 진행 상황 추적 어려움
+**파일:** `lib/services/ai_service.dart`
+
+**구현 방안:**
+1. **백엔드 서버 구축 (권장)**
+   - Firebase Cloud Functions 또는 Node.js 백엔드
+   - 메시지 큐 시스템:
+     - Option A: Firebase Pub/Sub (Firebase 생태계 통합)
+     - Option B: Redis Queue (자체 서버)
+     - Option C: Cloud Tasks (GCP)
+   - 워커 서버: IPM 한도 관리하며 순차 처리
+   - 데이터베이스: 요청 상태 추적 (pending/processing/completed/failed)
+
+2. **프론트엔드 변경사항**
+   - 이미지 생성 요청 → 큐에 추가 (즉시 리턴)
+   - 진행 상황 표시:
+     - "대기 중... (현재 X번째)"
+     - "이미지 생성 중..."
+     - "완료!"
+   - 실시간 상태 업데이트:
+     - Firebase Realtime Database 또는 Firestore 구독
+     - 또는 주기적 폴링 (5초마다)
+   - 알림 시스템:
+     - 푸시 알림 (Firebase Cloud Messaging)
+     - 인앱 알림
+
+3. **워커 로직**
+   - Rate Limiting: IPM 한도 준수 (예: 15 IPM)
+   - 우선순위 큐: 프리미엄 사용자 우선 처리
+   - 재시도 로직: 실패 시 3회 재시도 (exponential backoff)
+   - 타임아웃: 각 요청 최대 60초
+   - 에러 핸들링: 사용자에게 명확한 에러 메시지
+
+4. **데이터베이스 스키마 (예시)**
+   ```
+   image_generation_requests:
+     - id: auto
+     - userId: string
+     - diaryId: string
+     - status: pending/processing/completed/failed
+     - prompt: text
+     - options: json
+     - queuePosition: int
+     - createdAt: timestamp
+     - startedAt: timestamp (nullable)
+     - completedAt: timestamp (nullable)
+     - resultImageUrl: string (nullable)
+     - errorMessage: string (nullable)
+     - retryCount: int (default: 0)
+   ```
+
+5. **구현 단계**
+   - Phase 1: 백엔드 API 및 큐 시스템 구축
+   - Phase 2: 프론트엔드 비동기 처리 전환
+   - Phase 3: 실시간 상태 업데이트 구현
+   - Phase 4: 알림 시스템 추가
+   - Phase 5: 모니터링 및 최적화
+
+**예상 효과:**
+- API 한도 초과 방지 (IPM 관리)
+- 앱 응답성 향상 (비동기 처리)
+- 사용자 경험 개선 (진행 상황 표시)
+- 확장성 확보 (유저 증가에 대응)
+- 안정성 향상 (재시도 로직, 에러 핸들링)
+
+**우선순위:** 높음 (사용자 증가 대비 필수)
+**예상 개발 기간:** 2-3주
+**기술 스택 추천:**
+- 백엔드: Firebase Cloud Functions (Node.js)
+- 큐: Firebase Pub/Sub 또는 Cloud Tasks
+- 실시간 통신: Firebase Firestore
+- 알림: Firebase Cloud Messaging
+
 ### ✅ 5. 일기 백업/복원 기능 (완료 - v1.2)
 **위치:** 설정 화면 > 백업 및 복원
 **완료 상태:** v1.2 (2025-10-17)에서 완료
@@ -253,8 +331,9 @@
 **높은 우선순위:**
 1. ✅ ~~프로그레스 단계 표시~~ - 완료 (v1.1)
 2. ✅ ~~페이지 인디케이터 크기~~ - 완료 (v1.1)
-3. ⚠️ 성능 최적화 - 미완료 (프레임 드롭 문제)
-4. ⚠️ 오류 처리 개선 - 미완료
+3. ⚠️ **AI 이미지 생성 비동기 처리 및 큐 시스템** - 신규 (사용자 증가 대비 필수)
+4. ⚠️ 성능 최적화 - 미완료 (프레임 드롭 문제)
+5. ⚠️ 오류 처리 개선 - 미완료
 
 **중간 우선순위:**
 1. ⚠️ 디버그 로그 정리 - 미완료
@@ -282,6 +361,15 @@
 2. 오류 처리 개선 (네트워크 재시도, 타임아웃)
 3. 이미지 최적화 (압축, 리사이징)
 
+**중기 목표 (2-3주) - 사용자 증가 대비:**
+1. **AI 이미지 생성 비동기 처리 및 큐 시스템 구축** (최우선)
+   - Firebase Cloud Functions 백엔드 구축
+   - 메시지 큐 시스템 도입 (Pub/Sub/Cloud Tasks)
+   - IPM 한도 관리 워커 서버
+   - 실시간 진행 상황 추적
+   - 푸시 알림 시스템
+
 **배포 전 필수:**
-1. API 키 환경변수 이동
-2. 실제 결제 시스템 연동 (Google Play Billing, App Store IAP)
+1. API 키 환경변수 이동 (보안)
+2. AI 큐 시스템 구축 (확장성)
+3. 실제 결제 시스템 연동 (수익화)
