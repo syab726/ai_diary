@@ -29,10 +29,6 @@ class SettingsScreen extends ConsumerWidget {
         backgroundColor: Colors.white,
         foregroundColor: const Color(0xFF2D3748),
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
