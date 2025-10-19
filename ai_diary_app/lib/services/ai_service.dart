@@ -14,6 +14,8 @@ import '../models/image_time.dart';
 import '../models/image_weather.dart';
 import '../models/image_season.dart';
 import 'package:flutter/foundation.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 class AIService {
   // .env 파일에서 API 키 로드
@@ -635,10 +637,46 @@ JSON 형태로 답변해주세요:
       if (kDebugMode) print('=== AI 처리 완료 ===');
       if (kDebugMode) print('최종 결과: $result');
 
+      // Analytics: AI 이미지 생성 성공 이벤트
+      await FirebaseAnalytics.instance.logEvent(
+        name: 'ai_image_generated',
+        parameters: {
+          'success': true,
+          'style': style,
+          'emotion': emotion,
+          'has_user_photo': userPhotos != null && userPhotos.isNotEmpty,
+          'has_advanced_options': advancedOptions != null,
+          'has_perspective': perspectiveOptions != null,
+        },
+      );
+
       return result;
     } catch (e, stackTrace) {
       if (kDebugMode) print('AI 처리 오류: $e');
       if (kDebugMode) print('스택 트레이스: $stackTrace');
+
+      // Crashlytics: 에러 기록
+      await FirebaseCrashlytics.instance.recordError(
+        e,
+        stackTrace,
+        reason: 'AI 이미지 생성 실패',
+        information: [
+          '서비스: AIService',
+          '함수: processEntry',
+          '스타일: $style',
+        ],
+      );
+
+      // Analytics: AI 이미지 생성 실패 이벤트
+      await FirebaseAnalytics.instance.logEvent(
+        name: 'ai_image_generated',
+        parameters: {
+          'success': false,
+          'style': style,
+          'error': e.toString(),
+        },
+      );
+
       // 기본 폴백 이미지 크기 설정
       String fallbackDimensions = '400/400';
 
