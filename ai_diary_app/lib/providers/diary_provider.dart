@@ -102,5 +102,8 @@ final selectedDiaryProvider = StateProvider<DiaryEntry?>((ref) => null);
 // 검색 쿼리 상태 관리
 final searchQueryProvider = StateProvider<String>((ref) => '');
 
+// 감정 필터 상태 관리 (null이면 전체 표시)
+final emotionFilterProvider = StateProvider<String?>((ref) => null);
+
 // 현재 편집 중인 일기 상태 관리
 final editingDiaryProvider = StateProvider<DiaryEntry?>((ref) => null);

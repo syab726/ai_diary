@@ -35,6 +35,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
     if (kDebugMode) print('DiaryListScreen: build() 호출됨');
     final diariesAsync = ref.watch(diaryEntriesProvider);
     final searchQuery = ref.watch(searchQueryProvider);
+    final emotionFilter = ref.watch(emotionFilterProvider);
     final subscription = ref.watch(subscriptionProvider);
     if (kDebugMode) print('DiaryListScreen: diariesAsync 상태: ${diariesAsync.runtimeType}');
 
@@ -159,6 +160,30 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
               ),
             ),
 
+          // 감정 필터 칩
+          SliverToBoxAdapter(
+            child: Container(
+              height: 56,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _buildEmotionFilterChip(null, '전체', '😊', emotionFilter),
+                  _buildEmotionFilterChip('happy', '행복', '😊', emotionFilter),
+                  _buildEmotionFilterChip('sad', '슬픔', '😢', emotionFilter),
+                  _buildEmotionFilterChip('angry', '화남', '😠', emotionFilter),
+                  _buildEmotionFilterChip('excited', '흥분', '🎉', emotionFilter),
+                  _buildEmotionFilterChip('peaceful', '평온', '😌', emotionFilter),
+                  _buildEmotionFilterChip('anxious', '불안', '😰', emotionFilter),
+                  _buildEmotionFilterChip('grateful', '감사', '🙏', emotionFilter),
+                  _buildEmotionFilterChip('nostalgic', '그리움', '🥺', emotionFilter),
+                  _buildEmotionFilterChip('romantic', '로맨틱', '💕', emotionFilter),
+                  _buildEmotionFilterChip('frustrated', '짜증', '😤', emotionFilter),
+                ],
+              ),
+            ),
+          ),
+
           // 프리미엄 업그레이드 배너 (무료 사용자 + 일기가 1개 이상)
           diariesAsync.maybeWhen(
             data: (diaries) {
@@ -221,10 +246,18 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
 
               // 현재 월의 일기만 필터링
               final now = DateTime.now();
-              final currentMonthDiaries = diaries.where((diary) {
+              var currentMonthDiaries = diaries.where((diary) {
                 return diary.createdAt.year == now.year &&
                        diary.createdAt.month == now.month;
               }).toList();
+
+              // 감정 필터 적용
+              if (emotionFilter != null && emotionFilter.isNotEmpty) {
+                currentMonthDiaries = currentMonthDiaries.where((diary) {
+                  return diary.emotion?.toLowerCase() == emotionFilter.toLowerCase();
+                }).toList();
+                if (kDebugMode) print('감정 필터 적용 후 일기 개수: ${currentMonthDiaries.length}');
+              }
 
               if (kDebugMode) print('현재 월 일기 개수: ${currentMonthDiaries.length}');
 
@@ -752,6 +785,47 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// 감정 필터 칩 위젯
+  Widget _buildEmotionFilterChip(String? emotion, String label, String emoji, String? currentFilter) {
+    final isSelected = emotion == currentFilter;
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: FilterChip(
+        label: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 16)),
+            const SizedBox(width: 4),
+            Text(label),
+          ],
+        ),
+        selected: isSelected,
+        onSelected: (selected) {
+          ref.read(emotionFilterProvider.notifier).state = selected ? emotion : null;
+        },
+        backgroundColor: Colors.white,
+        selectedColor: _getEmotionColor(emotion ?? 'default').withOpacity(0.2),
+        checkmarkColor: _getEmotionColor(emotion ?? 'default'),
+        labelStyle: TextStyle(
+          color: isSelected
+              ? _getEmotionColor(emotion ?? 'default')
+              : const Color(0xFF4A5568),
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: isSelected
+                ? _getEmotionColor(emotion ?? 'default')
+                : const Color(0xFFE5E7EB),
+          ),
+        ),
+        elevation: isSelected ? 2 : 0,
       ),
     );
   }
