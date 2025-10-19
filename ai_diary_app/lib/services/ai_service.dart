@@ -58,7 +58,58 @@ class AIService {
   static String get _huggingFaceApiKey => dotenv.env['HUGGINGFACE_API_KEY'] ?? '';
   static late GenerativeModel _textModel;
   static late GenerativeModel _imageModel;
-  
+
+  // HTTP 요청 재시도 설정
+  static const int _maxRetries = 3;
+  static const Duration _requestTimeout = Duration(seconds: 30);
+
+  // 재시도 로직이 포함된 HTTP POST 헬퍼 메서드
+  static Future<http.Response> _retryablePost({
+    required Uri url,
+    required Map<String, String> headers,
+    required String body,
+  }) async {
+    int retryCount = 0;
+
+    while (retryCount < _maxRetries) {
+      try {
+        if (kDebugMode && retryCount > 0) {
+          print('재시도 ${retryCount + 1}/$_maxRetries...');
+        }
+
+        final response = await http.post(
+          url,
+          headers: headers,
+          body: body,
+        ).timeout(_requestTimeout);
+
+        // 성공 또는 클라이언트 오류(4xx)면 재시도하지 않음
+        if (response.statusCode < 500) {
+          return response;
+        }
+
+        // 서버 오류(5xx)면 재시도
+        if (kDebugMode) {
+          print('서버 오류 (${response.statusCode}), 재시도 대기 중...');
+        }
+      } catch (e) {
+        if (retryCount == _maxRetries - 1) {
+          // 마지막 시도에서 실패하면 예외 발생
+          rethrow;
+        }
+        if (kDebugMode) {
+          print('HTTP 요청 오류: $e, 재시도 대기 중...');
+        }
+      }
+
+      // Exponential backoff: 1초, 2초, 4초
+      await Future.delayed(Duration(seconds: 1 << retryCount));
+      retryCount++;
+    }
+
+    throw Exception('최대 재시도 횟수($_maxRetries)를 초과했습니다.');
+  }
+
   static void initialize() {
     if (kDebugMode) print('=== AI Service 초기화 ===');
     if (kDebugMode) print('텍스트 모델명: gemini-2.0-flash-lite');
@@ -236,8 +287,8 @@ ${photoSuffix.isNotEmpty ? '업로드된 사진의 스타일과 분위기를 최
 
         if (kDebugMode) print('최종 강화된 프롬프트: $enhancedPrompt');
 
-        final response = await http.post(
-          Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=$_geminiApiKey'),
+        final response = await _retryablePost(
+          url: Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=$_geminiApiKey'),
           headers: {
             'Content-Type': 'application/json',
           },
