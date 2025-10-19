@@ -17,7 +17,7 @@ class PremiumSubscriptionScreen extends ConsumerWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/list'),
+          onPressed: () => context.pop(),
         ),
         title: const Text(
           'ArtDiary Premium',

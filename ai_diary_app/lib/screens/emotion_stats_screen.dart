@@ -212,7 +212,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/list'),
+          onPressed: () => context.pop(),
         ),
         title: const Text(
           '감정 통계',
