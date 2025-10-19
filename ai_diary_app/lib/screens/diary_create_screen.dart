@@ -116,6 +116,50 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
   bool get _isEditMode => _existingEntry != null;
 
+  // 작성 중인 내용이 있는지 확인
+  bool get _hasUnsavedChanges {
+    final hasTitle = _titleController.text.trim().isNotEmpty;
+    final hasContent = _contentController.text.trim().isNotEmpty;
+
+    if (!_isEditMode) {
+      // 새 일기 작성 모드: 제목이나 내용이 있으면 true
+      return hasTitle || hasContent;
+    } else {
+      // 수정 모드: 기존 내용과 다르면 true
+      return _titleController.text != _existingEntry!.title ||
+             _contentController.text != _existingEntry!.content;
+    }
+  }
+
+  // 뒤로가기 경고 다이얼로그
+  Future<bool> _showExitConfirmDialog() async {
+    if (!_hasUnsavedChanges) {
+      return true; // 변경사항 없으면 바로 나가기
+    }
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('작성 중인 내용이 있습니다'),
+        content: const Text('저장하지 않은 내용은 사라집니다.\n정말 나가시겠습니까?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('나가기'),
+          ),
+        ],
+      ),
+    );
+
+    return result ?? false; // null이면 false (다이얼로그 외부 클릭 시)
+  }
 
   /// ============== Phase 3: 하이브리드 프리미엄 모델 ==============
   ///
@@ -709,8 +753,23 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     final subscription = ref.watch(subscriptionProvider);
     final selectedFont = ref.watch(fontProvider);
 
-    return Scaffold(
-      appBar: AppBar(
+    return PopScope(
+      canPop: !_hasUnsavedChanges, // 변경사항 없으면 바로 나가기
+      onPopInvokedWithResult: (bool didPop, dynamic result) async {
+        if (didPop) return; // 이미 pop된 경우 (변경사항 없음)
+
+        // 변경사항 있으면 경고 다이얼로그 표시
+        final shouldPop = await _showExitConfirmDialog();
+        if (shouldPop && context.mounted) {
+          if (_isEditMode) {
+            context.go('/detail/${_existingEntry!.id}');
+          } else {
+            context.go('/list');
+          }
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
         title: Text(
           _isEditMode ? '일기 수정' : '새 일기 작성',
           style: const TextStyle(
@@ -730,11 +789,14 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
             color: Color(0xFF4A5568),
             size: 20,
           ),
-          onPressed: () {
-            if (_isEditMode) {
-              context.go('/detail/${_existingEntry!.id}');
-            } else {
-              context.go('/list');
+          onPressed: () async {
+            final shouldPop = await _showExitConfirmDialog();
+            if (shouldPop && context.mounted) {
+              if (_isEditMode) {
+                context.go('/detail/${_existingEntry!.id}');
+              } else {
+                context.go('/list');
+              }
             }
           },
         ),
@@ -1397,7 +1459,8 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
               ),
             ],
           ),
-    );
+      ), // Scaffold 끝
+    ); // PopScope 끝
   }
 
   // 고급옵션 자동설정 적용 (조명, 분위기, 색상, 구도만)
