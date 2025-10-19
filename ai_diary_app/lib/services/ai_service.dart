@@ -6,6 +6,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/image_options.dart';
 import '../models/perspective_options.dart';
 import '../models/image_time.dart';
@@ -14,7 +15,14 @@ import '../models/image_season.dart';
 import 'package:flutter/foundation.dart';
 
 class AIService {
-  static const String _geminiApiKey = 'AIzaSyB4sTKHWNsKq_k-X-jlm5l_9BCQC4eq-hc';
+  // .env 파일에서 API 키 로드
+  static String get _geminiApiKey {
+    final key = dotenv.env['GEMINI_API_KEY'] ?? '';
+    if (key.isEmpty) {
+      throw Exception('GEMINI_API_KEY가 .env 파일에 설정되지 않았습니다.');
+    }
+    return key;
+  }
 
   // 이미지를 파일로 저장하고 파일 경로 반환
   static Future<String> _saveImageToFile(String base64Data, String mimeType) async {
@@ -45,8 +53,9 @@ class AIService {
       return '';
     }
   }
-  static const String _openaiApiKey = 'sk-proj-YOUR_OPENAI_API_KEY'; // OpenAI API 키를 여기에 입력하세요
-  static const String _huggingFaceApiKey = 'hf_YOUR_API_KEY'; // Hugging Face API 키 (무료 가입 후 발급)
+  // .env 파일에서 선택적 API 키 로드
+  static String get _openaiApiKey => dotenv.env['OPENAI_API_KEY'] ?? '';
+  static String get _huggingFaceApiKey => dotenv.env['HUGGINGFACE_API_KEY'] ?? '';
   static late GenerativeModel _textModel;
   static late GenerativeModel _imageModel;
   
