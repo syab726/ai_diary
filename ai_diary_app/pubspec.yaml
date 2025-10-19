@@ -29,6 +29,7 @@ dependencies:
   file_picker: ^8.1.4
   table_calendar: ^3.1.2
   gal: ^2.3.0
+  image: ^4.0.0
   
   # Authentication
   firebase_core: ^3.6.0

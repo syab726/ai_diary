@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:image/image.dart' as img;
 import '../models/image_options.dart';
 import '../models/perspective_options.dart';
 import '../models/image_time.dart';
@@ -24,7 +25,7 @@ class AIService {
     return key;
   }
 
-  // 이미지를 파일로 저장하고 파일 경로 반환
+  // 이미지를 파일로 저장하고 파일 경로 반환 (최적화 포함)
   static Future<String> _saveImageToFile(String base64Data, String mimeType) async {
     try {
       final directory = await getApplicationDocumentsDirectory();
@@ -35,22 +36,71 @@ class AIService {
         await imagesDir.create(recursive: true);
       }
 
+      // base64 디코딩
+      final imageBytes = base64Decode(base64Data);
+
+      // 이미지 최적화
+      final optimizedBytes = await _optimizeImage(imageBytes);
+
       // 파일명 생성 (타임스탬프 기반)
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final extension = mimeType.split('/').last;
-      final fileName = 'diary_image_$timestamp.$extension';
+      final fileName = 'diary_image_$timestamp.jpg'; // 항상 JPEG로 저장 (최적화)
       final filePath = path.join(imagesDir.path, fileName);
 
-      // base64 디코딩 후 파일 저장
-      final imageBytes = base64Decode(base64Data);
+      // 최적화된 이미지 저장
       final file = File(filePath);
-      await file.writeAsBytes(imageBytes);
+      await file.writeAsBytes(optimizedBytes);
 
-      if (kDebugMode) print('이미지 파일 저장 완료: $filePath');
+      final originalSize = imageBytes.length / 1024; // KB
+      final optimizedSize = optimizedBytes.length / 1024; // KB
+      final compressionRatio = ((originalSize - optimizedSize) / originalSize * 100).toStringAsFixed(1);
+
+      if (kDebugMode) {
+        print('이미지 최적화 완료:');
+        print('  원본 크기: ${originalSize.toStringAsFixed(1)} KB');
+        print('  최적화 크기: ${optimizedSize.toStringAsFixed(1)} KB');
+        print('  압축률: $compressionRatio%');
+        print('  저장 경로: $filePath');
+      }
+
       return filePath;
     } catch (e) {
       if (kDebugMode) print('이미지 파일 저장 오류: $e');
       return '';
+    }
+  }
+
+  // 이미지 최적화 (리사이징 및 압축)
+  static Future<Uint8List> _optimizeImage(Uint8List imageBytes) async {
+    try {
+      // 이미지 디코딩
+      final image = img.decodeImage(imageBytes);
+      if (image == null) {
+        if (kDebugMode) print('이미지 디코딩 실패, 원본 반환');
+        return imageBytes;
+      }
+
+      // 최대 크기 설정 (2048px)
+      const maxDimension = 2048;
+      img.Image resizedImage = image;
+
+      if (image.width > maxDimension || image.height > maxDimension) {
+        if (image.width > image.height) {
+          resizedImage = img.copyResize(image, width: maxDimension);
+        } else {
+          resizedImage = img.copyResize(image, height: maxDimension);
+        }
+        if (kDebugMode) {
+          print('이미지 리사이징: ${image.width}x${image.height} → ${resizedImage.width}x${resizedImage.height}');
+        }
+      }
+
+      // JPEG 압축 (품질 85%)
+      final compressedBytes = img.encodeJpg(resizedImage, quality: 85);
+      return Uint8List.fromList(compressedBytes);
+    } catch (e) {
+      if (kDebugMode) print('이미지 최적화 오류: $e, 원본 반환');
+      return imageBytes; // 오류 시 원본 반환
     }
   }
   // .env 파일에서 선택적 API 키 로드
