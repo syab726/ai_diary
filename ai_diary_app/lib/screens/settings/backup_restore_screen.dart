@@ -459,7 +459,7 @@ class BackupRestoreScreen extends ConsumerWidget {
     print('=== _showCloudBackupDialog 호출됨 ===');
     final scaffoldContext = context;  // 원래 Scaffold context 저장
     showDialog(
-      context: context,
+      context: scaffoldContext,
       builder: (dialogContext) => AlertDialog(
         title: const Row(
           children: [
