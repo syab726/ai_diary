@@ -87,7 +87,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         if (kDebugMode) print('DiaryCreateScreen: 기존 일기 ID로 로딩 시작: ${widget.existingDiaryId}');
         final entry = await DatabaseService.getDiaryById(widget.existingDiaryId!);
         if (entry != null) {
-          print('DiaryCreateScreen: 기존 일기 로딩 성공: ${entry.title}');
+          if (kDebugMode) print('DiaryCreateScreen: 기존 일기 로딩 성공: ${entry.title}');
           setState(() {
             _existingEntry = entry;
             _titleController.text = entry.title;
@@ -173,7 +173,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
     // Step 2: 프리미엄 사용자는 바로 생성
     if (subscription.isPremium) {
-      print('[하이브리드 모델] 프리미엄 사용자 - 광고 없이 바로 생성');
+      if (kDebugMode) print('[하이브리드 모델] 프리미엄 사용자 - 광고 없이 바로 생성');
       await _createDiary();
       return;
     }
@@ -183,7 +183,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     try {
       allDiaries = await DatabaseService.getAllDiaries();
       if (allDiaries.length < 5) {
-        print('[하이브리드 모델] 최초 5개 무료 생성: ${allDiaries.length + 1}/5');
+        if (kDebugMode) print('[하이브리드 모델] 최초 5개 무료 생성: ${allDiaries.length + 1}/5');
         await _createDiary();
         return;
       }
@@ -202,7 +202,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     );
 
     if (!shouldShowAd) {
-      print('[하이브리드 모델] 사용자가 광고 시청 취소');
+      if (kDebugMode) print('[하이브리드 모델] 사용자가 광고 시청 취소');
       return;
     }
 
@@ -211,7 +211,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     final adWatched = await AdService().showRewardedAd();
 
     if (!adWatched) {
-      print('[하이브리드 모델] 광고 로드 실패 또는 시청 중단');
+      if (kDebugMode) print('[하이브리드 모델] 광고 로드 실패 또는 시청 중단');
       _showAdFailedDialog();
       return;
     }

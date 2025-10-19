@@ -109,7 +109,7 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
                 onPressed: () {
                   if (Navigator.of(context).canPop()) {
-                    print('Detail: Navigator에서 뒤로가기');
+                    if (kDebugMode) print('Detail: Navigator에서 뒤로가기');
                     Navigator.of(context).pop();
                   } else {
                     // URL 쿼리 파라미터 확인
@@ -121,10 +121,10 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
                     if (kDebugMode) print('Detail: URL 파라미터 - from: $from, date: $date, diaryId: $diaryId');
 
                     if (from == 'calendar' && date != null && diaryId != null) {
-                      print('Detail: 달력으로 이동 - /calendar?selectedDate=$date&selectedDiary=$diaryId');
+                      if (kDebugMode) print('Detail: 달력으로 이동 - /calendar?selectedDate=$date&selectedDiary=$diaryId');
                       context.go('/calendar?selectedDate=$date&selectedDiary=$diaryId');
                     } else if (from == 'calendar') {
-                      print('Detail: 달력으로 이동 (파라미터 없음)');
+                      if (kDebugMode) print('Detail: 달력으로 이동 (파라미터 없음)');
                       context.go('/calendar');
                     } else {
                       if (kDebugMode) print('Detail: 리스트로 이동');
