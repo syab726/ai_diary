@@ -44,6 +44,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
       body: Stack(
         children: [
           CustomScrollView(
+        cacheExtent: 1000.0, // 성능 최적화: 화면 밖 아이템 미리 렌더링
         slivers: [
           // 상단 앱바
           SliverAppBar(
