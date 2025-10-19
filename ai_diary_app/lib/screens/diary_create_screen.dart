@@ -853,6 +853,24 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                             },
                           ),
 
+                          // 글자수 카운터
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: ValueListenableBuilder<TextEditingValue>(
+                              valueListenable: _contentController,
+                              builder: (context, value, child) {
+                                return Text(
+                                  '${value.text.length} / 1000자',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+
                           // 생성된 이미지와 사용자 사진 갤러리 표시
                           if (_generatedImageUrl != null || _selectedPhotos.isNotEmpty) ...[
                             const SizedBox(height: 16),
