@@ -244,7 +244,7 @@ class SettingsScreen extends ConsumerWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: () => context.go('/premium-subscription'),
+              onPressed: () => context.push('/premium-subscription'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: const Color(0xFFF97316),
