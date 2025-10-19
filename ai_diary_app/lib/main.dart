@@ -6,6 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
 import 'services/ai_service.dart';
@@ -76,6 +78,9 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Firebase Crashlytics 초기화 (자동 오류 수집)
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
   // AdMob SDK 초기화
   await AdService.initialize();

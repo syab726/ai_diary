@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import '../models/diary_entry.dart';
 import '../models/image_style.dart';
 import '../models/image_options.dart';
@@ -338,6 +340,17 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         diaryId = _existingEntry!.id;
       } else {
         diaryId = await DatabaseService.insertDiary(diary);
+
+        // Firebase Analytics: 일기 생성 이벤트
+        await FirebaseAnalytics.instance.logEvent(
+          name: 'diary_created',
+          parameters: {
+            'has_image': imageUrl != null,
+            'has_user_photo': _userPhotos.isNotEmpty,
+            'emotion': diary.emotion ?? 'unknown',
+            'image_style': diary.imageStyle?.value ?? 'none',
+          },
+        );
       }
 
       // Diary Provider 업데이트
@@ -355,7 +368,15 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         );
         context.go('/detail/$diaryId');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      // Firebase Crashlytics: 오류 로깅
+      await FirebaseCrashlytics.instance.recordError(
+        e,
+        stackTrace,
+        reason: '일기 생성/저장 실패',
+        information: ['화면: DiaryCreateScreen', '작업: 일기 저장'],
+      );
+
       setState(() {
         _isLoading = false;
         _isGeneratingImage = false;
@@ -423,6 +444,17 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
           userPhotos: _selectedPhotos,
         );
         diaryId = await DatabaseService.insertDiary(diary);
+
+        // Firebase Analytics: 일기 생성 이벤트 (이미지 없음)
+        await FirebaseAnalytics.instance.logEvent(
+          name: 'diary_created',
+          parameters: {
+            'has_image': false,
+            'has_user_photo': _selectedPhotos.isNotEmpty,
+            'emotion': 'none',
+            'image_style': 'none',
+          },
+        );
       }
 
       // Diary Provider 업데이트
