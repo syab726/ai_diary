@@ -98,7 +98,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                 ),
                 child: IconButton(
                   icon: const Icon(Icons.calendar_month, color: Color(0xFF4A5568)),
-                  onPressed: () => context.go('/calendar'),
+                  onPressed: () => context.push('/calendar'),
                 ),
               ),
               Container(
@@ -116,7 +116,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                 ),
                 child: IconButton(
                   icon: const Icon(Icons.bar_chart, color: Color(0xFF4A5568)),
-                  onPressed: () => context.go('/stats'),
+                  onPressed: () => context.push('/stats'),
                 ),
               ),
               Container(
@@ -134,7 +134,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                 ),
                 child: IconButton(
                   icon: const Icon(Icons.settings, color: Color(0xFF4A5568)),
-                  onPressed: () => context.go('/settings'),
+                  onPressed: () => context.push('/settings'),
                 ),
               ),
             ],
@@ -252,7 +252,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                         ),
                         const SizedBox(height: 24),
                         ElevatedButton.icon(
-                          onPressed: () => context.go('/create'),
+                          onPressed: () => context.push('/create'),
                           icon: const Icon(Icons.add),
                           label: Text(AppLocalizations.of(context).createFirstEntry),
                           style: ElevatedButton.styleFrom(
@@ -338,7 +338,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/create'),
+        onPressed: () => context.push('/create'),
         backgroundColor: const Color(0xFF667EEA),
         child: const Icon(Icons.add, color: Colors.white),
       ),
@@ -364,7 +364,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
         ],
       ),
       child: InkWell(
-        onTap: () => context.go('/detail/${diary.id}'),
+        onTap: () => context.push('/detail/${diary.id}'),
         borderRadius: BorderRadius.circular(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -732,7 +732,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () => context.go('/premium-subscription'),
+                onPressed: () => context.push('/premium-subscription'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: const Color(0xFFF97316),

@@ -226,7 +226,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 ),
                 child: IconButton(
                   icon: const Icon(Icons.settings, color: Color(0xFF4A5568)),
-                  onPressed: () => context.go('/settings'),
+                  onPressed: () => context.push('/settings'),
                 ),
               ),
             ],

@@ -1795,7 +1795,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
           FilledButton.icon(
             onPressed: () {
               Navigator.pop(context);
-              context.go('/settings');
+              context.push('/settings');
             },
             icon: const Icon(Icons.diamond, size: 18),
             label: const Text('프리미엄 알아보기'),
@@ -1945,7 +1945,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
           FilledButton.icon(
             onPressed: () {
               Navigator.pop(context);
-              context.go('/settings');
+              context.push('/settings');
             },
             icon: const Icon(Icons.diamond, size: 18),
             label: const Text('프리미엄 알아보기'),
@@ -2504,7 +2504,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
           FilledButton.icon(
             onPressed: () {
               Navigator.pop(context);
-              context.go('/settings'); // 프리미엄 구독 화면으로
+              context.push('/settings'); // 프리미엄 구독 화면으로
             },
             icon: const Icon(Icons.diamond, size: 18),
             label: const Text('프리미엄 알아보기'),

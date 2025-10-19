@@ -145,7 +145,7 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
                 ),
                 child: IconButton(
                   icon: const Icon(Icons.edit, color: Colors.white),
-                  onPressed: () => context.go('/edit/${widget.entryId}'),
+                  onPressed: () => context.push('/edit/${widget.entryId}'),
                 ),
               ),
               Consumer(
