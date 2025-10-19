@@ -199,7 +199,14 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
                       color: Colors.grey[600],
                     ),
                   ),
-                  
+                  const SizedBox(height: 4),
+                  Text(
+                    '작성: ${DateFormat('yyyy.MM.dd HH:mm').format(_diary!.createdAt)}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey[500],
+                    ),
+                  ),
+
                   const SizedBox(height: 24),
                   
                   // 감정과 키워드
