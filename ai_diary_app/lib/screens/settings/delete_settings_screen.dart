@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'package:path/path.dart' as path;
 import '../../l10n/app_localizations.dart';
 import '../../services/database_service.dart';
 
@@ -67,11 +70,119 @@ class DeleteSettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           _buildSettingsTile(
+            icon: Icons.cleaning_services,
+            title: '캐시 삭제',
+            subtitle: '저장된 이미지 캐시를 삭제하여 저장 공간 확보',
+            onTap: () => _showClearCacheDialog(context),
+            isDestructive: false,
+          ),
+          _buildSettingsTile(
             icon: Icons.delete_forever,
             title: AppLocalizations.of(context).deleteAllData,
             subtitle: AppLocalizations.of(context).deleteAllDataSubtitle,
             onTap: () => _showDeleteAllDialog(context),
             isDestructive: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 캐시 크기 계산
+  Future<String> _calculateCacheSize() async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final imagesDir = Directory(path.join(directory.path, 'diary_images'));
+
+      if (!await imagesDir.exists()) {
+        return '0 MB';
+      }
+
+      int totalBytes = 0;
+      await for (final entity in imagesDir.list(recursive: true)) {
+        if (entity is File) {
+          totalBytes += await entity.length();
+        }
+      }
+
+      final megaBytes = totalBytes / (1024 * 1024);
+      return '${megaBytes.toStringAsFixed(2)} MB';
+    } catch (e) {
+      return '계산 실패';
+    }
+  }
+
+  // 캐시 삭제
+  Future<bool> _clearCache() async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final imagesDir = Directory(path.join(directory.path, 'diary_images'));
+
+      if (!await imagesDir.exists()) {
+        return true; // 이미 없으면 성공으로 간주
+      }
+
+      // 디렉토리 내 모든 파일 삭제
+      await for (final entity in imagesDir.list(recursive: false)) {
+        if (entity is File) {
+          await entity.delete();
+        }
+      }
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  void _showClearCacheDialog(BuildContext context) async {
+    final cacheSize = await _calculateCacheSize();
+
+    if (!context.mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('캐시 삭제'),
+        content: Text(
+          '이미지 캐시를 삭제하시겠습니까?\n\n'
+          '현재 캐시 크기: $cacheSize\n\n'
+          '참고: 일기 데이터는 삭제되지 않으며,\n'
+          '필요 시 이미지가 다시 생성됩니다.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.pop(context); // 다이얼로그 닫기
+
+              // 진행 상태 표시
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('캐시 삭제 중...'),
+                  duration: Duration(seconds: 1),
+                ),
+              );
+
+              final success = await _clearCache();
+
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      success
+                          ? '캐시가 성공적으로 삭제되었습니다'
+                          : '캐시 삭제 중 오류가 발생했습니다',
+                    ),
+                    backgroundColor: success ? Colors.green : Colors.red,
+                  ),
+                );
+              }
+            },
+            child: const Text('삭제'),
           ),
         ],
       ),
