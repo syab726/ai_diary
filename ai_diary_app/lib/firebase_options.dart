@@ -50,31 +50,29 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'demo-api-key',
-    appId: '1:123456789:android:demo-app-id',
-    messagingSenderId: '123456789',
-    projectId: 'demo-project-id',
-    storageBucket: 'demo-project-id.appspot.com',
+    apiKey: 'AIzaSyDL03F0-wS7lYto4NS-NGy7hbOGk6D4M40',
+    appId: '1:717196605259:android:8f19097f423d85ebe19ace',
+    messagingSenderId: '717196605259',
+    projectId: 'artdiary-ai',
+    storageBucket: 'artdiary-ai.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'demo-api-key',
-    appId: '1:123456789:ios:demo-app-id',
-    messagingSenderId: '123456789',
-    projectId: 'demo-project-id',
-    storageBucket: 'demo-project-id.appspot.com',
-    iosClientId: 'demo-ios-client-id.apps.googleusercontent.com',
-    iosBundleId: 'com.example.aiDiaryApp',
+    apiKey: 'AIzaSyD5drCowpgVIUVvVQ2czinDiDVhWQIaLUc',
+    appId: '1:717196605259:ios:f7dbca79950386e9e19ace',
+    messagingSenderId: '717196605259',
+    projectId: 'artdiary-ai',
+    storageBucket: 'artdiary-ai.firebasestorage.app',
+    iosBundleId: 'com.aidiary.app.aiDiaryApp',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'demo-api-key',
-    appId: '1:123456789:ios:demo-app-id',
-    messagingSenderId: '123456789',
-    projectId: 'demo-project-id',
-    storageBucket: 'demo-project-id.appspot.com',
-    iosClientId: 'demo-ios-client-id.apps.googleusercontent.com',
-    iosBundleId: 'com.example.aiDiaryApp',
+    apiKey: 'AIzaSyD5drCowpgVIUVvVQ2czinDiDVhWQIaLUc',
+    appId: '1:717196605259:ios:f7dbca79950386e9e19ace',
+    messagingSenderId: '717196605259',
+    projectId: 'artdiary-ai',
+    storageBucket: 'artdiary-ai.firebasestorage.app',
+    iosBundleId: 'com.aidiary.app.aiDiaryApp',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
