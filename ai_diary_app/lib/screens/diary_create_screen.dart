@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import '../models/diary_entry.dart';
 import '../models/image_style.dart';
 import '../models/image_options.dart';
@@ -29,7 +27,6 @@ import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
-import 'package:flutter/foundation.dart';
 
 class DiaryCreateScreen extends ConsumerStatefulWidget {
   final String? existingDiaryId;
@@ -86,10 +83,10 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   Future<void> _loadExistingEntry() async {
     if (widget.existingDiaryId != null) {
       try {
-        if (kDebugMode) print('DiaryCreateScreen: 기존 일기 ID로 로딩 시작: ${widget.existingDiaryId}');
+        print('DiaryCreateScreen: 기존 일기 ID로 로딩 시작: ${widget.existingDiaryId}');
         final entry = await DatabaseService.getDiaryById(widget.existingDiaryId!);
         if (entry != null) {
-          if (kDebugMode) print('DiaryCreateScreen: 기존 일기 로딩 성공: ${entry.title}');
+          print('DiaryCreateScreen: 기존 일기 로딩 성공: ${entry.title}');
           setState(() {
             _existingEntry = entry;
             _titleController.text = entry.title;
@@ -103,10 +100,10 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
             _selectedPhotos = List.from(entry.userPhotos);
           });
         } else {
-          if (kDebugMode) print('DiaryCreateScreen: 기존 일기를 찾을 수 없음');
+          print('DiaryCreateScreen: 기존 일기를 찾을 수 없음');
         }
       } catch (e) {
-        if (kDebugMode) print('DiaryCreateScreen: 기존 일기 로딩 오류: $e');
+        print('DiaryCreateScreen: 기존 일기 로딩 오류: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('일기를 불러오는데 실패했습니다: $e')),
@@ -118,50 +115,6 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
   bool get _isEditMode => _existingEntry != null;
 
-  // 작성 중인 내용이 있는지 확인
-  bool get _hasUnsavedChanges {
-    final hasTitle = _titleController.text.trim().isNotEmpty;
-    final hasContent = _contentController.text.trim().isNotEmpty;
-
-    if (!_isEditMode) {
-      // 새 일기 작성 모드: 제목이나 내용이 있으면 true
-      return hasTitle || hasContent;
-    } else {
-      // 수정 모드: 기존 내용과 다르면 true
-      return _titleController.text != _existingEntry!.title ||
-             _contentController.text != _existingEntry!.content;
-    }
-  }
-
-  // 뒤로가기 경고 다이얼로그
-  Future<bool> _showExitConfirmDialog() async {
-    if (!_hasUnsavedChanges) {
-      return true; // 변경사항 없으면 바로 나가기
-    }
-
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('작성 중인 내용이 있습니다'),
-        content: const Text('저장하지 않은 내용은 사라집니다.\n정말 나가시겠습니까?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('취소'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
-            ),
-            child: const Text('나가기'),
-          ),
-        ],
-      ),
-    );
-
-    return result ?? false; // null이면 false (다이얼로그 외부 클릭 시)
-  }
 
   /// ============== Phase 3: 하이브리드 프리미엄 모델 ==============
   ///
@@ -175,7 +128,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
     // Step 2: 프리미엄 사용자는 바로 생성
     if (subscription.isPremium) {
-      if (kDebugMode) print('[하이브리드 모델] 프리미엄 사용자 - 광고 없이 바로 생성');
+      print('[하이브리드 모델] 프리미엄 사용자 - 광고 없이 바로 생성');
       await _createDiary();
       return;
     }
@@ -185,18 +138,18 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     try {
       allDiaries = await DatabaseService.getAllDiaries();
       if (allDiaries.length < 5) {
-        if (kDebugMode) print('[하이브리드 모델] 최초 5개 무료 생성: ${allDiaries.length + 1}/5');
+        print('[하이브리드 모델] 최초 5개 무료 생성: ${allDiaries.length + 1}/5');
         await _createDiary();
         return;
       }
     } catch (e) {
-      if (kDebugMode) print('[하이브리드 모델] 데이터베이스 오류 - 일기 개수 확인 실패: $e');
+      print('[하이브리드 모델] 데이터베이스 오류 - 일기 개수 확인 실패: $e');
       // 데이터베이스 오류 시 광고 시청 경로로 진행
-      if (kDebugMode) print('[하이브리드 모델] 안전을 위해 광고 경로로 진행');
+      print('[하이브리드 모델] 안전을 위해 광고 경로로 진행');
     }
 
     // Step 4: 6번째 일기부터는 광고 시청 필요 (하루 제한 없음)
-    if (kDebugMode) print('[하이브리드 모델] 6번째 일기 이상 - 광고 시청 필요');
+    print('[하이브리드 모델] 6번째 일기 이상 - 광고 시청 필요');
 
     // Step 5: 광고 안내 다이얼로그 표시
     final shouldShowAd = await _showAdExplanationDialog(
@@ -204,22 +157,22 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     );
 
     if (!shouldShowAd) {
-      if (kDebugMode) print('[하이브리드 모델] 사용자가 광고 시청 취소');
+      print('[하이브리드 모델] 사용자가 광고 시청 취소');
       return;
     }
 
     // Step 6: 보상형 광고 표시
-    if (kDebugMode) print('[하이브리드 모델] 보상형 광고 표시 시작');
+    print('[하이브리드 모델] 보상형 광고 표시 시작');
     final adWatched = await AdService().showRewardedAd();
 
     if (!adWatched) {
-      if (kDebugMode) print('[하이브리드 모델] 광고 로드 실패 또는 시청 중단');
+      print('[하이브리드 모델] 광고 로드 실패 또는 시청 중단');
       _showAdFailedDialog();
       return;
     }
 
     // 광고 시청 성공
-    if (kDebugMode) print('[하이브리드 모델] 광고 시청 완료');
+    print('[하이브리드 모델] 광고 시청 완료');
 
     // 성공 애니메이션 표시
     _showAdCompletionAnimation();
@@ -231,12 +184,12 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
   /// 실제 일기 생성 로직 (프리미엄/무료 모두 사용)
   Future<void> _createDiary() async {
-    if (kDebugMode) print('=== _createDiary 시작 ===');
+    print('=== _createDiary 시작 ===');
     setState(() {
       _isLoading = true;
       _isGeneratingImage = true;
       _progressMessage = _selectedPhotos.isNotEmpty ? '사진 분석 중...' : '감정 분석 중...';
-      if (kDebugMode) print('_isGeneratingImage = true 설정됨');
+      print('_isGeneratingImage = true 설정됨');
     });
 
     try {
@@ -262,7 +215,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
       setState(() => _progressMessage = '이미지 프롬프트 생성 중...');
       await Future.delayed(const Duration(milliseconds: 300));
 
-      setState(() => _progressMessage = 'AI 이미지 생성 중...');
+      setState(() => _progressMessage = 'AI 이미지 생성 중... (최대 30초 소요)');
 
       // AI 서비스를 통한 이미지 생성
       final Map<String, dynamic> result = await AIService.processEntry(
@@ -291,23 +244,23 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
             final file = File(filePath);
             if (await file.exists()) {
               imageData = await file.readAsBytes();
-              if (kDebugMode) print('파일에서 이미지 데이터 로드 성공: ${imageData.length} bytes');
+              print('파일에서 이미지 데이터 로드 성공: ${imageData.length} bytes');
             }
           } else if (imageUrl.startsWith('data:image/')) {
             // base64 데이터에서 디코드
             final base64Data = imageUrl.split(',')[1];
             imageData = base64Decode(base64Data);
-            if (kDebugMode) print('base64에서 이미지 데이터 디코드 성공: ${imageData.length} bytes');
+            print('base64에서 이미지 데이터 디코드 성공: ${imageData.length} bytes');
           } else if (imageUrl.startsWith('/')) {
             // 절대 경로에서 파일 읽기
             final file = File(imageUrl);
             if (await file.exists()) {
               imageData = await file.readAsBytes();
-              if (kDebugMode) print('절대경로 파일에서 이미지 데이터 로드 성공: ${imageData.length} bytes');
+              print('절대경로 파일에서 이미지 데이터 로드 성공: ${imageData.length} bytes');
             }
           }
         } catch (e) {
-          if (kDebugMode) print('이미지 데이터 추출 오류: $e');
+          print('이미지 데이터 추출 오류: $e');
         }
       }
 
@@ -340,17 +293,6 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         diaryId = _existingEntry!.id;
       } else {
         diaryId = await DatabaseService.insertDiary(diary);
-
-        // Firebase Analytics: 일기 생성 이벤트
-        await FirebaseAnalytics.instance.logEvent(
-          name: 'diary_created',
-          parameters: {
-            'has_image': imageUrl != null,
-            'has_user_photo': _userPhotos.isNotEmpty,
-            'emotion': diary.emotion ?? 'unknown',
-            'image_style': diary.imageStyle?.value ?? 'none',
-          },
-        );
       }
 
       // Diary Provider 업데이트
@@ -368,15 +310,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         );
         context.go('/detail/$diaryId');
       }
-    } catch (e, stackTrace) {
-      // Firebase Crashlytics: 오류 로깅
-      await FirebaseCrashlytics.instance.recordError(
-        e,
-        stackTrace,
-        reason: '일기 생성/저장 실패',
-        information: ['화면: DiaryCreateScreen', '작업: 일기 저장'],
-      );
-
+    } catch (e) {
       setState(() {
         _isLoading = false;
         _isGeneratingImage = false;
@@ -444,17 +378,6 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
           userPhotos: _selectedPhotos,
         );
         diaryId = await DatabaseService.insertDiary(diary);
-
-        // Firebase Analytics: 일기 생성 이벤트 (이미지 없음)
-        await FirebaseAnalytics.instance.logEvent(
-          name: 'diary_created',
-          parameters: {
-            'has_image': false,
-            'has_user_photo': _selectedPhotos.isNotEmpty,
-            'emotion': 'none',
-            'image_style': 'none',
-          },
-        );
       }
 
       // Diary Provider 업데이트
@@ -519,7 +442,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
       setState(() => _progressMessage = '이미지 프롬프트 생성 중...');
       await Future.delayed(const Duration(milliseconds: 300));
 
-      setState(() => _progressMessage = 'AI 이미지 생성 중...');
+      setState(() => _progressMessage = 'AI 이미지 생성 중... (최대 30초 소요)');
 
       // AI 서비스를 통한 이미지 재생성
       final Map<String, dynamic> result = await AIService.processEntry(
@@ -548,23 +471,23 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
             final file = File(filePath);
             if (await file.exists()) {
               imageData = await file.readAsBytes();
-              if (kDebugMode) print('파일에서 이미지 데이터 로드 성공: ${imageData.length} bytes');
+              print('파일에서 이미지 데이터 로드 성공: ${imageData.length} bytes');
             }
           } else if (newImageUrl.startsWith('data:image/')) {
             // base64 데이터에서 디코드
             final base64Data = newImageUrl.split(',')[1];
             imageData = base64Decode(base64Data);
-            if (kDebugMode) print('base64에서 이미지 데이터 디코드 성공: ${imageData.length} bytes');
+            print('base64에서 이미지 데이터 디코드 성공: ${imageData.length} bytes');
           } else if (newImageUrl.startsWith('/')) {
             // 절대 경로에서 파일 읽기
             final file = File(newImageUrl);
             if (await file.exists()) {
               imageData = await file.readAsBytes();
-              if (kDebugMode) print('절대경로 파일에서 이미지 데이터 로드 성공: ${imageData.length} bytes');
+              print('절대경로 파일에서 이미지 데이터 로드 성공: ${imageData.length} bytes');
             }
           }
         } catch (e) {
-          if (kDebugMode) print('이미지 데이터 추출 오류: $e');
+          print('이미지 데이터 추출 오류: $e');
         }
       }
 
@@ -613,7 +536,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         }
       }
     } catch (e) {
-      if (kDebugMode) print('이미지 재생성 오류: $e');
+      print('이미지 재생성 오류: $e');
       setState(() {
         _isLoading = false;
         _isGeneratingImage = false;
@@ -680,12 +603,12 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
           file,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
-            if (kDebugMode) print('로컬 이미지 로드 오류: $error');
+            print('로컬 이미지 로드 오류: $error');
             return _buildImagePlaceholder();
           },
         );
       } else {
-        if (kDebugMode) print('로컬 이미지 파일이 존재하지 않음: $filePath');
+        print('로컬 이미지 파일이 존재하지 않음: $filePath');
         return _buildImagePlaceholder();
       }
     }
@@ -699,12 +622,12 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
           file,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
-            if (kDebugMode) print('로컬 이미지 로드 오류: $error');
+            print('로컬 이미지 로드 오류: $error');
             return _buildImagePlaceholder();
           },
         );
       } else {
-        if (kDebugMode) print('로컬 이미지 파일이 존재하지 않음: $imageUrl');
+        print('로컬 이미지 파일이 존재하지 않음: $imageUrl');
         return _buildImagePlaceholder();
       }
     }
@@ -717,12 +640,12 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
           bytes,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
-            if (kDebugMode) print('base64 이미지 로드 오류: $error');
+            print('base64 이미지 로드 오류: $error');
             return _buildImagePlaceholder();
           },
         );
       } catch (e) {
-        if (kDebugMode) print('base64 디코딩 오류: $e');
+        print('base64 디코딩 오류: $e');
         return _buildImagePlaceholder();
       }
     }
@@ -737,14 +660,14 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
           child: const Center(child: CircularProgressIndicator()),
         ),
         errorWidget: (context, url, error) {
-          if (kDebugMode) print('네트워크 이미지 로드 오류: $error');
+          print('네트워크 이미지 로드 오류: $error');
           return _buildImagePlaceholder();
         },
       );
     }
     // 알 수 없는 형식
     else {
-      if (kDebugMode) print('알 수 없는 이미지 URL 형식: $imageUrl');
+      print('알 수 없는 이미지 URL 형식: $imageUrl');
       return _buildImagePlaceholder();
     }
 
@@ -785,23 +708,8 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     final subscription = ref.watch(subscriptionProvider);
     final selectedFont = ref.watch(fontProvider);
 
-    return PopScope(
-      canPop: !_hasUnsavedChanges, // 변경사항 없으면 바로 나가기
-      onPopInvokedWithResult: (bool didPop, dynamic result) async {
-        if (didPop) return; // 이미 pop된 경우 (변경사항 없음)
-
-        // 변경사항 있으면 경고 다이얼로그 표시
-        final shouldPop = await _showExitConfirmDialog();
-        if (shouldPop && context.mounted) {
-          if (_isEditMode) {
-            context.go('/detail/${_existingEntry!.id}');
-          } else {
-            context.go('/list');
-          }
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
+    return Scaffold(
+      appBar: AppBar(
         title: Text(
           _isEditMode ? '일기 수정' : '새 일기 작성',
           style: const TextStyle(
@@ -821,14 +729,11 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
             color: Color(0xFF4A5568),
             size: 20,
           ),
-          onPressed: () async {
-            final shouldPop = await _showExitConfirmDialog();
-            if (shouldPop && context.mounted) {
-              if (_isEditMode) {
-                context.go('/detail/${_existingEntry!.id}');
-              } else {
-                context.go('/list');
-              }
+          onPressed: () {
+            if (_isEditMode) {
+              context.go('/detail/${_existingEntry!.id}');
+            } else {
+              context.go('/list');
             }
           },
         ),
@@ -945,24 +850,6 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                               }
                               return null;
                             },
-                          ),
-
-                          // 글자수 카운터
-                          const SizedBox(height: 8),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: ValueListenableBuilder<TextEditingValue>(
-                              valueListenable: _contentController,
-                              builder: (context, value, child) {
-                                return Text(
-                                  '${value.text.length} / 1000자',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey.shade600,
-                                  ),
-                                );
-                              },
-                            ),
                           ),
 
                           // 생성된 이미지와 사용자 사진 갤러리 표시
@@ -1160,8 +1047,8 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                                               height: 120,
                                               fit: BoxFit.cover,
                                               errorBuilder: (context, error, stackTrace) {
-                                                if (kDebugMode) print('사진 미리보기 로드 오류: $error');
-                                                if (kDebugMode) print('사진 경로: ${_selectedPhotos[index]}');
+                                                print('사진 미리보기 로드 오류: $error');
+                                                print('사진 경로: ${_selectedPhotos[index]}');
                                                 return Container(
                                                   width: 120,
                                                   height: 120,
@@ -1491,8 +1378,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
               ),
             ],
           ),
-      ), // Scaffold 끝
-    ); // PopScope 끝
+    );
   }
 
   // 고급옵션 자동설정 적용 (조명, 분위기, 색상, 구도만)
@@ -2185,9 +2071,9 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
             await sourceFile.copy(permanentPath);
 
             permanentPaths.add(permanentPath);
-            if (kDebugMode) print('사용자 사진 영구 저장: $permanentPath');
+            print('사용자 사진 영구 저장: $permanentPath');
           } catch (e) {
-            if (kDebugMode) print('사진 저장 오류: $e');
+            print('사진 저장 오류: $e');
           }
         }
 
@@ -2200,7 +2086,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         });
       }
     } catch (e) {
-      if (kDebugMode) print('사진 선택 오류: $e');
+      print('사진 선택 오류: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('사진 선택 실패: $e')),

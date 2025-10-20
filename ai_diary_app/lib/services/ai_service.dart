@@ -203,6 +203,7 @@ ${photoSuffix.isNotEmpty ? '업로드된 사진의 스타일과 분위기를 최
   }
 
   static Future<String?> generateImage(String prompt, [ImageTime? imageTime, ImageWeather? imageWeather]) async {
+    final startTime = DateTime.now(); // 시간 측정 시작
     try {
       if (kDebugMode) print('=== Gemini Imagen API를 통한 이미지 생성 시작 ===');
       if (kDebugMode) print('프롬프트: $prompt');
@@ -263,7 +264,9 @@ ${photoSuffix.isNotEmpty ? '업로드된 사진의 스타일과 분위기를 최
             if (candidate['content'] != null && candidate['content']['parts'] != null) {
               for (final part in candidate['content']['parts']) {
                 if (part['inlineData'] != null) {
-                  print('*** Gemini 2.5 Flash Image API 이미지 생성 성공! ***');
+                  final endTime = DateTime.now();
+                  final duration = endTime.difference(startTime).inSeconds;
+                  print('*** Gemini 2.5 Flash Image API 이미지 생성 성공! (소요 시간: ${duration}초) ***');
                   final imageData = part['inlineData']['data'];
                   final mimeType = part['inlineData']['mimeType'] ?? 'image/png';
                   if (kDebugMode) print('이미지 데이터 크기: ${imageData.length} characters');
