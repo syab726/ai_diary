@@ -6,28 +6,17 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:image/image.dart' as img;
 import '../models/image_options.dart';
 import '../models/perspective_options.dart';
 import '../models/image_time.dart';
 import '../models/image_weather.dart';
 import '../models/image_season.dart';
 import 'package:flutter/foundation.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 class AIService {
-  // .env 파일에서 API 키 로드
-  static String get _geminiApiKey {
-    final key = dotenv.env['GEMINI_API_KEY'] ?? '';
-    if (key.isEmpty) {
-      throw Exception('GEMINI_API_KEY가 .env 파일에 설정되지 않았습니다.');
-    }
-    return key;
-  }
+  static const String _geminiApiKey = 'AIzaSyB4sTKHWNsKq_k-X-jlm5l_9BCQC4eq-hc';
 
-  // 이미지를 파일로 저장하고 파일 경로 반환 (최적화 포함)
+  // 이미지를 파일로 저장하고 파일 경로 반환
   static Future<String> _saveImageToFile(String base64Data, String mimeType) async {
     try {
       final directory = await getApplicationDocumentsDirectory();
@@ -38,130 +27,29 @@ class AIService {
         await imagesDir.create(recursive: true);
       }
 
-      // base64 디코딩
-      final imageBytes = base64Decode(base64Data);
-
-      // 이미지 최적화
-      final optimizedBytes = await _optimizeImage(imageBytes);
-
       // 파일명 생성 (타임스탬프 기반)
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final fileName = 'diary_image_$timestamp.jpg'; // 항상 JPEG로 저장 (최적화)
+      final extension = mimeType.split('/').last;
+      final fileName = 'diary_image_$timestamp.$extension';
       final filePath = path.join(imagesDir.path, fileName);
 
-      // 최적화된 이미지 저장
+      // base64 디코딩 후 파일 저장
+      final imageBytes = base64Decode(base64Data);
       final file = File(filePath);
-      await file.writeAsBytes(optimizedBytes);
+      await file.writeAsBytes(imageBytes);
 
-      final originalSize = imageBytes.length / 1024; // KB
-      final optimizedSize = optimizedBytes.length / 1024; // KB
-      final compressionRatio = ((originalSize - optimizedSize) / originalSize * 100).toStringAsFixed(1);
-
-      if (kDebugMode) {
-        print('이미지 최적화 완료:');
-        print('  원본 크기: ${originalSize.toStringAsFixed(1)} KB');
-        print('  최적화 크기: ${optimizedSize.toStringAsFixed(1)} KB');
-        print('  압축률: $compressionRatio%');
-        print('  저장 경로: $filePath');
-      }
-
+      if (kDebugMode) print('이미지 파일 저장 완료: $filePath');
       return filePath;
     } catch (e) {
       if (kDebugMode) print('이미지 파일 저장 오류: $e');
       return '';
     }
   }
-
-  // 이미지 최적화 (리사이징 및 압축)
-  static Future<Uint8List> _optimizeImage(Uint8List imageBytes) async {
-    try {
-      // 이미지 디코딩
-      final image = img.decodeImage(imageBytes);
-      if (image == null) {
-        if (kDebugMode) print('이미지 디코딩 실패, 원본 반환');
-        return imageBytes;
-      }
-
-      // 최대 크기 설정 (2048px)
-      const maxDimension = 2048;
-      img.Image resizedImage = image;
-
-      if (image.width > maxDimension || image.height > maxDimension) {
-        if (image.width > image.height) {
-          resizedImage = img.copyResize(image, width: maxDimension);
-        } else {
-          resizedImage = img.copyResize(image, height: maxDimension);
-        }
-        if (kDebugMode) {
-          print('이미지 리사이징: ${image.width}x${image.height} → ${resizedImage.width}x${resizedImage.height}');
-        }
-      }
-
-      // JPEG 압축 (품질 85%)
-      final compressedBytes = img.encodeJpg(resizedImage, quality: 85);
-      return Uint8List.fromList(compressedBytes);
-    } catch (e) {
-      if (kDebugMode) print('이미지 최적화 오류: $e, 원본 반환');
-      return imageBytes; // 오류 시 원본 반환
-    }
-  }
-  // .env 파일에서 선택적 API 키 로드
-  static String get _openaiApiKey => dotenv.env['OPENAI_API_KEY'] ?? '';
-  static String get _huggingFaceApiKey => dotenv.env['HUGGINGFACE_API_KEY'] ?? '';
+  static const String _openaiApiKey = 'sk-proj-YOUR_OPENAI_API_KEY'; // OpenAI API 키를 여기에 입력하세요
+  static const String _huggingFaceApiKey = 'hf_YOUR_API_KEY'; // Hugging Face API 키 (무료 가입 후 발급)
   static late GenerativeModel _textModel;
   static late GenerativeModel _imageModel;
-
-  // HTTP 요청 재시도 설정
-  static const int _maxRetries = 3;
-  static const Duration _requestTimeout = Duration(seconds: 30);
-
-  // 재시도 로직이 포함된 HTTP POST 헬퍼 메서드
-  static Future<http.Response> _retryablePost({
-    required Uri url,
-    required Map<String, String> headers,
-    required String body,
-  }) async {
-    int retryCount = 0;
-
-    while (retryCount < _maxRetries) {
-      try {
-        if (kDebugMode && retryCount > 0) {
-          print('재시도 ${retryCount + 1}/$_maxRetries...');
-        }
-
-        final response = await http.post(
-          url,
-          headers: headers,
-          body: body,
-        ).timeout(_requestTimeout);
-
-        // 성공 또는 클라이언트 오류(4xx)면 재시도하지 않음
-        if (response.statusCode < 500) {
-          return response;
-        }
-
-        // 서버 오류(5xx)면 재시도
-        if (kDebugMode) {
-          print('서버 오류 (${response.statusCode}), 재시도 대기 중...');
-        }
-      } catch (e) {
-        if (retryCount == _maxRetries - 1) {
-          // 마지막 시도에서 실패하면 예외 발생
-          rethrow;
-        }
-        if (kDebugMode) {
-          print('HTTP 요청 오류: $e, 재시도 대기 중...');
-        }
-      }
-
-      // Exponential backoff: 1초, 2초, 4초
-      await Future.delayed(Duration(seconds: 1 << retryCount));
-      retryCount++;
-    }
-
-    throw Exception('최대 재시도 횟수($_maxRetries)를 초과했습니다.');
-  }
-
+  
   static void initialize() {
     if (kDebugMode) print('=== AI Service 초기화 ===');
     if (kDebugMode) print('텍스트 모델명: gemini-2.0-flash-lite');
@@ -339,8 +227,8 @@ ${photoSuffix.isNotEmpty ? '업로드된 사진의 스타일과 분위기를 최
 
         if (kDebugMode) print('최종 강화된 프롬프트: $enhancedPrompt');
 
-        final response = await _retryablePost(
-          url: Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=$_geminiApiKey'),
+        final response = await http.post(
+          Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=$_geminiApiKey'),
           headers: {
             'Content-Type': 'application/json',
           },
@@ -402,12 +290,9 @@ ${photoSuffix.isNotEmpty ? '업로드된 사진의 스타일과 분위기를 최
         if (kDebugMode) print('Gemini Imagen API 호출 오류: $e');
       }
 
-      // Gemini API 실패시 폴백으로 Unsplash/Picsum 사용
-      if (kDebugMode) print('폴백: Unsplash/Picsum 이미지 사용');
-      final smartKeywords = _generateSmartImageKeywords(prompt);
-      final fallbackImageUrl = _selectBestImageUrl(smartKeywords, prompt);
-      if (kDebugMode) print('폴백 이미지 URL: $fallbackImageUrl');
-      return fallbackImageUrl;
+      // AI 이미지 생성 실패 시 null 반환 (외부 서비스 의존성 제거)
+      if (kDebugMode) print('AI 이미지 생성 실패');
+      return null;
 
     } catch (e) {
       if (kDebugMode) print('*** 이미지 생성 실패 ***');
@@ -416,91 +301,6 @@ ${photoSuffix.isNotEmpty ? '업로드된 사진의 스타일과 분위기를 최
     }
   }
   
-  static List<String> _generateSmartImageKeywords(String prompt) {
-    final keywords = <String>[];
-    final lowercasePrompt = prompt.toLowerCase();
-    
-    // 감정 기반 키워드
-    if (lowercasePrompt.contains('peaceful') || lowercasePrompt.contains('calm') || lowercasePrompt.contains('tranquil')) {
-      keywords.addAll(['peaceful', 'serene', 'calm']);
-    }
-    if (lowercasePrompt.contains('rain') || lowercasePrompt.contains('shower') || lowercasePrompt.contains('wet')) {
-      keywords.addAll(['rain', 'rainfall', 'water']);
-    }
-    if (lowercasePrompt.contains('rainbow') || lowercasePrompt.contains('colorful')) {
-      keywords.addAll(['rainbow', 'colors', 'sky']);
-    }
-    if (lowercasePrompt.contains('late afternoon') || lowercasePrompt.contains('sunset')) {
-      keywords.addAll(['sunset', 'golden hour', 'afternoon']);
-    }
-    if (lowercasePrompt.contains('window') || lowercasePrompt.contains('indoor')) {
-      keywords.addAll(['window', 'indoor', 'cozy']);
-    }
-    if (lowercasePrompt.contains('realistic') || lowercasePrompt.contains('photorealistic')) {
-      keywords.addAll(['photography', 'realistic', 'natural']);
-    }
-    
-    // 일반적인 장면 키워드
-    if (lowercasePrompt.contains('home') || lowercasePrompt.contains('room')) {
-      keywords.addAll(['home', 'interior', 'cozy']);
-    }
-    if (lowercasePrompt.contains('nature') || lowercasePrompt.contains('outdoor')) {
-      keywords.addAll(['nature', 'landscape', 'outdoor']);
-    }
-    
-    // 기본값이 없다면 평화로운 이미지
-    if (keywords.isEmpty) {
-      keywords.addAll(['peaceful', 'nature', 'beautiful']);
-    }
-    
-    return keywords.take(4).toList();
-  }
-  
-  static String _selectBestImageUrl(List<String> keywords, String prompt) {
-    final searchTerm = keywords.join(',');
-
-    // 기본 이미지 크기
-    String dimensions = '800x800';
-
-    if (kDebugMode) print('선택된 이미지 크기: $dimensions');
-
-    // 다양한 이미지 소스 중에서 선택
-    final sources = [
-      'https://source.unsplash.com/$dimensions/?$searchTerm',
-      'https://picsum.photos/${dimensions.split('x')[0]}/${dimensions.split('x')[1]}?random=${DateTime.now().millisecondsSinceEpoch}',
-    ];
-
-    // 프롬프트에 따라 더 적합한 소스 선택
-    if (prompt.toLowerCase().contains('realistic') || prompt.toLowerCase().contains('photo')) {
-      return sources[0]; // Unsplash (실제 사진)
-    } else {
-      return sources[0]; // 기본적으로 Unsplash 사용
-    }
-  }
-  
-  static List<String> _extractKeywordsFromPrompt(String prompt) {
-    final keywords = <String>[];
-    final lowercasePrompt = prompt.toLowerCase();
-    
-    // 감정 키워드
-    if (lowercasePrompt.contains('peaceful') || lowercasePrompt.contains('calm')) keywords.add('peaceful');
-    if (lowercasePrompt.contains('happy') || lowercasePrompt.contains('joy')) keywords.add('happy');
-    if (lowercasePrompt.contains('sad') || lowercasePrompt.contains('melancholy')) keywords.add('sad');
-    if (lowercasePrompt.contains('romantic') || lowercasePrompt.contains('love')) keywords.add('romantic');
-    
-    // 자연 키워드
-    if (lowercasePrompt.contains('nature') || lowercasePrompt.contains('outdoor')) keywords.add('nature');
-    if (lowercasePrompt.contains('rain') || lowercasePrompt.contains('rainbow')) keywords.add('rain');
-    if (lowercasePrompt.contains('sunset') || lowercasePrompt.contains('sunrise')) keywords.add('sunset');
-    if (lowercasePrompt.contains('garden') || lowercasePrompt.contains('flower')) keywords.add('garden');
-    
-    // 일상 키워드  
-    if (lowercasePrompt.contains('daily') || lowercasePrompt.contains('life')) keywords.add('lifestyle');
-    if (lowercasePrompt.contains('home') || lowercasePrompt.contains('cozy')) keywords.add('cozy');
-    if (lowercasePrompt.contains('illustration') || lowercasePrompt.contains('art')) keywords.add('illustration');
-    
-    return keywords.isEmpty ? ['nature', 'peaceful'] : keywords.take(3).toList();
-  }
 
   static Future<Map<String, dynamic>> autoConfigureOptions(String diaryContent) async {
     try {
@@ -637,46 +437,10 @@ JSON 형태로 답변해주세요:
       if (kDebugMode) print('=== AI 처리 완료 ===');
       if (kDebugMode) print('최종 결과: $result');
 
-      // Analytics: AI 이미지 생성 성공 이벤트
-      await FirebaseAnalytics.instance.logEvent(
-        name: 'ai_image_generated',
-        parameters: {
-          'success': true,
-          'style': style,
-          'emotion': emotion,
-          'has_user_photo': userPhotos != null && userPhotos.isNotEmpty,
-          'has_advanced_options': advancedOptions != null,
-          'has_perspective': perspectiveOptions != null,
-        },
-      );
-
       return result;
     } catch (e, stackTrace) {
       if (kDebugMode) print('AI 처리 오류: $e');
       if (kDebugMode) print('스택 트레이스: $stackTrace');
-
-      // Crashlytics: 에러 기록
-      await FirebaseCrashlytics.instance.recordError(
-        e,
-        stackTrace,
-        reason: 'AI 이미지 생성 실패',
-        information: [
-          '서비스: AIService',
-          '함수: processEntry',
-          '스타일: $style',
-        ],
-      );
-
-      // Analytics: AI 이미지 생성 실패 이벤트
-      await FirebaseAnalytics.instance.logEvent(
-        name: 'ai_image_generated',
-        parameters: {
-          'success': false,
-          'style': style,
-          'error': e.toString(),
-        },
-      );
-
       // 기본 폴백 이미지 크기 설정
       String fallbackDimensions = '400/400';
 
