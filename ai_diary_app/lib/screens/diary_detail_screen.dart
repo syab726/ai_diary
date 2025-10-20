@@ -309,6 +309,12 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
   }
 
   Widget _buildImageWidget(String imageUrl) {
+    // 레거시 외부 이미지 URL (Unsplash, Picsum) 무시 (외부 서비스 의존성 제거)
+    if (imageUrl.contains('unsplash.com') || imageUrl.contains('picsum.photos')) {
+      if (kDebugMode) print('레거시 외부 이미지 URL 무시: $imageUrl');
+      return const SizedBox.shrink(); // 이미지 영역을 표시하지 않음
+    }
+
     Widget imageWidget;
 
     // file:// 경로인 경우 로컬 파일로 처리
