@@ -3,69 +3,42 @@
 **최종 업데이트:** 2025-10-21
 **현재 완성도:** 85%
 
+**개발 전략:**
+1. **Phase 1**: iOS/Android 공통 작업 (스토어 등록 불필요)
+2. **Phase 2**: Android 결제 시스템 (Google Play 등록 $25)
+3. **Phase 3**: iOS 결제 시스템 (App Store 등록 $99)
+4. **Phase 4**: 대규모 사용자 증가 후 큐 시스템
+
 ---
 
-## 배포 전 필수 작업 (3주 예상)
+## Phase 1: iOS/Android 공통 작업 (1주, 스토어 등록 불필요)
 
 ### 1. API 키 보안 처리 ⚠️ CRITICAL
 **예상 시간:** 0.5일
 **난이도:** 쉬움
 **현재 문제:**
-- Gemini API 키가 `lib/services/ai_service.dart` 15번째 줄에 하드코딩
-- 앱 디컴파일 시 API 키 노출 위험
+- Gemini API 키가 `lib/services/ai_service.dart` 17번째 줄에 하드코딩
+- .env 파일은 있지만 실제로 사용되지 않음
 
 **해결 방법:**
-```
-1. .env 파일 생성
-2. .gitignore에 .env 추가
-3. flutter_dotenv 패키지로 API 키 로드
-4. ai_service.dart 수정
+```dart
+// ai_service.dart 수정
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+class AIService {
+  static final String _geminiApiKey = dotenv.env['GEMINI_API_KEY']!;
+  // ...
+}
 ```
 
 **체크리스트:**
-- [ ] `.env` 파일 생성 및 API 키 이동
-- [ ] `.gitignore`에 `.env` 추가
-- [ ] `ai_service.dart` 수정 (dotenv 사용)
+- [ ] `ai_service.dart`에서 dotenv 사용하도록 수정
+- [ ] `.env` 파일이 `.gitignore`에 있는지 확인
 - [ ] 테스트 (앱 실행 확인)
 
 ---
 
-### 2. 실제 결제 시스템 연동 ⚠️ CRITICAL
-**예상 시간:** 5-7일
-**난이도:** 어려움
-**현재 상태:**
-- in_app_purchase 패키지만 설치됨
-- 프리미엄 UI는 있지만 실제 결제 불가
-
-**필요 작업:**
-
-#### 2-1. Google Play Billing (Android)
-- [ ] Google Play Console에서 앱 등록
-- [ ] 인앱 상품 생성 (월간 구독, 연간 구독)
-- [ ] 결제 코드 작성
-- [ ] 샌드박스 테스트
-
-#### 2-2. App Store IAP (iOS)
-- [ ] App Store Connect에서 앱 등록
-- [ ] 구독 상품 생성
-- [ ] 결제 코드 작성
-- [ ] 샌드박스 테스트
-
-#### 2-3. 공통 작업
-- [ ] PurchaseService 완성
-- [ ] 구독 상태 확인 로직
-- [ ] 구독 복원 기능
-- [ ] 무료 평가판 (7일) 구현
-- [ ] 영수증 검증
-
-**참고:**
-- 패키지: `in_app_purchase`, `in_app_purchase_android`, `in_app_purchase_storekit`
-- Google Play 수수료: 15% (첫 $1M까지)
-- App Store 수수료: 15% (첫 $1M까지)
-
----
-
-### 3. 성능 최적화
+### 2. 성능 최적화
 **예상 시간:** 2-3일
 **난이도:** 중간
 **현재 문제:**
@@ -74,20 +47,19 @@
 
 **해결 방법:**
 
-#### 4-1. 이미지 로딩 최적화
+#### 2-1. 이미지 로딩 최적화
 - [ ] 썸네일 생성 (256x256)
 - [ ] 이미지 압축 (flutter_image_compress)
 - [ ] 리스트뷰에 cacheExtent 설정
 - [ ] 이미지 lazy loading
 
-#### 4-2. 데이터베이스 최적화
+#### 2-2. 데이터베이스 최적화
 - [ ] 인덱스 추가 (createdAt, emotion)
 - [ ] 페이지네이션 구현 (한 번에 20개씩)
 - [ ] 쿼리 최적화
 
-#### 4-3. AI 처리 백그라운드화
+#### 2-3. AI 처리 백그라운드화
 - [ ] Isolate 사용 고려
-- [ ] 이미지 생성 비동기 처리 (위 3번과 연계)
 
 **체크리스트:**
 - [ ] 썸네일 생성 함수 작성
@@ -98,7 +70,7 @@
 
 ---
 
-### 4. 오류 처리 개선
+### 3. 오류 처리 개선
 **예상 시간:** 1-2일
 **난이도:** 쉬움-중간
 **현재 문제:**
@@ -108,7 +80,7 @@
 
 **해결 방법:**
 
-#### 5-1. 네트워크 오류 처리
+#### 3-1. 네트워크 오류 처리
 ```dart
 Future<T> retryOnNetworkError<T>(Future<T> Function() fn) async {
   for (int i = 0; i < 3; i++) {
@@ -123,12 +95,12 @@ Future<T> retryOnNetworkError<T>(Future<T> Function() fn) async {
 }
 ```
 
-#### 5-2. 사용자 친화적 에러 메시지
+#### 3-2. 사용자 친화적 에러 메시지
 - [ ] 네트워크 오류: "인터넷 연결을 확인해주세요"
 - [ ] AI 생성 실패: "이미지 생성에 실패했습니다. 다시 시도해주세요"
 - [ ] 저장 실패: "일기 저장에 실패했습니다"
 
-#### 5-3. 오프라인 감지
+#### 3-3. 오프라인 감지
 - [ ] connectivity_plus 패키지 사용
 - [ ] 오프라인 시 안내 배너 표시
 
@@ -142,9 +114,7 @@ Future<T> retryOnNetworkError<T>(Future<T> Function() fn) async {
 
 ---
 
-## 배포 전 권장 작업 (1주 예상)
-
-### 5. 디버그 로그 정리
+### 4. 디버그 로그 정리
 **예상 시간:** 0.5일
 **난이도:** 쉬움
 **대상 파일:**
@@ -168,7 +138,7 @@ if (kDebugMode) print('AI 이미지 생성 시작');
 
 ---
 
-### 6. 이미지 최적화
+### 5. 이미지 최적화
 **예상 시간:** 1일
 **난이도:** 중간
 **현재 문제:**
@@ -184,7 +154,7 @@ if (kDebugMode) print('AI 이미지 생성 시작');
 
 ---
 
-### 7. 개인정보처리방침 + 이용약관
+### 6. 개인정보처리방침 + 이용약관
 **예상 시간:** 1-2일
 **난이도:** 쉬움-중간
 **필요성:** 앱스토어 심사 필수
@@ -201,65 +171,184 @@ if (kDebugMode) print('AI 이미지 생성 시작');
 
 ---
 
-## 선택 작업 (배포 후)
+## Phase 2: Android 결제 시스템 (1주, Google Play 등록 필요)
 
-### 8. Firebase 인증 완성 (선택)
-**예상 시간:** 3-4일
-**난이도:** 어려움
-**필요성:** 낮음 (현재 로컬 저장만으로 충분)
+**비용:** $25 (일회성)
+**준비 사항:**
+- Google 계정
+- 신용카드
+- 개발자 정보
+
+### 7. Google Play Console 등록
+**예상 시간:** 0.5일
+
+**절차:**
+1. [ ] Google Play Console 접속 (https://play.google.com/console)
+2. [ ] 개발자 등록 ($25 결제)
+3. [ ] 앱 생성
+4. [ ] 앱 정보 입력 (이름, 설명, 카테고리)
+
+---
+
+### 8. Android 인앱 구독 설정
+**예상 시간:** 1일
 
 **작업:**
-- [ ] Firebase Console 수동 설정
-- [ ] AuthService 재작성 (700+ 줄)
-- [ ] LoginScreen UI 재작성
-- [ ] Firestore/Storage 연동
-
-**판단 기준:**
-- 다중 기기 동기화 필요하면 → 구현
-- 로컬 저장만으로 충분하면 → 보류
+- [ ] Google Play Console에서 인앱 상품 생성
+  - 월간 구독: `premium_monthly`
+  - 연간 구독: `premium_yearly`
+- [ ] 가격 설정 (예: 월 2,900원, 연 29,000원)
+- [ ] 무료 평가판 설정 (7일)
 
 ---
 
-### 9. 앱 온보딩
-**예상 시간:** 1-2일
-**난이도:** 쉬움-중간
-**구현:**
-- [ ] 첫 실행 시 튜토리얼
-- [ ] 주요 기능 설명
-- [ ] Skip 버튼
+### 9. Android 결제 코드 구현
+**예상 시간:** 3-4일
+**난이도:** 어려움
+
+**작업:**
+```dart
+// lib/services/purchase_service.dart 완성
+
+class PurchaseService {
+  // 구독 상품 확인
+  Future<void> initializePurchases() async {
+    final available = await InAppPurchase.instance.isAvailable();
+    if (!available) return;
+
+    // 구독 상품 로드
+    const Set<String> _kIds = {
+      'premium_monthly',
+      'premium_yearly',
+    };
+    final response = await InAppPurchase.instance.queryProductDetails(_kIds);
+    // ...
+  }
+
+  // 구매 시작
+  Future<void> buySubscription(String productId) async {
+    // ...
+  }
+
+  // 구독 복원
+  Future<void> restorePurchases() async {
+    // ...
+  }
+}
+```
+
+**체크리스트:**
+- [ ] PurchaseService 완성
+- [ ] 구독 상태 확인 로직
+- [ ] 구독 복원 기능
+- [ ] 영수증 검증
 
 ---
 
-## 대규모 사용자 증가 후 작업
+### 10. Android 샌드박스 테스트
+**예상 시간:** 1일
 
-### 10. AI 이미지 생성 큐 시스템
+**테스트 항목:**
+- [ ] 월간 구독 구매
+- [ ] 연간 구독 구매
+- [ ] 무료 평가판 확인
+- [ ] 구독 취소
+- [ ] 구독 복원
+- [ ] 앱 재설치 후 구독 확인
+
+---
+
+## Phase 3: iOS 결제 시스템 (1주, App Store 등록 필요)
+
+**비용:** $99/년
+**준비 사항:**
+- Apple ID
+- 신용카드
+- 개발자 정보
+
+### 11. App Store Connect 등록
+**예상 시간:** 0.5일
+
+**절차:**
+1. [ ] Apple Developer Program 가입 ($99/년)
+2. [ ] App Store Connect 접속
+3. [ ] 앱 생성
+4. [ ] Bundle ID 설정: `com.aidiary.app.aiDiaryApp`
+5. [ ] 앱 정보 입력
+
+---
+
+### 12. iOS 인앱 구독 설정
+**예상 시간:** 1일
+
+**작업:**
+- [ ] App Store Connect에서 구독 그룹 생성
+- [ ] 구독 상품 생성
+  - 월간 구독: `premium_monthly`
+  - 연간 구독: `premium_yearly`
+- [ ] 가격 설정 (예: 월 $2.99, 연 $29.99)
+- [ ] 무료 평가판 설정 (7일)
+
+---
+
+### 13. iOS 결제 코드 구현
+**예상 시간:** 2-3일
+**난이도:** 중간 (Android 코드 재사용)
+
+**작업:**
+- [ ] iOS 전용 코드 추가 (StoreKit 관련)
+- [ ] 영수증 검증 로직 (iOS용)
+- [ ] 프로바이더 연동
+
+**참고:**
+- Android 결제 로직 대부분 재사용 가능
+- iOS 특화 부분만 추가 작업
+
+---
+
+### 14. iOS 샌드박스 테스트
+**예상 시간:** 1일
+**필요:** 실제 iOS 기기 (시뮬레이터 불가)
+
+**테스트 항목:**
+- [ ] 월간 구독 구매
+- [ ] 연간 구독 구매
+- [ ] 무료 평가판 확인
+- [ ] 구독 취소
+- [ ] 구독 복원
+- [ ] 앱 재설치 후 구독 확인
+
+---
+
+## Phase 4: 대규모 사용자 증가 후 작업
+
+### 15. AI 이미지 생성 큐 시스템
 **예상 시간:** 2-3주
 **난이도:** 매우 어려움
-**필요 조건:** DAU 1000명+ 또는 API 한도 초과 발생 시
+**필요 조건:** DAU 5,000-10,000명 초과 또는 API 한도 초과 발생 시
 
 **현재 상황:**
 - 동기적 처리 방식 (즉시 생성)
 - Gemini API IPM 한도: 15 IPM
 - 초기 사용자 수: 예상 10-100명/일
-- **현재 방식으로 충분함**
+- **현재 방식으로 DAU 5,000-10,000명까지 충분함**
 
 **큐 시스템이 필요한 시점:**
-1. DAU 1000명 이상
+1. DAU 5,000-10,000명 초과
 2. API 한도 초과 오류 빈발
-3. 사용자 불만 접수 (생성 실패)
+3. 사용자 불만 접수 (생성 실패, 긴 대기 시간)
 
 **구현 방안:**
 - Firebase Cloud Functions 백엔드
 - Firebase Pub/Sub 메시지 큐
 - Firestore 상태 추적
 - FCM 푸시 알림
-- 로컬 SQLite → Firestore 마이그레이션
+- 로컬 SQLite는 그대로 유지 (사용자 데이터는 로컬에 저장)
 
 **문제점:**
 - 개발 시간: 2-3주
-- 추가 비용: Firebase Functions, Pub/Sub
+- 추가 비용: Firebase Functions, Pub/Sub (개발자 부담)
 - 유지보수 복잡도 증가
-- 데이터 마이그레이션 필요
 
 **현실적 판단:**
 - 초기에는 현재 방식 유지
@@ -274,45 +363,32 @@ if (kDebugMode) print('AI 이미지 생성 시작');
 
 ---
 
-## 작업 우선순위 요약
-
-### 🔥 최우선 (배포 불가능)
-1. API 키 보안 처리 (0.5일)
-2. 실제 결제 시스템 (5-7일)
-
-### ⚠️ 높음 (배포 가능하지만 문제 발생 가능)
-3. 성능 최적화 (2-3일)
-4. 오류 처리 개선 (1-2일)
-
-### 📋 중간 (배포 전 권장)
-5. 디버그 로그 정리 (0.5일)
-6. 이미지 최적화 (1일)
-7. 개인정보처리방침 + 이용약관 (1-2일)
-
-### 💡 낮음 (배포 후)
-8. Firebase 인증 (선택)
-9. 앱 온보딩
-
-### 🚀 대규모 사용자 증가 후
-10. AI 큐 시스템 (DAU 1000명+ 또는 API 한도 초과 발생 시)
-
----
-
 ## 예상 일정
 
-### 최소 배포 버전 (MVP)
-**총 소요 시간:** 약 2주
-- Week 1: API 키 보안 (0.5일) + 결제 시스템 시작 (3-4일) + 성능 최적화 시작 (1-2일)
-- Week 2: 결제 시스템 완성 + 오류 처리 개선 + 테스트
+### Phase 1: 공통 작업 (1주)
+**총 소요 시간:** 약 7일
+- Day 1: API 키 보안
+- Day 2-4: 성능 최적화
+- Day 5-6: 오류 처리 + 디버그 로그
+- Day 7: 이미지 최적화 + 개인정보처리방침
 
-### 안정적 배포 버전
-**총 소요 시간:** 약 3주
-- Week 1-2: 위와 동일
-- Week 3: 디버그 로그 + 이미지 최적화 + 캐시 삭제 + 개인정보처리방침 + 최종 테스트
+### Phase 2: Android (1주)
+**총 소요 시간:** 약 7일
+- Day 1: Google Play 등록 + 인앱 상품 설정
+- Day 2-5: Android 결제 코드 구현
+- Day 6-7: 샌드박스 테스트 + 버그 수정
+
+### Phase 3: iOS (1주)
+**총 소요 시간:** 약 7일
+- Day 1: App Store 등록 + 인앱 상품 설정
+- Day 2-4: iOS 결제 코드 구현
+- Day 5-7: 샌드박스 테스트 + 버그 수정
+
+**전체 예상 기간: 3주**
 
 ---
 
-## 체크리스트 (배포 전 최종 점검)
+## 배포 전 최종 체크리스트
 
 ### 보안
 - [ ] API 키 환경변수 처리
@@ -320,7 +396,8 @@ if (kDebugMode) print('AI 이미지 생성 시작');
 - [ ] Release 빌드 테스트
 
 ### 기능
-- [ ] 결제 시스템 작동 확인 (샌드박스)
+- [ ] Android 결제 시스템 작동 확인 (샌드박스)
+- [ ] iOS 결제 시스템 작동 확인 (샌드박스)
 - [ ] 모든 핵심 기능 테스트
 
 ### 성능
@@ -338,10 +415,31 @@ if (kDebugMode) print('AI 이미지 생성 시작');
 - [ ] 스플래시 스크린 확인
 - [ ] 스크린샷 준비 (5-8장)
 - [ ] 앱 설명 작성 (한/영)
+- [ ] Google Play 심사 제출
+- [ ] App Store 심사 제출
 
 ---
 
-**참고:**
+## 선택 작업 (배포 후)
+
+### Firebase 인증 완성 (선택)
+**예상 시간:** 3-4일
+**난이도:** 어려움
+**필요성:** 낮음 (현재 로컬 저장만으로 충분)
+
+**작업:**
+- [ ] Firebase Console 수동 설정
+- [ ] AuthService 재작성 (700+ 줄)
+- [ ] LoginScreen UI 재작성
+- [ ] Firestore/Storage 연동
+
+**판단 기준:**
+- 다중 기기 동기화 필요하면 → 구현
+- 로컬 저장만으로 충분하면 → 보류
+
+---
+
+**참고 문서:**
 - upgrade_todo.md: 상세한 개선 계획
 - TODO.md: Firebase 인증 관련
 - CLAUDE.md: 프로젝트 전체 정보
