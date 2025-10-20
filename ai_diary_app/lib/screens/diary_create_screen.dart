@@ -215,7 +215,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
       setState(() => _progressMessage = '이미지 프롬프트 생성 중...');
       await Future.delayed(const Duration(milliseconds: 300));
 
-      setState(() => _progressMessage = 'AI 이미지 생성 중...\n\n(최대 30초 소요)');
+      setState(() => _progressMessage = 'AI 이미지 생성 중...\n\n(사용자가 많을 경우 대기 시간이 길어질 수 있습니다)');
 
       // AI 서비스를 통한 이미지 생성
       final Map<String, dynamic> result = await AIService.processEntry(
@@ -442,7 +442,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
       setState(() => _progressMessage = '이미지 프롬프트 생성 중...');
       await Future.delayed(const Duration(milliseconds: 300));
 
-      setState(() => _progressMessage = 'AI 이미지 생성 중...\n\n(최대 30초 소요)');
+      setState(() => _progressMessage = 'AI 이미지 생성 중...\n\n(사용자가 많을 경우 대기 시간이 길어질 수 있습니다)');
 
       // AI 서비스를 통한 이미지 재생성
       final Map<String, dynamic> result = await AIService.processEntry(
