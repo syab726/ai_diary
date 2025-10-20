@@ -12,9 +12,10 @@ import '../models/image_time.dart';
 import '../models/image_weather.dart';
 import '../models/image_season.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AIService {
-  static const String _geminiApiKey = 'AIzaSyB4sTKHWNsKq_k-X-jlm5l_9BCQC4eq-hc';
+  static final String _geminiApiKey = dotenv.env['GEMINI_API_KEY']!;
 
   // 이미지를 파일로 저장하고 파일 경로 반환
   static Future<String> _saveImageToFile(String base64Data, String mimeType) async {
