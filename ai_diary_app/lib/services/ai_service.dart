@@ -14,6 +14,7 @@ import '../models/image_season.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../utils/network_helper.dart';
+import '../utils/image_helper.dart';
 
 class AIService {
   static final String _geminiApiKey = dotenv.env['GEMINI_API_KEY']!;
@@ -41,7 +42,18 @@ class AIService {
       await file.writeAsBytes(imageBytes);
 
       if (kDebugMode) print('이미지 파일 저장 완료: $filePath');
-      return filePath;
+
+      // 이미지 압축 적용 (1-2MB → 200-300KB)
+      if (kDebugMode) print('이미지 압축 시작...');
+      final compressedFile = await ImageHelper.compressAIImage(
+        imageFile: file,
+        quality: 85,
+        maxWidth: 1080,
+        maxHeight: 1080,
+      );
+
+      if (kDebugMode) print('이미지 압축 완료: ${compressedFile.path}');
+      return compressedFile.path;
     } catch (e) {
       if (kDebugMode) print('이미지 파일 저장 오류: $e');
       return '';
