@@ -13,6 +13,7 @@ import '../models/image_weather.dart';
 import '../models/image_season.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../utils/network_helper.dart';
 
 class AIService {
   static final String _geminiApiKey = dotenv.env['GEMINI_API_KEY']!;
@@ -71,14 +72,18 @@ class AIService {
 
   static Future<String> analyzeEmotion(String diaryContent) async {
     try {
-      final response = await _textModel.generateContent([
-        Content.text('''다음 일기 내용의 주요 감정을 분석해주세요. 
+      final response = await NetworkHelper.retryOnNetworkError(
+        fn: () => _textModel.generateContent([
+          Content.text('''다음 일기 내용의 주요 감정을 분석해주세요.
 가능한 감정: happy, sad, angry, excited, peaceful, anxious, grateful, nostalgic, romantic, frustrated
 하나의 감정만 답변해주세요.
 
 일기 내용: $diaryContent''')
-      ]);
-      
+        ]),
+        maxAttempts: 3,
+        timeout: const Duration(seconds: 30),
+      );
+
       return response.text?.trim() ?? 'peaceful';
     } catch (e) {
       log('감정 분석 오류: $e');
@@ -88,12 +93,16 @@ class AIService {
 
   static Future<List<String>> extractKeywords(String diaryContent) async {
     try {
-      final response = await _textModel.generateContent([
-        Content.text('''다음 일기 내용에서 주요 키워드 5개를 추출해주세요.
+      final response = await NetworkHelper.retryOnNetworkError(
+        fn: () => _textModel.generateContent([
+          Content.text('''다음 일기 내용에서 주요 키워드 5개를 추출해주세요.
 쉼표로 구분하여 답변해주세요.
 
 일기 내용: $diaryContent''')
-      ]);
+        ]),
+        maxAttempts: 3,
+        timeout: const Duration(seconds: 30),
+      );
 
       String keywords = response.text?.trim() ?? '';
       return keywords.split(',').map((k) => k.trim()).where((k) => k.isNotEmpty).toList();
@@ -151,7 +160,11 @@ class AIService {
 
 2-3문장으로 간결하게 요약해주세요.'''));
 
-      final response = await visionModel.generateContent([Content.multi(parts)]);
+      final response = await NetworkHelper.retryOnNetworkError(
+        fn: () => visionModel.generateContent([Content.multi(parts)]),
+        maxAttempts: 3,
+        timeout: const Duration(seconds: 30),
+      );
       final analysisResult = response.text?.trim() ?? '';
 
       if (kDebugMode) print('사진 분석 결과: $analysisResult');
@@ -174,8 +187,9 @@ class AIService {
       // 사진 분석 결과
       final photoSuffix = photoAnalysis != null && photoAnalysis.isNotEmpty ? '사진 분석: $photoAnalysis' : '';
 
-      final response = await _textModel.generateContent([
-        Content.text('''다음 일기 내용을 바탕으로 이미지 생성 프롬프트를 만들어주세요.
+      final response = await NetworkHelper.retryOnNetworkError(
+        fn: () => _textModel.generateContent([
+          Content.text('''다음 일기 내용을 바탕으로 이미지 생성 프롬프트를 만들어주세요.
 스타일: $style
 감정적이고 아름다운 이미지가 되도록 작성해주세요.
 
@@ -194,7 +208,10 @@ ${perspectiveSuffix.isNotEmpty ? '시점 옵션에서 지정된 관점을 반영
 ${timeSuffix.isNotEmpty ? '지정된 시간대 ${imageTime!.displayName}의 분위기를 반영해주세요.' : ''}
 ${weatherSuffix.isNotEmpty ? '지정된 날씨 ${imageWeather!.displayName}의 느낌을 표현해주세요.' : ''}
 ${photoSuffix.isNotEmpty ? '업로드된 사진의 스타일과 분위기를 최대한 반영해주세요.' : ''}''')
-      ]);
+        ]),
+        maxAttempts: 3,
+        timeout: const Duration(seconds: 30),
+      );
 
       return response.text?.trim() ?? 'A peaceful and emotional illustration';
     } catch (e) {
@@ -229,28 +246,32 @@ ${photoSuffix.isNotEmpty ? '업로드된 사진의 스타일과 분위기를 최
 
         if (kDebugMode) print('최종 강화된 프롬프트: $enhancedPrompt');
 
-        final response = await http.post(
-          Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=$_geminiApiKey'),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({
-            'contents': [
-              {
-                'parts': [
-                  {
-                    'text': enhancedPrompt
-                  }
-                ]
+        final response = await NetworkHelper.retryOnNetworkError(
+          fn: () => http.post(
+            Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=$_geminiApiKey'),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({
+              'contents': [
+                {
+                  'parts': [
+                    {
+                      'text': enhancedPrompt
+                    }
+                  ]
+                }
+              ],
+              'generationConfig': {
+                'temperature': 0.9,
+                'topK': 1,
+                'topP': 1,
+                'maxOutputTokens': 8192,
               }
-            ],
-            'generationConfig': {
-              'temperature': 0.9,
-              'topK': 1,
-              'topP': 1,
-              'maxOutputTokens': 8192,
-            }
-          }),
+            }),
+          ),
+          maxAttempts: 3,
+          timeout: const Duration(seconds: 60),
         );
 
         if (kDebugMode) print('Gemini Imagen API 응답 상태: ${response.statusCode}');
@@ -311,8 +332,9 @@ ${photoSuffix.isNotEmpty ? '업로드된 사진의 스타일과 분위기를 최
       if (kDebugMode) print('=== AI 자동 설정 시작 ===');
       if (kDebugMode) print('일기 내용: $diaryContent');
 
-      final response = await _textModel.generateContent([
-        Content.text('''다음 일기 내용을 분석해서 이미지 생성에 적합한 설정들을 추천해주세요.
+      final response = await NetworkHelper.retryOnNetworkError(
+        fn: () => _textModel.generateContent([
+          Content.text('''다음 일기 내용을 분석해서 이미지 생성에 적합한 설정들을 추천해주세요.
 JSON 형태로 답변해주세요:
 
 {
@@ -327,7 +349,10 @@ JSON 형태로 답변해주세요:
 일기 내용: $diaryContent
 
 일기의 분위기, 감정, 시간대, 날씨, 상황 등을 종합적으로 고려해서 가장 적합한 설정을 선택해주세요.''')
-      ]);
+        ]),
+        maxAttempts: 3,
+        timeout: const Duration(seconds: 30),
+      );
 
       String responseText = response.text?.trim() ?? '';
       if (kDebugMode) print('AI 응답: $responseText');
