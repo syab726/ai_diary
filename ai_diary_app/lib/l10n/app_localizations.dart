@@ -184,9 +184,89 @@ class AppLocalizations {
       'app_name': 'ArtDiary AI',
       'app_description': 'AI가 그려주는 특별한 그림일기 앱',
       'privacy_policy_title': '개인정보 처리방침',
-      'privacy_policy_content': '개인정보 처리방침 내용이 여기에 표시됩니다...',
+      'privacy_policy_content': '''ArtDiary AI 개인정보 처리방침
+
+최종 업데이트: 2025년 1월
+
+1. 수집하는 정보
+• 일기 내용 및 제목
+• AI 생성 이미지
+• 감정 분석 데이터
+• 기기 식별 정보 (익명)
+
+2. 정보 사용 목적
+• 일기 작성 및 관리 서비스 제공
+• AI 이미지 생성 및 감정 분석
+• 앱 성능 개선 및 오류 수정
+• 사용자 경험 향상
+
+3. 정보 저장 및 보안
+• 모든 데이터는 기기 내부에 안전하게 저장됩니다
+• 클라우드 백업은 사용자 선택 시에만 활성화됩니다
+• 데이터 암호화 및 보안 조치를 적용합니다
+
+4. 제3자 제공
+• 사용자 동의 없이 제3자에게 정보를 제공하지 않습니다
+• AI 서비스 제공을 위해 Google Gemini API를 사용합니다
+• 광고 표시를 위해 Google AdMob을 사용합니다
+
+5. 사용자 권리
+• 언제든지 데이터 삭제 요청 가능
+• 개인정보 열람 및 수정 권한
+• 서비스 이용 동의 철회 가능
+
+6. 문의
+개인정보 관련 문의사항은 앱 내 문의 기능을 이용해 주세요.
+
+본 방침은 관련 법령 및 서비스 정책 변경에 따라 수정될 수 있습니다.''',
       'terms_title': '이용약관',
-      'terms_content': '서비스 이용약관 내용이 여기에 표시됩니다...',
+      'terms_content': '''ArtDiary AI 서비스 이용약관
+
+최종 업데이트: 2025년 1월
+
+1. 서비스 이용
+• 본 앱은 AI 기반 그림일기 작성 서비스입니다
+• 만 14세 이상 사용자를 대상으로 합니다
+• 불법적이거나 부적절한 콘텐츠 작성을 금지합니다
+
+2. 사용자 의무
+• 정확한 정보 제공
+• 타인의 권리 침해 금지
+• 서비스 악용 또는 남용 금지
+• 관련 법규 준수
+
+3. 서비스 제공
+• AI 이미지 생성 기능
+• 일기 작성 및 관리 기능
+• 감정 분석 및 통계 기능
+• 무료 및 프리미엄 서비스
+
+4. 프리미엄 서비스
+• 월간 또는 연간 구독 제공
+• 무제한 AI 이미지 생성
+• 고급 기능 및 글꼴 사용
+• 광고 제거
+
+5. 서비스 중단 및 변경
+• 시스템 점검 시 일시 중단 가능
+• 사전 공지 후 서비스 내용 변경 가능
+• 불가피한 경우 즉시 중단 가능
+
+6. 면책 조항
+• AI 생성 콘텐츠의 품질 보장 불가
+• 사용자 기기 문제로 인한 데이터 손실 책임 없음
+• 네트워크 장애로 인한 서비스 중단 책임 없음
+
+7. 지적 재산권
+• 사용자가 작성한 일기 내용은 사용자에게 귀속됨
+• AI 생성 이미지의 사용권은 사용자에게 있음
+• 앱 디자인 및 코드의 저작권은 개발자에게 있음
+
+8. 계약 해지
+• 사용자는 언제든지 서비스 이용을 중단할 수 있습니다
+• 약관 위반 시 서비스 이용이 제한될 수 있습니다
+
+본 약관은 대한민국 법률에 따라 규율되고 해석됩니다.''',
       'privacy_policy_subtitle': '개인정보 처리방침을 확인하세요',
       'terms_subtitle': '서비스 이용약관을 확인하세요',
       'ok': '확인',
@@ -383,9 +463,89 @@ class AppLocalizations {
       'app_name': 'ArtDiary AI',
       'app_description': 'AIが描いてくれる特別な絵日記アプリ',
       'privacy_policy_title': 'プライバシーポリシー',
-      'privacy_policy_content': 'プライバシーポリシーの内容がここに表示されます...',
+      'privacy_policy_content': '''ArtDiary AI プライバシーポリシー
+
+最終更新: 2025年1月
+
+1. 収集する情報
+• 日記の内容とタイトル
+• AI生成画像
+• 感情分析データ
+• デバイス識別情報（匿名）
+
+2. 情報利用目的
+• 日記作成・管理サービスの提供
+• AI画像生成と感情分析
+• アプリのパフォーマンス改善とエラー修正
+• ユーザーエクスペリエンスの向上
+
+3. 情報保存とセキュリティ
+• すべてのデータはデバイス内部に安全に保存されます
+• クラウドバックアップはユーザーが選択した場合にのみ有効化されます
+• データ暗号化とセキュリティ対策を適用します
+
+4. 第三者への提供
+• ユーザーの同意なしに第三者に情報を提供しません
+• AIサービス提供のためにGoogle Gemini APIを使用します
+• 広告表示のためにGoogle AdMobを使用します
+
+5. ユーザーの権利
+• いつでもデータ削除のリクエストが可能
+• 個人情報の閲覧・修正権限
+• サービス利用同意の撤回が可能
+
+6. お問い合わせ
+個人情報に関するお問い合わせは、アプリ内のお問い合わせ機能をご利用ください。
+
+本方針は、関連法令およびサービスポリシーの変更に応じて修正される場合があります。''',
       'terms_title': '利用規約',
-      'terms_content': 'サービス利用規約の内容がここに表示されます...',
+      'terms_content': '''ArtDiary AI サービス利用規約
+
+最終更新: 2025年1月
+
+1. サービス利用
+• 本アプリはAIベースの絵日記作成サービスです
+• 満14歳以上のユーザーを対象とします
+• 違法または不適切なコンテンツの作成を禁止します
+
+2. ユーザーの義務
+• 正確な情報の提供
+• 他者の権利侵害の禁止
+• サービスの悪用・濫用の禁止
+• 関連法規の遵守
+
+3. サービス提供
+• AI画像生成機能
+• 日記作成・管理機能
+• 感情分析・統計機能
+• 無料・プレミアムサービス
+
+4. プレミアムサービス
+• 月間または年間サブスクリプションの提供
+• 無制限AI画像生成
+• 高度な機能とフォントの使用
+• 広告削除
+
+5. サービス中断・変更
+• システムメンテナンス時に一時中断する場合があります
+• 事前通知後にサービス内容を変更する場合があります
+• やむを得ない場合は即時中断する場合があります
+
+6. 免責事項
+• AI生成コンテンツの品質は保証できません
+• ユーザーのデバイス問題によるデータ損失については責任を負いません
+• ネットワーク障害によるサービス中断については責任を負いません
+
+7. 知的財産権
+• ユーザーが作成した日記内容はユーザーに帰属します
+• AI生成画像の使用権はユーザーにあります
+• アプリのデザインとコードの著作権は開発者にあります
+
+8. 契約解除
+• ユーザーはいつでもサービスの利用を中止できます
+• 規約違反時にサービスの利用が制限される場合があります
+
+本規約は大韓民国の法律に従って規律され解釈されます。''',
       'privacy_policy_subtitle': 'プライバシーポリシーをご確認ください',
       'terms_subtitle': 'サービス利用規約をご確認ください',
       'ok': '確認',
@@ -587,9 +747,89 @@ class AppLocalizations {
       'app_name': 'ArtDiary AI',
       'app_description': 'Special picture diary app drawn by AI',
       'privacy_policy_title': 'Privacy Policy',
-      'privacy_policy_content': 'Privacy policy content will be displayed here...',
+      'privacy_policy_content': '''ArtDiary AI Privacy Policy
+
+Last Updated: January 2025
+
+1. Information We Collect
+• Diary content and titles
+• AI-generated images
+• Emotion analysis data
+• Device identification information (anonymous)
+
+2. Purpose of Information Use
+• Providing diary creation and management services
+• AI image generation and emotion analysis
+• App performance improvement and bug fixes
+• User experience enhancement
+
+3. Information Storage and Security
+• All data is securely stored on your device
+• Cloud backup is only activated when selected by users
+• Data encryption and security measures are applied
+
+4. Third-Party Disclosure
+• We do not provide information to third parties without user consent
+• Google Gemini API is used for AI services
+• Google AdMob is used for advertising
+
+5. User Rights
+• Request data deletion at any time
+• Right to view and modify personal information
+• Ability to withdraw service usage consent
+
+6. Contact
+For inquiries regarding personal information, please use the in-app contact feature.
+
+This policy may be amended in accordance with relevant laws and service policy changes.''',
       'terms_title': 'Terms of Service',
-      'terms_content': 'Terms of service content will be displayed here...',
+      'terms_content': '''ArtDiary AI Terms of Service
+
+Last Updated: January 2025
+
+1. Service Usage
+• This app is an AI-based picture diary service
+• Intended for users aged 14 and above
+• Creation of illegal or inappropriate content is prohibited
+
+2. User Obligations
+• Providing accurate information
+• Prohibition of infringing others\' rights
+• Prohibition of service abuse or misuse
+• Compliance with applicable laws
+
+3. Service Provision
+• AI image generation feature
+• Diary creation and management features
+• Emotion analysis and statistics features
+• Free and premium services
+
+4. Premium Services
+• Monthly or annual subscription offerings
+• Unlimited AI image generation
+• Advanced features and font usage
+• Ad removal
+
+5. Service Interruption and Changes
+• Service may be temporarily suspended during system maintenance
+• Service content may be changed after prior notice
+• May be immediately suspended in unavoidable circumstances
+
+6. Disclaimer
+• Quality of AI-generated content is not guaranteed
+• No liability for data loss due to user device issues
+• No liability for service interruption due to network failures
+
+7. Intellectual Property Rights
+• Diary content created by users belongs to the users
+• Usage rights of AI-generated images belong to the users
+• Copyrights of app design and code belong to the developer
+
+8. Termination
+• Users may discontinue service usage at any time
+• Service usage may be restricted in case of terms violation
+
+These terms are governed by and interpreted in accordance with the laws of the Republic of Korea.''',
       'privacy_policy_subtitle': 'Review the privacy policy',
       'terms_subtitle': 'Review the terms of service',
       'ok': 'OK',
@@ -791,9 +1031,89 @@ class AppLocalizations {
       'app_name': 'ArtDiary AI',
       'app_description': 'AI绘制的特殊图画日记应用',
       'privacy_policy_title': '隐私政策',
-      'privacy_policy_content': '隐私政策内容将在此处显示...',
+      'privacy_policy_content': '''ArtDiary AI 隐私政策
+
+最后更新：2025年1月
+
+1. 我们收集的信息
+• 日记内容和标题
+• AI生成的图像
+• 情感分析数据
+• 设备识别信息（匿名）
+
+2. 信息使用目的
+• 提供日记创建和管理服务
+• AI图像生成和情感分析
+• 应用性能改进和错误修复
+• 用户体验提升
+
+3. 信息存储和安全
+• 所有数据安全存储在您的设备内部
+• 云备份仅在用户选择时启用
+• 应用数据加密和安全措施
+
+4. 第三方披露
+• 未经用户同意不向第三方提供信息
+• 使用Google Gemini API提供AI服务
+• 使用Google AdMob显示广告
+
+5. 用户权利
+• 随时请求删除数据
+• 查看和修改个人信息的权利
+• 撤回服务使用同意的能力
+
+6. 联系方式
+有关个人信息的咨询，请使用应用内联系功能。
+
+本政策可能根据相关法律和服务政策变更进行修订。''',
       'terms_title': '服务条款',
-      'terms_content': '服务条款内容将在此处显示...',
+      'terms_content': '''ArtDiary AI 服务条款
+
+最后更新：2025年1月
+
+1. 服务使用
+• 本应用是基于AI的图画日记服务
+• 面向14岁及以上用户
+• 禁止创建非法或不当内容
+
+2. 用户义务
+• 提供准确信息
+• 禁止侵犯他人权利
+• 禁止滥用或误用服务
+• 遵守适用法律
+
+3. 服务提供
+• AI图像生成功能
+• 日记创建和管理功能
+• 情感分析和统计功能
+• 免费和高级服务
+
+4. 高级服务
+• 提供月度或年度订阅
+• 无限AI图像生成
+• 高级功能和字体使用
+• 广告移除
+
+5. 服务中断和变更
+• 系统维护期间可能暂时中断服务
+• 事先通知后可能更改服务内容
+• 不可避免情况下可能立即中断
+
+6. 免责声明
+• 不保证AI生成内容的质量
+• 对用户设备问题导致的数据丢失不承担责任
+• 对网络故障导致的服务中断不承担责任
+
+7. 知识产权
+• 用户创建的日记内容归用户所有
+• AI生成图像的使用权归用户所有
+• 应用设计和代码的版权归开发者所有
+
+8. 终止
+• 用户可随时中止服务使用
+• 违反条款时可能限制服务使用
+
+本条款受大韩民国法律管辖并据此解释。''',
       'privacy_policy_subtitle': '查看隐私政策',
       'terms_subtitle': '查看服务条款',
       'ok': '确定',
@@ -993,9 +1313,89 @@ class AppLocalizations {
       'app_name': 'ArtDiary AI',
       'app_description': 'Diarium pictum speciale ab AI depictum',
       'privacy_policy_title': 'Politica Privacitatis',
-      'privacy_policy_content': 'Contentum politicae privacitatis hic ostendetur...',
+      'privacy_policy_content': '''ArtDiary AI Politica Privacitatis
+
+Ultima Renovatio: Ianuarius MMXXV
+
+1. Informationes Collectae
+• Contentum et titulum diarii
+• Imagines ab AI generatae
+• Data analyseos emotionum
+• Informationes identificationis instrumenti (anonymae)
+
+2. Propositum Usus Informationum
+• Servitium creationis et administrationis diarii praebere
+• Generatio imaginum AI et analysis emotionum
+• Melioratio operationis applicationis et correctio errorum
+• Augmentatio experientiae usoris
+
+3. Conservatio et Securitas Informationum
+• Omnia data secure in instrumento tuo conservantur
+• Copia nubis solum cum usor eligit activatur
+• Encryptio datarum et mensuras securitatis applicantur
+
+4. Patefactio ad Tertios
+• Informationes ad tertios sine consensu usoris non praebimus
+• Google Gemini API ad servitia AI utimur
+• Google AdMob ad reclamas utimur
+
+5. Iura Usoris
+• Petitionem deletionis datarum quovis tempore
+• Ius inspiciendi et modificandi informationes personales
+• Facultas revocandi consensum usus servitii
+
+6. Contactus
+Pro quaestionibus de informationibus personalibus, utere functione contactus in applicatione.
+
+Haec politica secundum leges pertinentes et mutationes politicae servitii emendari potest.''',
       'terms_title': 'Condiciones Servitii',
-      'terms_content': 'Contentum condicionum servitii hic ostendetur...',
+      'terms_content': '''ArtDiary AI Condiciones Servitii
+
+Ultima Renovatio: Ianuarius MMXXV
+
+1. Usus Servitii
+• Haec applicatio servitium diarii picti basatum in AI est
+• Destinata usoribus aetatis XIV annorum et supra
+• Creatio contenti illegalis vel inconvenienti prohibita est
+
+2. Obligationes Usoris
+• Praebere informationes accuratas
+• Prohibitio violationis iurium aliorum
+• Prohibitio abusus vel male usus servitii
+• Observantia legum applicabilium
+
+3. Praebiti Servitii
+• Functio generationis imaginum AI
+• Functiones creationis et administrationis diarii
+• Functiones analyseos emotionum et statisticarum
+• Servitia gratuita et premium
+
+4. Servitia Premium
+• Subscriptiones mensuales vel annuales offeruntur
+• Generatio illimitata imaginum AI
+• Usus functionum et fontium advancatarum
+• Remotio reclamarum
+
+5. Interruptio et Mutationes Servitii
+• Servitium tempore manutentionis systematis temporarie suspendi potest
+• Contentum servitii post notificationem praecedentem mutari potest
+• In circumstantiis inevitabilibus immediate suspendi potest
+
+6. Renuntiatio Responsibitatis
+• Qualitas contenti generati ab AI non guarantitur
+• Responsibilitas pro iactura datarum ex problematibus instrumenti usoris non suscipitur
+• Responsibilitas pro interruptione servitii ex defectibus retis non suscipitur
+
+7. Iura Proprietatis Intellectualis
+• Contentum diarii ab usore creatum ad usorem pertinet
+• Iura usus imaginum ab AI generatarum ad usorem pertinent
+• Iura auctoris designationis et codicis applicationis ad developerem pertinent
+
+8. Terminatio
+• Usor quovis tempore usum servitii desistere potest
+• Usus servitii in casu violationis condicionum limitari potest
+
+Hae condiciones secundum leges Rei Publicae Coreae reguntur et interpretantur.''',
       'privacy_policy_subtitle': 'Inspice politicam privacitatis',
       'terms_subtitle': 'Inspice condiciones servitii',
       'ok': 'Recte',
