@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
@@ -188,7 +189,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
         });
       }
     } catch (e) {
-      print('AI 인사이트 생성 오류 ($type): $e');
+      if (kDebugMode) print('AI 인사이트 생성 오류 ($type): $e');
       if (mounted) {
         setState(() {
           _isGenerating[type] = false;

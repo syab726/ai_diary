@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -24,7 +25,7 @@ class AdService {
   /// AdMob SDK 초기화
   static Future<void> initialize() async {
     await MobileAds.instance.initialize();
-    print('[AdService] AdMob SDK 초기화 완료');
+    if (kDebugMode) print('[AdService] AdMob SDK 초기화 완료');
   }
 
   /// 보상형 광고 Unit ID 가져오기
@@ -60,25 +61,25 @@ class AdService {
   /// 보상형 광고 로드
   Future<void> loadRewardedAd() async {
     if (_isRewardedAdLoading || _rewardedAd != null) {
-      print('[AdService] 보상형 광고 이미 로드 중이거나 로드됨');
+      if (kDebugMode) print('[AdService] 보상형 광고 이미 로드 중이거나 로드됨');
       return;
     }
 
     _isRewardedAdLoading = true;
-    print('[AdService] 보상형 광고 로드 시작...');
+    if (kDebugMode) print('[AdService] 보상형 광고 로드 시작...');
 
     await RewardedAd.load(
       adUnitId: _rewardedAdUnitId,
       request: const AdRequest(),
       rewardedAdLoadCallback: RewardedAdLoadCallback(
         onAdLoaded: (ad) {
-          print('[AdService] 보상형 광고 로드 성공');
+          if (kDebugMode) print('[AdService] 보상형 광고 로드 성공');
           _rewardedAd = ad;
           _isRewardedAdLoading = false;
           // fullScreenContentCallback은 show() 시 설정됨
         },
         onAdFailedToLoad: (error) {
-          print('[AdService] 보상형 광고 로드 실패: $error');
+          if (kDebugMode) print('[AdService] 보상형 광고 로드 실패: $error');
           _isRewardedAdLoading = false;
           _rewardedAd = null;
         },
@@ -106,7 +107,7 @@ class AdService {
 
     // 광고 로드 실패시 기능 차단하지 않고 진행 허용
     if (_rewardedAd == null) {
-      print('[AdService] 보상형 광고 로드 실패 - 기능 허용');
+      if (kDebugMode) print('[AdService] 보상형 광고 로드 실패 - 기능 허용');
       return true; // 광고 없이도 기능 사용 허용
     }
 
@@ -117,10 +118,10 @@ class AdService {
     // 광고 이벤트 리스너 설정 (show 전에 설정)
     _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
       onAdShowedFullScreenContent: (ad) {
-        print('[AdService] 보상형 광고 표시 시작');
+        if (kDebugMode) print('[AdService] 보상형 광고 표시 시작');
       },
       onAdDismissedFullScreenContent: (ad) {
-        print('[AdService] 보상형 광고 닫힘 - 보상 수령 여부: $rewardEarned');
+        if (kDebugMode) print('[AdService] 보상형 광고 닫힘 - 보상 수령 여부: $rewardEarned');
         ad.dispose();
         _rewardedAd = null;
 
@@ -133,7 +134,7 @@ class AdService {
         loadRewardedAd();
       },
       onAdFailedToShowFullScreenContent: (ad, error) {
-        print('[AdService] 보상형 광고 표시 실패: $error');
+        if (kDebugMode) print('[AdService] 보상형 광고 표시 실패: $error');
         ad.dispose();
         _rewardedAd = null;
 
@@ -147,7 +148,7 @@ class AdService {
     // 광고 표시
     await _rewardedAd!.show(
       onUserEarnedReward: (ad, reward) {
-        print('[AdService] 사용자가 보상 획득: ${reward.amount} ${reward.type}');
+        if (kDebugMode) print('[AdService] 사용자가 보상 획득: ${reward.amount} ${reward.type}');
         rewardEarned = true;
       },
     );
@@ -159,40 +160,40 @@ class AdService {
   /// 전면 광고 로드 (추후 사용)
   Future<void> loadInterstitialAd() async {
     if (_isInterstitialAdLoading || _interstitialAd != null) {
-      print('[AdService] 전면 광고 이미 로드 중이거나 로드됨');
+      if (kDebugMode) print('[AdService] 전면 광고 이미 로드 중이거나 로드됨');
       return;
     }
 
     _isInterstitialAdLoading = true;
-    print('[AdService] 전면 광고 로드 시작...');
+    if (kDebugMode) print('[AdService] 전면 광고 로드 시작...');
 
     await InterstitialAd.load(
       adUnitId: _interstitialAdUnitId,
       request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
-          print('[AdService] 전면 광고 로드 성공');
+          if (kDebugMode) print('[AdService] 전면 광고 로드 성공');
           _interstitialAd = ad;
           _isInterstitialAdLoading = false;
 
           _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
             onAdShowedFullScreenContent: (ad) {
-              print('[AdService] 전면 광고 표시 시작');
+              if (kDebugMode) print('[AdService] 전면 광고 표시 시작');
             },
             onAdDismissedFullScreenContent: (ad) {
-              print('[AdService] 전면 광고 닫힘');
+              if (kDebugMode) print('[AdService] 전면 광고 닫힘');
               ad.dispose();
               _interstitialAd = null;
             },
             onAdFailedToShowFullScreenContent: (ad, error) {
-              print('[AdService] 전면 광고 표시 실패: $error');
+              if (kDebugMode) print('[AdService] 전면 광고 표시 실패: $error');
               ad.dispose();
               _interstitialAd = null;
             },
           );
         },
         onAdFailedToLoad: (error) {
-          print('[AdService] 전면 광고 로드 실패: $error');
+          if (kDebugMode) print('[AdService] 전면 광고 로드 실패: $error');
           _isInterstitialAdLoading = false;
           _interstitialAd = null;
         },
@@ -206,7 +207,7 @@ class AdService {
       await _interstitialAd!.show();
       _interstitialAd = null;
     } else {
-      print('[AdService] 전면 광고가 로드되지 않음');
+      if (kDebugMode) print('[AdService] 전면 광고가 로드되지 않음');
     }
   }
 

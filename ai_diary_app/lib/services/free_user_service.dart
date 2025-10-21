@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/storage_keys.dart';
 
@@ -19,7 +20,7 @@ class FreeUserService {
     try {
       _prefs ??= await SharedPreferences.getInstance();
     } catch (e) {
-      print('[FreeUserService] SharedPreferences 초기화 실패: $e');
+      if (kDebugMode) print('[FreeUserService] SharedPreferences 초기화 실패: $e');
       rethrow;
     }
   }
@@ -51,11 +52,11 @@ class FreeUserService {
       await _prefs!.setInt(StorageKeys.dailyAdCount, newCount);
       await _updateLastAdDate();
 
-      print('[FreeUserService] 광고 시청 횟수 증가: $currentCount → $newCount');
+      if (kDebugMode) print('[FreeUserService] 광고 시청 횟수 증가: $currentCount → $newCount');
 
       return newCount;
     } catch (e) {
-      print('[FreeUserService] incrementAdCount 실패: $e');
+      if (kDebugMode) print('[FreeUserService] incrementAdCount 실패: $e');
       rethrow;
     }
   }
@@ -89,7 +90,7 @@ class FreeUserService {
 
     // 날짜가 바뀌었으면 카운터 리셋
     if (lastDate != today) {
-      print('[FreeUserService] 날짜 변경 감지: $lastDate → $today, 카운터 리셋');
+      if (kDebugMode) print('[FreeUserService] 날짜 변경 감지: $lastDate → $today, 카운터 리셋');
       await _prefs!.setInt(StorageKeys.dailyAdCount, 0);
       await _prefs!.setString(StorageKeys.lastAdDate, today);
     }
@@ -145,7 +146,7 @@ class FreeUserService {
     await initialize();
     await _prefs!.setInt(StorageKeys.dailyAdCount, 0);
     await _prefs!.setString(StorageKeys.lastAdDate, _getTodayString());
-    print('[FreeUserService] 테스트용 카운터 리셋 완료');
+    if (kDebugMode) print('[FreeUserService] 테스트용 카운터 리셋 완료');
   }
 
   /// 테스트용: 특정 카운트로 설정
@@ -155,6 +156,6 @@ class FreeUserService {
     await initialize();
     await _prefs!.setInt(StorageKeys.dailyAdCount, count);
     await _prefs!.setString(StorageKeys.lastAdDate, _getTodayString());
-    print('[FreeUserService] 테스트용 카운터 설정: $count');
+    if (kDebugMode) print('[FreeUserService] 테스트용 카운터 설정: $count');
   }
 }

@@ -137,7 +137,7 @@ class AIService {
       }
 
       if (parts.isEmpty) {
-        print('분석 가능한 사진이 없습니다');
+        if (kDebugMode) print('분석 가능한 사진이 없습니다');
         return '';
       }
 
@@ -267,7 +267,7 @@ ${photoSuffix.isNotEmpty ? '업로드된 사진의 스타일과 분위기를 최
                 if (part['inlineData'] != null) {
                   final endTime = DateTime.now();
                   final duration = endTime.difference(startTime).inSeconds;
-                  print('*** Gemini 2.5 Flash Image API 이미지 생성 성공! (소요 시간: ${duration}초) ***');
+                  if (kDebugMode) print('*** Gemini 2.5 Flash Image API 이미지 생성 성공! (소요 시간: ${duration}초) ***');
                   final imageData = part['inlineData']['data'];
                   final mimeType = part['inlineData']['mimeType'] ?? 'image/png';
                   if (kDebugMode) print('이미지 데이터 크기: ${imageData.length} characters');
@@ -275,7 +275,7 @@ ${photoSuffix.isNotEmpty ? '업로드된 사진의 스타일과 분위기를 최
                   // 이미지를 파일로 저장
                   final filePath = await _saveImageToFile(imageData, mimeType);
                   if (filePath.isNotEmpty) {
-                    print('파일 저장 성공, 경로 반환: $filePath');
+                    if (kDebugMode) print('파일 저장 성공, 경로 반환: $filePath');
                     return 'file://$filePath';
                   } else {
                     if (kDebugMode) print('파일 저장 실패, base64 데이터 반환');
@@ -393,7 +393,7 @@ JSON 형태로 답변해주세요:
       // 사진 분석 (있으면)
       String photoAnalysis = '';
       if (userPhotos != null && userPhotos.isNotEmpty) {
-        print('사용자 업로드 사진 분석 시작...');
+        if (kDebugMode) print('사용자 업로드 사진 분석 시작...');
         photoAnalysis = await analyzePhotos(userPhotos);
         if (kDebugMode) print('사진 분석 완료: $photoAnalysis');
       }

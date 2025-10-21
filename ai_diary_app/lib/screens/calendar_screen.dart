@@ -36,17 +36,17 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       final selectedDateString = uri.queryParameters['selectedDate'];
       final selectedDiaryId = uri.queryParameters['selectedDiary'];
 
-      print('Calendar 초기화: URL 체크 중...');
+      if (kDebugMode) print('Calendar 초기화: URL 체크 중...');
       if (selectedDateString != null && selectedDiaryId != null) {
         try {
-          print('Calendar: URL 파라미터 감지됨! - 날짜: $selectedDateString, 일기ID: $selectedDiaryId');
+          if (kDebugMode) print('Calendar: URL 파라미터 감지됨! - 날짜: $selectedDateString, 일기ID: $selectedDiaryId');
           final selectedDate = DateTime.parse(selectedDateString);
           setState(() {
             _focusedDay = selectedDate;
             _selectedDay = selectedDate;
             _highlightedDiaryId = selectedDiaryId;
           });
-          print('Calendar: 상태 업데이트 완료! - 포커스된 날짜: $selectedDate, 강조할 일기: $selectedDiaryId');
+          if (kDebugMode) print('Calendar: 상태 업데이트 완료! - 포커스된 날짜: $selectedDate, 강조할 일기: $selectedDiaryId');
 
           // 3초 후 하이라이트 제거
           Timer(const Duration(seconds: 3), () {
@@ -57,7 +57,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             }
           });
         } catch (e) {
-          print('날짜 파싱 오류: $e');
+          if (kDebugMode) print('날짜 파싱 오류: $e');
         }
       }
     });
@@ -76,7 +76,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
         if (selectedDateString != null && selectedDiaryId != null && _highlightedDiaryId != selectedDiaryId) {
           try {
-            print('Calendar: 일기 데이터 로드 완료 후 URL 파라미터 처리 - 날짜: $selectedDateString, 일기ID: $selectedDiaryId');
+            if (kDebugMode) print('Calendar: 일기 데이터 로드 완료 후 URL 파라미터 처리 - 날짜: $selectedDateString, 일기ID: $selectedDiaryId');
             final selectedDate = DateTime.parse(selectedDateString);
 
             // 해당 일기가 실제로 존재하는지 확인
@@ -91,8 +91,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               _highlightedDiaryId = selectedDiaryId;
             });
 
-            print('Calendar: 타겟 일기 확인 완료! - 제목: ${targetDiary.title}');
-            print('Calendar: 하이라이트 설정 완료! - 일기ID: $selectedDiaryId');
+            if (kDebugMode) print('Calendar: 타겟 일기 확인 완료! - 제목: ${targetDiary.title}');
+            if (kDebugMode) print('Calendar: 하이라이트 설정 완료! - 일기ID: $selectedDiaryId');
 
             // 3초 후 하이라이트 제거
             Timer(const Duration(seconds: 3), () {
@@ -100,11 +100,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 setState(() {
                   _highlightedDiaryId = null;
                 });
-                print('Calendar: 하이라이트 제거됨');
+                if (kDebugMode) print('Calendar: 하이라이트 제거됨');
               }
             });
           } catch (e) {
-            print('Calendar: 일기 처리 오류 - $e');
+            if (kDebugMode) print('Calendar: 일기 처리 오류 - $e');
           }
         }
       });
@@ -523,8 +523,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       child: InkWell(
         onTap: () {
           final dateString = '${diary.createdAt.year}-${diary.createdAt.month.toString().padLeft(2, '0')}-${diary.createdAt.day.toString().padLeft(2, '0')}';
-          print('Calendar: 일기 카드 클릭 - 일기ID: ${diary.id}, 날짜: $dateString');
-          print('Calendar: 이동할 URL - /detail/${diary.id}?from=calendar&date=$dateString&diaryId=${diary.id}');
+          if (kDebugMode) print('Calendar: 일기 카드 클릭 - 일기ID: ${diary.id}, 날짜: $dateString');
+          if (kDebugMode) print('Calendar: 이동할 URL - /detail/${diary.id}?from=calendar&date=$dateString&diaryId=${diary.id}');
           context.go('/detail/${diary.id}?from=calendar&date=$dateString&diaryId=${diary.id}');
         },
         borderRadius: BorderRadius.circular(16),

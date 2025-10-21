@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../services/ad_service.dart';
 
@@ -37,7 +38,7 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
       request: const AdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (ad) {
-          print('[AdBannerWidget] 배너 광고 로드 성공');
+          if (kDebugMode) print('[AdBannerWidget] 배너 광고 로드 성공');
           if (mounted) {
             setState(() {
               _isAdLoaded = true;
@@ -45,7 +46,7 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
           }
         },
         onAdFailedToLoad: (ad, error) {
-          print('[AdBannerWidget] 배너 광고 로드 실패: $error');
+          if (kDebugMode) print('[AdBannerWidget] 배너 광고 로드 실패: $error');
           ad.dispose();
           if (mounted) {
             setState(() {
@@ -76,24 +77,59 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
     }
 
     return Container(
-      height: _bannerAd!.size.height.toDouble(),
+      margin: const EdgeInsets.only(top: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.grey.shade50,
         border: Border(
           top: BorderSide(
-            color: Colors.grey.shade300,
-            width: 1,
+            color: Colors.grey.shade400,
+            width: 2,
           ),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, -2),
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, -4),
           ),
         ],
       ),
-      child: AdWidget(ad: _bannerAd!),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 광고 라벨
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            color: Colors.grey.shade200,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.campaign,
+                  size: 12,
+                  color: Colors.grey.shade600,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '광고',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // 광고 배너
+          Container(
+            height: _bannerAd!.size.height.toDouble(),
+            color: Colors.white,
+            child: AdWidget(ad: _bannerAd!),
+          ),
+        ],
+      ),
     );
   }
 }

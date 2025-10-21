@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -53,7 +54,7 @@ class AuthService {
       final UserCredential userCredential = await _auth.signInWithCredential(credential);
       return userCredential.user;
     } catch (e) {
-      print('Google 로그인 오류: $e');
+      if (kDebugMode) print('Google 로그인 오류: $e');
       rethrow;
     }
   }
@@ -83,7 +84,7 @@ class AuthService {
       final UserCredential userCredential = await _auth.signInWithCredential(oauthCredential);
       return userCredential.user;
     } catch (e) {
-      print('Apple 로그인 오류: $e');
+      if (kDebugMode) print('Apple 로그인 오류: $e');
       rethrow;
     }
   }
@@ -101,13 +102,13 @@ class AuthService {
           isAnonymous: true,
         );
         _authStateController.add(_currentMockUser);
-        print('✅ Firebase 익명 로그인 성공: ${user.uid}');
+        if (kDebugMode) print('✅ Firebase 익명 로그인 성공: ${user.uid}');
         return _currentMockUser;
       }
       return null;
     } catch (e) {
       // Firebase 로그인 실패 시 로컬 Mock 사용 (개발용)
-      print('⚠️ Firebase 익명 로그인 실패, 로컬 Mock 사용: $e');
+      if (kDebugMode) print('⚠️ Firebase 익명 로그인 실패, 로컬 Mock 사용: $e');
       _currentMockUser = MockUser(
         uid: 'local-mock-${DateTime.now().millisecondsSinceEpoch}',
         isAnonymous: true,
@@ -128,7 +129,7 @@ class AuthService {
       _currentMockUser = null;
       _authStateController.add(null);
     } catch (e) {
-      print('로그아웃 오류: $e');
+      if (kDebugMode) print('로그아웃 오류: $e');
       rethrow;
     }
   }
@@ -141,7 +142,7 @@ class AuthService {
         await user.delete();
       }
     } catch (e) {
-      print('계정 삭제 오류: $e');
+      if (kDebugMode) print('계정 삭제 오류: $e');
       rethrow;
     }
   }
@@ -155,7 +156,7 @@ class AuthService {
         await user.updatePhotoURL(photoURL);
       }
     } catch (e) {
-      print('프로필 업데이트 오류: $e');
+      if (kDebugMode) print('프로필 업데이트 오류: $e');
       rethrow;
     }
   }
@@ -178,7 +179,7 @@ class AuthService {
       final UserCredential userCredential = await user.linkWithCredential(credential);
       return userCredential.user;
     } catch (e) {
-      print('계정 연결 오류: $e');
+      if (kDebugMode) print('계정 연결 오류: $e');
       rethrow;
     }
   }

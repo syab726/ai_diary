@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 import '../models/diary_entry.dart';
 import '../services/database_service.dart';
 import '../services/ai_service.dart';
@@ -15,17 +16,17 @@ class DiaryEntriesNotifier extends StateNotifier<AsyncValue<List<DiaryEntry>>> {
 
   Future<void> loadDiaries() async {
     try {
-      print('DiaryProvider: loadDiaries 시작');
+      if (kDebugMode) print('DiaryProvider: loadDiaries 시작');
       state = const AsyncValue.loading();
       final diaries = await DatabaseService.getAllDiaries();
-      print('DiaryProvider: 데이터베이스에서 가져온 일기 개수: ${diaries.length}');
+      if (kDebugMode) print('DiaryProvider: 데이터베이스에서 가져온 일기 개수: ${diaries.length}');
       for (int i = 0; i < diaries.length && i < 3; i++) {
-        print('DiaryProvider: 일기 $i - 제목: ${diaries[i].title}, 내용 길이: ${diaries[i].content.length}');
+        if (kDebugMode) print('DiaryProvider: 일기 $i - 제목: ${diaries[i].title}, 내용 길이: ${diaries[i].content.length}');
       }
       state = AsyncValue.data(diaries);
-      print('DiaryProvider: 상태 업데이트 완료');
+      if (kDebugMode) print('DiaryProvider: 상태 업데이트 완료');
     } catch (error, stackTrace) {
-      print('DiaryProvider: 에러 발생: $error');
+      if (kDebugMode) print('DiaryProvider: 에러 발생: $error');
       state = AsyncValue.error(error, stackTrace);
     }
   }

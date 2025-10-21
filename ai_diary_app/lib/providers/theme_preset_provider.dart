@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/theme_preset.dart';
 
@@ -13,7 +14,7 @@ class ThemePresetNotifier extends StateNotifier<String?> {
       final presetId = prefs.getString('selected_theme_preset');
       state = presetId;
     } catch (e) {
-      print('테마 프리셋 로드 오류: $e');
+      if (kDebugMode) print('테마 프리셋 로드 오류: $e');
     }
   }
 
@@ -31,7 +32,7 @@ class ThemePresetNotifier extends StateNotifier<String?> {
         await prefs.remove('selected_theme_preset');
       }
     } catch (e) {
-      print('테마 프리셋 저장 오류: $e');
+      if (kDebugMode) print('테마 프리셋 저장 오류: $e');
     }
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AutoAdvancedSettingsNotifier extends StateNotifier<bool> {
@@ -13,7 +14,7 @@ class AutoAdvancedSettingsNotifier extends StateNotifier<bool> {
       final prefs = await SharedPreferences.getInstance();
       state = prefs.getBool(_key) ?? false;
     } catch (e) {
-      print('고급설정 자동설정 로드 오류: $e');
+      if (kDebugMode) print('고급설정 자동설정 로드 오류: $e');
       state = false;
     }
   }
@@ -24,7 +25,7 @@ class AutoAdvancedSettingsNotifier extends StateNotifier<bool> {
       await prefs.setBool(_key, enabled);
       state = enabled;
     } catch (e) {
-      print('고급설정 자동설정 저장 오류: $e');
+      if (kDebugMode) print('고급설정 자동설정 저장 오류: $e');
     }
   }
 

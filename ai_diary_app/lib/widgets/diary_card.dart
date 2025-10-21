@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
@@ -150,12 +151,12 @@ class DiaryCard extends StatelessWidget {
           file,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
-            print('로컬 이미지 로드 오류: $error');
+            if (kDebugMode) print('로컬 이미지 로드 오류: $error');
             return _buildPlaceholder(context);
           },
         );
       } else {
-        print('로컬 이미지 파일이 존재하지 않음: $filePath');
+        if (kDebugMode) print('로컬 이미지 파일이 존재하지 않음: $filePath');
         return _buildPlaceholder(context);
       }
     }
@@ -168,12 +169,12 @@ class DiaryCard extends StatelessWidget {
           bytes,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
-            print('base64 이미지 로드 오류: $error');
+            if (kDebugMode) print('base64 이미지 로드 오류: $error');
             return _buildPlaceholder(context);
           },
         );
       } catch (e) {
-        print('base64 디코딩 오류: $e');
+        if (kDebugMode) print('base64 디코딩 오류: $e');
         return _buildPlaceholder(context);
       }
     }
@@ -187,14 +188,14 @@ class DiaryCard extends StatelessWidget {
           child: const Center(child: CircularProgressIndicator()),
         ),
         errorWidget: (context, url, error) {
-          print('네트워크 이미지 로드 오류: $error');
+          if (kDebugMode) print('네트워크 이미지 로드 오류: $error');
           return _buildPlaceholder(context);
         },
       );
     }
     // 알 수 없는 형식
     else {
-      print('알 수 없는 이미지 URL 형식: $imageUrl');
+      if (kDebugMode) print('알 수 없는 이미지 URL 형식: $imageUrl');
       return _buildPlaceholder(context);
     }
 
