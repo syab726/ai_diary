@@ -189,6 +189,63 @@ class DatabaseService {
     return diaries;
   }
 
+  /// 페이지네이션을 지원하는 일기 목록 조회
+  ///
+  /// [limit]: 한 번에 가져올 개수 (기본값: 20)
+  /// [offset]: 건너뛸 개수 (기본값: 0)
+  static Future<List<DiaryEntry>> getDiariesPaginated({
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    if (kDebugMode) print('DatabaseService: getDiariesPaginated 호출됨 (limit: $limit, offset: $offset)');
+    final db = await database;
+
+    // imageData BLOB 필드를 제외하고 조회 (CursorWindow 크기 제한 방지)
+    final List<Map<String, dynamic>> maps = await db.query(
+      tableName,
+      columns: [
+        'id',
+        'title',
+        'content',
+        'createdAt',
+        'updatedAt',
+        'generatedImageUrl',
+        // 'imageData',  // BLOB 데이터 제외
+        'emotion',
+        'keywords',
+        'aiPrompt',
+        'imageStyle',
+        'hasBeenRegenerated',
+        'fontFamily',
+        'imageTime',
+        'imageWeather',
+        'imageSeason',
+        'userPhotos',
+      ],
+      orderBy: 'createdAt DESC',
+      limit: limit,
+      offset: offset,
+    );
+
+    if (kDebugMode) print('DatabaseService: 가져온 일기 개수: ${maps.length}');
+
+    final List<DiaryEntry> diaries = List.generate(maps.length, (i) {
+      return DiaryEntry.fromMap(maps[i]);
+    });
+
+    if (kDebugMode) print('DatabaseService: DiaryEntry 객체 생성 완료: ${diaries.length}개');
+    return diaries;
+  }
+
+  /// 전체 일기 개수 조회 (페이지네이션용)
+  static Future<int> getDiaryCount() async {
+    final db = await database;
+    final result = await db.rawQuery('SELECT COUNT(*) as count FROM $tableName');
+    final count = Sqflite.firstIntValue(result) ?? 0;
+    if (kDebugMode) print('DatabaseService: 전체 일기 개수: $count');
+    return count;
+  }
+
   static Future<DiaryEntry?> getDiaryById(String id) async {
     final db = await database;
     // imageData BLOB 필드를 제외하고 조회 (CursorWindow 크기 제한 방지)
