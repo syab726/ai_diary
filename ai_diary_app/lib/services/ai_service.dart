@@ -103,7 +103,7 @@ class AIService {
   }
 
   // 사용자 업로드 사진 분석
-  static Future<String> analyzePhotos(List<String> photoPaths) async {
+  static Future<String> analyzePhotos(BuildContext context, List<String> photoPaths) async {
     if (photoPaths.isEmpty) return '';
 
     try {
@@ -141,14 +141,8 @@ class AIService {
       }
 
       // 분석 프롬프트 추가
-      parts.add(TextPart('''이 사진들을 분석해서 다음 정보를 추출해주세요:
-- 전체적인 분위기와 느낌
-- 주요 색감과 톤
-- 시간대 (아침, 낮, 저녁, 밤)
-- 장소와 환경 (실내/실외, 도시/자연 등)
-- 주요 피사체나 오브젝트
-
-2-3문장으로 간결하게 요약해주세요.'''));
+      final l10n = AppLocalizations.of(context);
+      parts.add(TextPart(l10n.aiPhotoAnalysisPrompt));
 
       final response = await visionModel.generateContent([Content.multi(parts)]);
       final analysisResult = response.text?.trim() ?? '';
@@ -161,8 +155,10 @@ class AIService {
     }
   }
 
-  static Future<String> generateImagePrompt(String diaryContent, String emotion, List<String> keywords, String style, [AdvancedImageOptions? advancedOptions, PerspectiveOptions? perspectiveOptions, ImageTime? imageTime, ImageWeather? imageWeather, String? photoAnalysis]) async {
+  static Future<String> generateImagePrompt(BuildContext context, String diaryContent, String emotion, List<String> keywords, String style, [AdvancedImageOptions? advancedOptions, PerspectiveOptions? perspectiveOptions, ImageTime? imageTime, ImageWeather? imageWeather, String? photoAnalysis]) async {
     try {
+      final l10n = AppLocalizations.of(context);
+
       // 고급 옵션을 프롬프트 접미사로 변환
       final advancedSuffix = advancedOptions?.generatePromptSuffix() ?? '';
       // 시점 옵션을 프롬프트 접미사로 변환
@@ -173,26 +169,54 @@ class AIService {
       // 사진 분석 결과
       final photoSuffix = photoAnalysis != null && photoAnalysis.isNotEmpty ? '사진 분석: $photoAnalysis' : '';
 
+      // 고급 옵션들을 하나의 문자열로 조합
+      List<String> advancedParts = [];
+
+      // 중간 부분: 옵션 값들
+      if (advancedSuffix.isNotEmpty) {
+        advancedParts.add('고급 옵션: $advancedSuffix');
+      }
+      if (perspectiveSuffix.isNotEmpty) {
+        advancedParts.add('시점: $perspectiveSuffix');
+      }
+      if (timeSuffix.isNotEmpty) {
+        advancedParts.add(timeSuffix);
+      }
+      if (weatherSuffix.isNotEmpty) {
+        advancedParts.add(weatherSuffix);
+      }
+      if (photoSuffix.isNotEmpty) {
+        advancedParts.add(photoSuffix);
+        advancedParts.add('\n위 사진의 분위기, 색감, 시간대, 장소를 참고해서 일관성 있는 이미지를 생성해주세요.');
+      }
+
+      // 하단 부분: 추가 설명들
+      if (advancedSuffix.isNotEmpty) {
+        advancedParts.add('고급 옵션에서 지정된 조명, 분위기, 색상, 구도 요소들을 반영해주세요.');
+      }
+      if (perspectiveSuffix.isNotEmpty) {
+        advancedParts.add('시점 옵션에서 지정된 관점을 반영해주세요.');
+      }
+      if (imageTime != null) {
+        advancedParts.add('지정된 시간대 ${imageTime.displayName}의 분위기를 반영해주세요.');
+      }
+      if (imageWeather != null) {
+        advancedParts.add('지정된 날씨 ${imageWeather.displayName}의 느낌을 표현해주세요.');
+      }
+      if (photoAnalysis != null && photoAnalysis.isNotEmpty) {
+        advancedParts.add('업로드된 사진의 스타일과 분위기를 최대한 반영해주세요.');
+      }
+
+      String advancedCombined = advancedParts.isEmpty ? '' : '\n' + advancedParts.join('\n');
+
       final response = await _textModel.generateContent([
-        Content.text('''다음 일기 내용을 바탕으로 이미지 생성 프롬프트를 만들어주세요.
-스타일: $style
-감정적이고 아름다운 이미지가 되도록 작성해주세요.
-
-일기 내용: $diaryContent
-주요 감정: $emotion
-키워드: ${keywords.join(', ')}
-${advancedSuffix.isNotEmpty ? '고급 옵션: $advancedSuffix' : ''}
-${perspectiveSuffix.isNotEmpty ? '시점: $perspectiveSuffix' : ''}
-${timeSuffix.isNotEmpty ? '시간: $timeSuffix' : ''}
-${weatherSuffix.isNotEmpty ? '날씨: $weatherSuffix' : ''}
-${photoSuffix.isNotEmpty ? '사용자 업로드 사진 분석:\n$photoAnalysis\n\n위 사진의 분위기, 색감, 시간대, 장소를 참고해서 일관성 있는 이미지를 생성해주세요.' : ''}
-
-프롬프트는 영어로 작성하고, 일기의 감정과 내용을 잘 표현하는 따뜻하고 감성적인 이미지가 되도록 해주세요.
-${advancedSuffix.isNotEmpty ? '고급 옵션에서 지정된 조명, 분위기, 색상, 구도 요소들을 반영해주세요.' : ''}
-${perspectiveSuffix.isNotEmpty ? '시점 옵션에서 지정된 관점을 반영해주세요.' : ''}
-${timeSuffix.isNotEmpty ? '지정된 시간대 ${imageTime!.displayName}의 분위기를 반영해주세요.' : ''}
-${weatherSuffix.isNotEmpty ? '지정된 날씨 ${imageWeather!.displayName}의 느낌을 표현해주세요.' : ''}
-${photoSuffix.isNotEmpty ? '업로드된 사진의 스타일과 분위기를 최대한 반영해주세요.' : ''}''')
+        Content.text(l10n.aiImagePromptBase(
+          style: style,
+          content: diaryContent,
+          emotion: emotion,
+          keywords: keywords.join(', '),
+          advanced: advancedCombined,
+        ))
       ]);
 
       return response.text?.trim() ?? 'A peaceful and emotional illustration';
@@ -457,8 +481,10 @@ JSON 형태로 답변해주세요:
   }
 
   // 감정 인사이트 생성
-  static Future<String> generateEmotionInsight(List<Map<String, dynamic>> diaryEntries, String periodType) async {
+  static Future<String> generateEmotionInsight(BuildContext context, List<Map<String, dynamic>> diaryEntries, String periodType) async {
     try {
+      final l10n = AppLocalizations.of(context);
+
       // 일기 내용 요약 준비
       String diariesSummary = '';
       for (var entry in diaryEntries) {
@@ -470,30 +496,18 @@ JSON 형태로 답변해주세요:
 
       String periodText = periodType == 'weekly' ? '주간' : periodType == 'monthly' ? '월간' : '전체 기간';
 
-      final prompt = '''
-당신은 친절하고 공감 능력이 뛰어난 심리 상담 전문가입니다.
-사용자의 $periodText 일기 데이터를 분석하여 감정 패턴과 인사이트를 제공해주세요.
-
-일기 데이터:
-$diariesSummary
-
-다음 지침을 따라 인사이트를 작성해주세요:
-1. 3-4문장으로 간결하게 작성
-2. 긍정적이고 공감적인 어조 사용
-3. 감정 패턴이나 변화에 대한 관찰 포함
-4. 실용적인 조언이나 격려의 메시지 포함
-5. 따뜻하고 친근한 말투 사용
-
-인사이트만 출력하고 다른 설명은 필요 없습니다.
-''';
+      final prompt = l10n.aiEmotionInsightSystem(
+        period: periodText,
+        diaries: diariesSummary,
+      );
 
       final content = [Content.text(prompt)];
       final response = await _textModel.generateContent(content);
 
-      return response.text ?? '이번 ${periodText}에는 다양한 감정을 경험하셨네요. 자신의 감정을 인식하고 기록하는 것만으로도 큰 의미가 있습니다.';
+      return response.text ?? l10n.aiDefaultInsight(periodText);
     } catch (e) {
       if (kDebugMode) print('감정 인사이트 생성 오류: $e');
-      return '이번 기간 동안의 감정 여정을 함께 기록해주셔서 감사합니다.';
+      return l10n.aiFallbackInsight;
     }
   }
 }

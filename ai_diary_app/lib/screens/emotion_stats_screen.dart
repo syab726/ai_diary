@@ -159,7 +159,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
       }).toList();
 
       // AI 인사이트 생성
-      final insightText = await AIService.generateEmotionInsight(diaryData, type);
+      final insightText = await AIService.generateEmotionInsight(context, diaryData, type);
 
       // 기존 인사이트 삭제
       final oldInsight = await DatabaseService.getInsightByType(type);
