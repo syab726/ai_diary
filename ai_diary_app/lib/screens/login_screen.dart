@@ -27,9 +27,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         // 무료 사용자로 설정 (나중에 프리미엄 구독 가능)
         ref.read(subscriptionProvider.notifier).setFreeUser();
 
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('환영합니다, ${user.displayName ?? '사용자'}님!'),
+            content: Text(l10n.welcomeUser(user.displayName ?? l10n.user)),
             backgroundColor: const Color(0xFF667EEA),
           ),
         );
@@ -38,9 +39,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Google 로그인 실패: $e'),
+            content: Text(l10n.googleLoginFailed(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -66,11 +68,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         // 무료 사용자로 설정
         ref.read(subscriptionProvider.notifier).setFreeUser();
 
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Guest로 시작합니다 (데이터는 이 기기에만 저장됩니다)'),
-            backgroundColor: Color(0xFFF59E0B),
-            duration: Duration(seconds: 4),
+          SnackBar(
+            content: Text(l10n.guestLoginMessage),
+            backgroundColor: const Color(0xFFF59E0B),
+            duration: const Duration(seconds: 4),
           ),
         );
 
@@ -78,9 +81,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('로그인 실패: $e'),
+            content: Text(l10n.loginFailed(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -96,6 +100,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: Center(
@@ -127,7 +132,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'AI 그림일기',
+                    l10n.loginTitle,
                     style: GoogleFonts.notoSans(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -136,7 +141,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'AI가 그려주는 감동적인 그림일기',
+                    l10n.loginDescription,
                     style: GoogleFonts.notoSans(
                       fontSize: 14,
                       color: const Color(0xFF718096),
@@ -152,7 +157,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               _buildLoginButton(
                 onPressed: _isLoading ? null : _signInWithGoogle,
                 icon: Icons.login,
-                text: 'Google로 시작하기',
+                text: l10n.startWithGoogle,
                 backgroundColor: const Color(0xFF667EEA),
                 textColor: Colors.white,
               ),
@@ -163,7 +168,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               _buildLoginButton(
                 onPressed: _isLoading ? null : _signInAsGuest,
                 icon: Icons.person_outline,
-                text: 'Guest로 계속하기',
+                text: l10n.continueAsGuest,
                 backgroundColor: Colors.white,
                 textColor: const Color(0xFF2D3748),
                 borderColor: const Color(0xFFE2E8F0),
@@ -183,7 +188,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
               // 설명 텍스트
               Text(
-                '매일의 소중한 순간을\nAI가 아름다운 그림으로 만들어드려요',
+                l10n.loginTagline,
                 style: GoogleFonts.notoSans(
                   fontSize: 14,
                   color: const Color(0xFF718096),

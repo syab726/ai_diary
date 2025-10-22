@@ -84,12 +84,16 @@ class AppLocalizations {
       'image_generation_error': '이미지 생성 중 오류가 발생했습니다: {error}',
       'save_error': '저장 중 오류가 발생했습니다: {error}',
       // Login screen
-      'login_title': 'ArtDiary AI에\n오신 것을 환영합니다',
-      'login_subtitle': '당신의 이야기를 아름다운 그림으로',
-      'continue_with_google': 'Google로 계속하기',
-      'continue_with_apple': 'Apple로 계속하기',
-      'continue_with_email': '이메일로 계속하기',
-      'continue_as_guest': '게스트로 계속하기',
+      'login_title': 'ArtDiary AI',
+      'login_description': 'AI가 그려주는 감동적인 그림일기',
+      'login_tagline': '매일의 소중한 순간을\nAI가 아름다운 그림으로 만들어드려요',
+      'start_with_google': 'Google로 시작하기',
+      'continue_as_guest': 'Guest로 계속하기',
+      'welcome_user': '환영합니다, {name}님!',
+      'user': '사용자',
+      'google_login_failed': 'Google 로그인 실패: {error}',
+      'guest_login_message': 'Guest로 시작합니다 (데이터는 이 기기에만 저장됩니다)',
+      'login_failed': '로그인 실패: {error}',
       // Emotions
       'emotion_happy': '행복',
       'emotion_sad': '슬픔',
@@ -365,12 +369,16 @@ class AppLocalizations {
       'diary_updated': '日記が更新されました',
       'image_generation_error': '画像生成エラー: {error}',
       'save_error': '保存エラー: {error}',
-      'login_title': 'ArtDiary AIへ\nようこそ',
-      'login_subtitle': 'あなたの物語を美しい絵に',
-      'continue_with_google': 'Googleで継続',
-      'continue_with_apple': 'Appleで継続',
-      'continue_with_email': 'メールで継続',
-      'continue_as_guest': 'ゲストで継続',
+      'login_title': 'ArtDiary AI',
+      'login_description': 'AIが描く感動の絵日記',
+      'login_tagline': '大切な日々の瞬間を\nAIが美しい絵に変えます',
+      'start_with_google': 'Googleで始める',
+      'continue_as_guest': 'ゲストで続ける',
+      'welcome_user': 'ようこそ、{name}さん!',
+      'user': 'ユーザー',
+      'google_login_failed': 'Googleログイン失敗: {error}',
+      'guest_login_message': 'ゲストモードで開始します（データはこのデバイスにのみ保存されます）',
+      'login_failed': 'ログイン失敗: {error}',
       'emotion_happy': '幸せ',
       'emotion_sad': '悲しい',
       'emotion_angry': '怒り',
@@ -647,12 +655,16 @@ class AppLocalizations {
       'image_generation_error': 'Error occurred while generating image: {error}',
       'save_error': 'Error occurred while saving: {error}',
       // Login screen
-      'login_title': 'Welcome to\nArtDiary AI',
-      'login_subtitle': 'Turn your stories into beautiful pictures',
-      'continue_with_google': 'Continue with Google',
-      'continue_with_apple': 'Continue with Apple',
-      'continue_with_email': 'Continue with Email',
+      'login_title': 'ArtDiary AI',
+      'login_description': 'AI-powered emotional diary with beautiful artwork',
+      'login_tagline': 'Transform your precious moments\ninto beautiful artwork with AI',
+      'start_with_google': 'Start with Google',
       'continue_as_guest': 'Continue as Guest',
+      'welcome_user': 'Welcome, {name}!',
+      'user': 'User',
+      'google_login_failed': 'Google login failed: {error}',
+      'guest_login_message': 'Starting as Guest (data will only be saved on this device)',
+      'login_failed': 'Login failed: {error}',
       // Emotions
       'emotion_happy': 'Happy',
       'emotion_sad': 'Sad',
@@ -931,12 +943,16 @@ These terms are governed by and interpreted in accordance with the laws of the R
       'image_generation_error': '生成图像时发生错误：{error}',
       'save_error': '保存时发生错误：{error}',
       // Login screen
-      'login_title': '欢迎使用\nArtDiary AI',
-      'login_subtitle': '将您的故事变成美丽的图画',
-      'continue_with_google': '使用Google继续',
-      'continue_with_apple': '使用Apple继续',
-      'continue_with_email': '使用邮箱继续',
-      'continue_as_guest': '作为访客继续',
+      'login_title': 'ArtDiary AI',
+      'login_description': 'AI绘制的感动日记',
+      'login_tagline': '让AI将您珍贵的每一刻\n变成美丽的画作',
+      'start_with_google': '使用Google开始',
+      'continue_as_guest': '以访客身份继续',
+      'welcome_user': '欢迎，{name}!',
+      'user': '用户',
+      'google_login_failed': 'Google登录失败：{error}',
+      'guest_login_message': '以访客模式开始（数据仅保存在此设备）',
+      'login_failed': '登录失败：{error}',
       // Emotions
       'emotion_happy': '快乐',
       'emotion_sad': '悲伤',
@@ -1213,12 +1229,16 @@ These terms are governed by and interpreted in accordance with the laws of the R
       'image_generation_error': 'Error in imagine generanda: {error}',
       'save_error': 'Error in servando: {error}',
       // Login screen
-      'login_title': 'Salve in\nArtDiary AI',
-      'login_subtitle': 'Fabulas tuas in pulchras picturas converte',
-      'continue_with_google': 'Cum Google pergere',
-      'continue_with_apple': 'Cum Apple pergere',
-      'continue_with_email': 'Cum epistula pergere',
-      'continue_as_guest': 'Ut hospes pergere',
+      'login_title': 'ArtDiary AI',
+      'login_description': 'Diarium Artificii Intellectus cum picturis pulchris',
+      'login_tagline': 'Momenta pretiosa tua\nin picturas pulchras per AI transformamus',
+      'start_with_google': 'Incipere cum Google',
+      'continue_as_guest': 'Continuare ut Hospes',
+      'welcome_user': 'Salve, {name}!',
+      'user': 'Usor',
+      'google_login_failed': 'Ingressio Google fracta est: {error}',
+      'guest_login_message': 'Modo Hospitis incipimus (notae in hoc instrumento solum servantur)',
+      'login_failed': 'Ingressio fracta est: {error}',
       // Emotions
       'emotion_happy': 'Laetus',
       'emotion_sad': 'Tristis',
@@ -1502,11 +1522,15 @@ Hae condiciones secundum leges Rei Publicae Coreae reguntur et interpretantur.''
   
   // Login screen
   String get loginTitle => _localizedValues[locale.languageCode]!['login_title']!;
-  String get loginSubtitle => _localizedValues[locale.languageCode]!['login_subtitle']!;
-  String get continueWithGoogle => _localizedValues[locale.languageCode]!['continue_with_google']!;
-  String get continueWithApple => _localizedValues[locale.languageCode]!['continue_with_apple']!;
-  String get continueWithEmail => _localizedValues[locale.languageCode]!['continue_with_email']!;
+  String get loginDescription => _localizedValues[locale.languageCode]!['login_description']!;
+  String get loginTagline => _localizedValues[locale.languageCode]!['login_tagline']!;
+  String get startWithGoogle => _localizedValues[locale.languageCode]!['start_with_google']!;
   String get continueAsGuest => _localizedValues[locale.languageCode]!['continue_as_guest']!;
+  String welcomeUser(String name) => _localizedValues[locale.languageCode]!['welcome_user']!.replaceAll('{name}', name);
+  String get user => _localizedValues[locale.languageCode]!['user']!;
+  String googleLoginFailed(String error) => _localizedValues[locale.languageCode]!['google_login_failed']!.replaceAll('{error}', error);
+  String get guestLoginMessage => _localizedValues[locale.languageCode]!['guest_login_message']!;
+  String loginFailed(String error) => _localizedValues[locale.languageCode]!['login_failed']!.replaceAll('{error}', error);
   
   // Emotions
   String get emotionHappy => _localizedValues[locale.languageCode]!['emotion_happy']!;
