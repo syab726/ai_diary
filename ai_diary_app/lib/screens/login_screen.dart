@@ -15,32 +15,32 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isLoading = false;
 
-  Future<void> _signInAsFreeUser() async {
+  Future<void> _signInWithGoogle() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // 익명 로그인 후 무료 사용자로 설정
-      final user = await AuthService.signInAnonymously();
+      // Google 로그인
+      final user = await AuthService.signInWithGoogle();
       if (user != null && mounted) {
-        // 무료 사용자로 설정
+        // 무료 사용자로 설정 (나중에 프리미엄 구독 가능)
         ref.read(subscriptionProvider.notifier).setFreeUser();
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('무료 사용자로 로그인했습니다'),
-            backgroundColor: Colors.orange,
+          SnackBar(
+            content: Text('환영합니다, ${user.displayName ?? '사용자'}님!'),
+            backgroundColor: const Color(0xFF667EEA),
           ),
         );
-        
+
         context.go('/');
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('로그인 실패: $e'),
+            content: Text('Google 로그인 실패: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -54,25 +54,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  Future<void> _signInAsPremiumUser() async {
+  Future<void> _signInAsGuest() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // 익명 로그인 후 프리미엄 사용자로 설정
+      // 익명 로그인 (Guest 모드)
       final user = await AuthService.signInAnonymously();
       if (user != null && mounted) {
-        // 프리미엄 사용자로 설정
-        ref.read(subscriptionProvider.notifier).setPremiumUser();
-        
+        // 무료 사용자로 설정
+        ref.read(subscriptionProvider.notifier).setFreeUser();
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('프리미엄 사용자로 로그인했습니다'),
-            backgroundColor: Colors.green,
+            content: Text('Guest로 시작합니다 (데이터는 이 기기에만 저장됩니다)'),
+            backgroundColor: Color(0xFFF59E0B),
+            duration: Duration(seconds: 4),
           ),
         );
-        
+
         context.go('/');
       }
     } catch (e) {
@@ -135,7 +136,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '테스트 모드',
+                    'AI가 그려주는 감동적인 그림일기',
                     style: GoogleFonts.notoSans(
                       fontSize: 14,
                       color: const Color(0xFF718096),
@@ -146,32 +147,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               
               const SizedBox(height: 48),
-              
-              // 테스트 로그인 버튼들
-              Column(
-                children: [
-                  // 무료 사용자 로그인
-                  _buildLoginButton(
-                    onPressed: _isLoading ? null : _signInAsFreeUser,
-                    icon: Icons.person,
-                    text: '무료 사용자로 시작하기',
-                    backgroundColor: Colors.orange,
-                    textColor: Colors.white,
-                  ),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // 프리미엄 사용자 로그인
-                  _buildLoginButton(
-                    onPressed: _isLoading ? null : _signInAsPremiumUser,
-                    icon: Icons.star,
-                    text: '프리미엄 사용자로 시작하기',
-                    backgroundColor: Colors.green,
-                    textColor: Colors.white,
-                  ),
-                ],
+
+              // Google 로그인 버튼
+              _buildLoginButton(
+                onPressed: _isLoading ? null : _signInWithGoogle,
+                icon: Icons.login,
+                text: 'Google로 시작하기',
+                backgroundColor: const Color(0xFF667EEA),
+                textColor: Colors.white,
               ),
-              
+
+              const SizedBox(height: 16),
+
+              // Guest 로그인 버튼
+              _buildLoginButton(
+                onPressed: _isLoading ? null : _signInAsGuest,
+                icon: Icons.person_outline,
+                text: 'Guest로 계속하기',
+                backgroundColor: Colors.white,
+                textColor: const Color(0xFF2D3748),
+                borderColor: const Color(0xFFE2E8F0),
+              ),
+
               const SizedBox(height: 32),
               
               // 로딩 인디케이터
@@ -183,35 +180,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
               
               const SizedBox(height: 24),
-              
+
               // 설명 텍스트
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+              Text(
+                '매일의 소중한 순간을\nAI가 아름다운 그림으로 만들어드려요',
+                style: GoogleFonts.notoSans(
+                  fontSize: 14,
+                  color: const Color(0xFF718096),
+                  height: 1.5,
                 ),
-                child: Column(
-                  children: [
-                    Text(
-                      '테스트 모드 안내',
-                      style: GoogleFonts.notoSans(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue[700],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '• 무료: 월 5개 이미지 + 광고 보상\n• 프리미엄: 무제한 이미지 + 전용 스타일\n• 설정에서 언제든지 전환 가능',
-                      style: GoogleFonts.notoSans(
-                        fontSize: 12,
-                        color: Colors.blue[600],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
+                textAlign: TextAlign.center,
               ),
             ],
           ),
