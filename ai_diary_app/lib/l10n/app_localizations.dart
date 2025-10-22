@@ -302,6 +302,62 @@ class AppLocalizations {
       'composition': '구도',
       'none': '없음',
       'clear_all_options': '자동선택으로',
+
+      // AI Prompts
+      'ai_emotion_analysis_prompt': '''다음 일기 내용의 주요 감정을 분석해주세요.
+가능한 감정: happy, sad, angry, excited, peaceful, anxious, grateful, nostalgic, romantic, frustrated
+하나의 감정만 답변해주세요.
+
+일기 내용: {content}''',
+      'ai_photo_analysis_prompt': '''이 사진들을 분석해서 다음 정보를 추출해주세요:
+- 전체적인 분위기와 느낌
+- 주요 색감과 톤
+- 시간대 (아침, 낮, 저녁, 밤)
+- 장소와 환경 (실내/실외, 도시/자연 등)
+- 주요 피사체나 오브젝트
+
+2-3문장으로 간결하게 요약해주세요.''',
+      'ai_image_prompt_base': '''다음 일기 내용을 바탕으로 이미지 생성 프롬프트를 만들어주세요.
+스타일: {style}
+감정적이고 아름다운 이미지가 되도록 작성해주세요.
+
+일기 내용: {content}
+주요 감정: {emotion}
+키워드: {keywords}
+{advanced}
+
+프롬프트는 영어로 작성하고, 일기의 감정과 내용을 잘 표현하는 따뜻하고 감성적인 이미지가 되도록 해주세요.
+구체적인 시각적 요소, 색감, 분위기를 포함해서 작성해주세요.''',
+      'ai_advanced_option_prefix': '고급 옵션: {options}',
+      'ai_auto_settings_prompt': '''다음 일기 내용을 분석해서 이미지 생성에 적합한 설정들을 추천해주세요.
+JSON 형태로 답변해주세요:
+
+{{
+  "lighting": "natural|dramatic|warm|cool|sunset|night 중 하나",
+  "mood": "peaceful|energetic|romantic|mysterious|joyful|melancholic 중 하나",
+  "color": "vibrant|pastel|monochrome|warm|cool|earthy 중 하나",
+  "composition": "centered|rule_of_thirds|symmetrical|dynamic|minimalist 중 하나"
+}}
+
+일기 내용: {content}
+
+일기의 분위기, 감정, 시간대, 날씨, 상황 등을 종합적으로 고려해서 가장 적합한 설정을 선택해주세요.''',
+      'ai_emotion_insight_system': '''당신은 친절하고 공감 능력이 뛰어난 심리 상담 전문가입니다.
+사용자의 {period} 일기 데이터를 분석하여 감정 패턴과 인사이트를 제공해주세요.
+
+일기 데이터:
+{diaries}
+
+다음 지침을 따라 인사이트를 작성해주세요:
+1. 3-4문장으로 간결하게 작성
+2. 긍정적이고 공감적인 어조 사용
+3. 감정 패턴이나 변화에 대한 관찰 포함
+4. 실용적인 조언이나 격려의 메시지 포함
+5. 따뜻하고 친근한 말투 사용
+
+인사이트만 출력하고 다른 설명은 필요 없습니다.''',
+      'ai_default_insight': '이번 {period}에는 다양한 감정을 경험하셨네요. 자신의 감정을 인식하고 기록하는 것만으로도 큰 의미가 있습니다.',
+      'ai_fallback_insight': '이번 기간 동안의 감정 여정을 함께 기록해주셔서 감사합니다.',
     },
     'ja': {
       'app_title': 'ArtDiary AI',
@@ -580,11 +636,67 @@ class AppLocalizations {
       // Advanced options
       'advanced_options': '高度なオプション',
       'lighting': 'ライティング',
-      'mood': 'ムード', 
+      'mood': 'ムード',
       'color': 'カラー',
       'composition': '構図',
       'none': 'なし',
       'clear_all_options': '自動選択',
+
+      // AI Prompts
+      'ai_emotion_analysis_prompt': '''次の日記内容の主要な感情を分析してください。
+可能な感情: happy, sad, angry, excited, peaceful, anxious, grateful, nostalgic, romantic, frustrated
+1つの感情のみ回答してください。
+
+日記内容: {content}''',
+      'ai_photo_analysis_prompt': '''この写真を分析して次の情報を抽出してください:
+- 全体的な雰囲気と感じ
+- 主要な色彩とトーン
+- 時間帯（朝、昼、夕方、夜）
+- 場所と環境（室内/屋外、都市/自然など）
+- 主要な被写体やオブジェクト
+
+2-3文で簡潔に要約してください。''',
+      'ai_image_prompt_base': '''次の日記内容を基にイメージ生成プロンプトを作成してください。
+スタイル: {style}
+感情的で美しいイメージになるように作成してください。
+
+日記内容: {content}
+主要感情: {emotion}
+キーワード: {keywords}
+{advanced}
+
+プロンプトは英語で作成し、日記の感情と内容をよく表現する温かく感性的なイメージになるようにしてください。
+具体的な視覚的要素、色彩、雰囲気を含めて作成してください。''',
+      'ai_advanced_option_prefix': '高度なオプション: {options}',
+      'ai_auto_settings_prompt': '''次の日記内容を分析して、イメージ生成に適した設定を推奨してください。
+JSON形式で回答してください:
+
+{{
+  "lighting": "natural|dramatic|warm|cool|sunset|night のいずれか",
+  "mood": "peaceful|energetic|romantic|mysterious|joyful|melancholic のいずれか",
+  "color": "vibrant|pastel|monochrome|warm|cool|earthy のいずれか",
+  "composition": "centered|rule_of_thirds|symmetrical|dynamic|minimalist のいずれか"
+}}
+
+日記内容: {content}
+
+日記の雰囲気、感情、時間帯、天気、状況などを総合的に考慮して最適な設定を選択してください。''',
+      'ai_emotion_insight_system': '''あなたは親切で共感力に優れた心理カウンセラーです。
+ユーザーの{period}日記データを分析して、感情パターンとインサイトを提供してください。
+
+日記データ:
+{diaries}
+
+次の指針に従ってインサイトを作成してください:
+1. 3-4文で簡潔に作成
+2. 肯定的で共感的な口調を使用
+3. 感情パターンや変化についての観察を含む
+4. 実用的なアドバイスや励ましのメッセージを含む
+5. 温かく親しみやすい口調を使用
+
+インサイトのみを出力し、他の説明は不要です。''',
+      'ai_default_insight': '今回の{period}には様々な感情を経験されましたね。自分の感情を認識し記録することだけでも大きな意味があります。',
+      'ai_fallback_insight': '今回の期間の感情の旅を一緒に記録してくださってありがとうございます。',
     },
     'en': {
       'app_title': 'ArtDiary AI',
@@ -868,11 +980,67 @@ These terms are governed by and interpreted in accordance with the laws of the R
       // Advanced options
       'advanced_options': 'Advanced Options',
       'lighting': 'Lighting',
-      'mood': 'Mood', 
+      'mood': 'Mood',
       'color': 'Color',
       'composition': 'Composition',
       'none': 'None',
       'clear_all_options': 'Auto Select',
+
+      // AI Prompts
+      'ai_emotion_analysis_prompt': '''Please analyze the main emotion of the following diary entry.
+Possible emotions: happy, sad, angry, excited, peaceful, anxious, grateful, nostalgic, romantic, frustrated
+Please respond with only one emotion.
+
+Diary content: {content}''',
+      'ai_photo_analysis_prompt': '''Please analyze these photos and extract the following information:
+- Overall mood and feeling
+- Main colors and tones
+- Time of day (morning, afternoon, evening, night)
+- Location and environment (indoor/outdoor, urban/nature, etc.)
+- Main subjects or objects
+
+Please summarize in 2-3 sentences.''',
+      'ai_image_prompt_base': '''Please create an image generation prompt based on the following diary entry.
+Style: {style}
+Create an emotional and beautiful image.
+
+Diary content: {content}
+Main emotion: {emotion}
+Keywords: {keywords}
+{advanced}
+
+Write the prompt in English, creating a warm and emotional image that expresses the diary's emotion and content well.
+Include specific visual elements, colors, and atmosphere.''',
+      'ai_advanced_option_prefix': 'Advanced options: {options}',
+      'ai_auto_settings_prompt': '''Please analyze the following diary entry and recommend suitable settings for image generation.
+Respond in JSON format:
+
+{{
+  "lighting": "one of: natural|dramatic|warm|cool|sunset|night",
+  "mood": "one of: peaceful|energetic|romantic|mysterious|joyful|melancholic",
+  "color": "one of: vibrant|pastel|monochrome|warm|cool|earthy",
+  "composition": "one of: centered|rule_of_thirds|symmetrical|dynamic|minimalist"
+}}
+
+Diary content: {content}
+
+Please select the most appropriate settings by comprehensively considering the diary's mood, emotion, time of day, weather, and situation.''',
+      'ai_emotion_insight_system': '''You are a kind and empathetic counseling psychologist.
+Please analyze the user's {period} diary data and provide emotional patterns and insights.
+
+Diary data:
+{diaries}
+
+Please write insights following these guidelines:
+1. Write concisely in 3-4 sentences
+2. Use a positive and empathetic tone
+3. Include observations about emotional patterns or changes
+4. Include practical advice or encouraging messages
+5. Use a warm and friendly tone
+
+Output only the insights, no other explanations needed.''',
+      'ai_default_insight': 'You have experienced various emotions this {period}. Recognizing and recording your emotions is meaningful in itself.',
+      'ai_fallback_insight': 'Thank you for recording your emotional journey during this period.',
     },
     'zh': {
       'app_title': 'ArtDiary AI',
@@ -1156,11 +1324,67 @@ These terms are governed by and interpreted in accordance with the laws of the R
       // Advanced options
       'advanced_options': '高级选项',
       'lighting': '照明',
-      'mood': '情绪', 
+      'mood': '情绪',
       'color': '颜色',
       'composition': '构图',
       'none': '无',
       'clear_all_options': '自动选择',
+
+      // AI Prompts
+      'ai_emotion_analysis_prompt': '''请分析以下日记内容的主要情绪。
+可能的情绪: happy, sad, angry, excited, peaceful, anxious, grateful, nostalgic, romantic, frustrated
+请只回答一种情绪。
+
+日记内容: {content}''',
+      'ai_photo_analysis_prompt': '''请分析这些照片并提取以下信息:
+- 整体氛围和感觉
+- 主要色彩和色调
+- 时间段（早晨、白天、傍晚、夜晚）
+- 地点和环境（室内/室外、城市/自然等）
+- 主要拍摄对象或物体
+
+请用2-3句话简要概括。''',
+      'ai_image_prompt_base': '''请根据以下日记内容创建图像生成提示。
+风格: {style}
+创建一个情感丰富且美丽的图像。
+
+日记内容: {content}
+主要情绪: {emotion}
+关键词: {keywords}
+{advanced}
+
+请用英语编写提示，创建一个温暖且富有情感的图像，能够很好地表达日记的情感和内容。
+包括具体的视觉元素、色彩和氛围。''',
+      'ai_advanced_option_prefix': '高级选项: {options}',
+      'ai_auto_settings_prompt': '''请分析以下日记内容并推荐适合图像生成的设置。
+以JSON格式回答:
+
+{{
+  "lighting": "选择一个: natural|dramatic|warm|cool|sunset|night",
+  "mood": "选择一个: peaceful|energetic|romantic|mysterious|joyful|melancholic",
+  "color": "选择一个: vibrant|pastel|monochrome|warm|cool|earthy",
+  "composition": "选择一个: centered|rule_of_thirds|symmetrical|dynamic|minimalist"
+}}
+
+日记内容: {content}
+
+请综合考虑日记的氛围、情绪、时间段、天气和情况，选择最合适的设置。''',
+      'ai_emotion_insight_system': '''你是一位亲切且善解人意的心理咨询师。
+请分析用户的{period}日记数据，提供情感模式和见解。
+
+日记数据:
+{diaries}
+
+请按照以下指导编写见解:
+1. 用3-4句话简洁地写
+2. 使用积极和同理的语气
+3. 包括对情感模式或变化的观察
+4. 包括实用的建议或鼓励的信息
+5. 使用温暖和友好的语气
+
+只输出见解，不需要其他说明。''',
+      'ai_default_insight': '在这个{period}中，您体验了各种情绪。认识并记录自己的情绪本身就很有意义。',
+      'ai_fallback_insight': '感谢您记录这段时间的情感旅程。',
     },
     'la': {
       'app_title': 'ArtDiary AI',
@@ -1442,11 +1666,67 @@ Hae condiciones secundum leges Rei Publicae Coreae reguntur et interpretantur.''
       // Advanced options
       'advanced_options': 'Optiones Superiores',
       'lighting': 'Lumen',
-      'mood': 'Animus', 
+      'mood': 'Animus',
       'color': 'Color',
       'composition': 'Compositio',
       'none': 'Nihil',
       'clear_all_options': 'Automatice Eligere',
+
+      // AI Prompts
+      'ai_emotion_analysis_prompt': '''Quaeso analyza praecipuam emotionem sequentis diarii contenti.
+Emotiones possibiles: happy, sad, angry, excited, peaceful, anxious, grateful, nostalgic, romantic, frustrated
+Responde tantum unam emotionem.
+
+Contentum diarii: {content}''',
+      'ai_photo_analysis_prompt': '''Quaeso analyza has photographias et extrahe sequentem informationem:
+- Ambitus et sensus generalis
+- Colores et toni praecipui
+- Tempus diei (mane, meridie, vespere, nocte)
+- Locus et ambitus (intus/foris, urbanus/naturalis, etc.)
+- Subiecta vel objecta praecipua
+
+Resume in 2-3 sententias breviter.''',
+      'ai_image_prompt_base': '''Quaeso crea indicium generationis imaginis basatum in sequenti contentum diarii.
+Stylus: {style}
+Crea imaginem emotionalem et pulchram.
+
+Contentum diarii: {content}
+Emotio praecipua: {emotion}
+Verba clavium: {keywords}
+{advanced}
+
+Scribe indicium Anglice, creando imaginem calidam et emotionalem quae emotionem et contentum diarii bene exprimit.
+Include elementa visualia specifica, colores, et ambitum.''',
+      'ai_advanced_option_prefix': 'Optiones superiores: {options}',
+      'ai_auto_settings_prompt': '''Quaeso analyza sequentem contentum diarii et commenda configurationes idoneas pro generatione imaginis.
+Responde in forma JSON:
+
+{{
+  "lighting": "unum ex: natural|dramatic|warm|cool|sunset|night",
+  "mood": "unum ex: peaceful|energetic|romantic|mysterious|joyful|melancholic",
+  "color": "unum ex: vibrant|pastel|monochrome|warm|cool|earthy",
+  "composition": "unum ex: centered|rule_of_thirds|symmetrical|dynamic|minimalist"
+}}
+
+Contentum diarii: {content}
+
+Quaeso elige configurationes aptissimas considerando comprehensive ambitum, emotionem, tempus diei, caelum, et situm diarii.''',
+      'ai_emotion_insight_system': '''Tu es psychologus consultativus benignus et empathicus.
+Quaeso analyza {period} data diarii usoris et provide patterns emotionales et perspicacitates.
+
+Data diarii:
+{diaries}
+
+Quaeso scribe perspicacitates sequendo has directiones:
+1. Scribe breviter in 3-4 sententias
+2. Ute tonum positivum et empathicum
+3. Include observationes de patterns emotionalibus vel mutationibus
+4. Include consilium practicum vel nuntia encouragement
+5. Ute tonum calidum et amicabilem
+
+Emitte tantum perspicacitates, nulla alia explanatio necessaria.''',
+      'ai_default_insight': 'In hoc {period}, varias emotiones expertus es. Recognoscere et recordare tuas emotiones ipsum magnum significatum habet.',
+      'ai_fallback_insight': 'Gratias tibi ago pro recordando iter emotionale huius periodi.',
     },
   };
 
@@ -1681,7 +1961,56 @@ Hae condiciones secundum leges Rei Publicae Coreae reguntur et interpretantur.''
   String get composition => _localizedValues[locale.languageCode]!['composition']!;
   String get none => _localizedValues[locale.languageCode]!['none']!;
   String get clearAllOptions => _localizedValues[locale.languageCode]!['clear_all_options']!;
-  
+
+  // AI Prompts
+  String aiEmotionAnalysisPrompt(String content) {
+    return _localizedValues[locale.languageCode]!['ai_emotion_analysis_prompt']!
+        .replaceAll('{content}', content);
+  }
+
+  String get aiPhotoAnalysisPrompt => _localizedValues[locale.languageCode]!['ai_photo_analysis_prompt']!;
+
+  String aiImagePromptBase({
+    required String style,
+    required String content,
+    required String emotion,
+    required String keywords,
+    String advanced = '',
+  }) {
+    return _localizedValues[locale.languageCode]!['ai_image_prompt_base']!
+        .replaceAll('{style}', style)
+        .replaceAll('{content}', content)
+        .replaceAll('{emotion}', emotion)
+        .replaceAll('{keywords}', keywords)
+        .replaceAll('{advanced}', advanced);
+  }
+
+  String aiAdvancedOptionPrefix(String options) {
+    return _localizedValues[locale.languageCode]!['ai_advanced_option_prefix']!
+        .replaceAll('{options}', options);
+  }
+
+  String aiAutoSettingsPrompt(String content) {
+    return _localizedValues[locale.languageCode]!['ai_auto_settings_prompt']!
+        .replaceAll('{content}', content);
+  }
+
+  String aiEmotionInsightSystem({
+    required String period,
+    required String diaries,
+  }) {
+    return _localizedValues[locale.languageCode]!['ai_emotion_insight_system']!
+        .replaceAll('{period}', period)
+        .replaceAll('{diaries}', diaries);
+  }
+
+  String aiDefaultInsight(String period) {
+    return _localizedValues[locale.languageCode]!['ai_default_insight']!
+        .replaceAll('{period}', period);
+  }
+
+  String get aiFallbackInsight => _localizedValues[locale.languageCode]!['ai_fallback_insight']!;
+
   String getImageStyleName(String styleKey) {
     switch (styleKey.toLowerCase()) {
       case 'auto': return styleAuto;
