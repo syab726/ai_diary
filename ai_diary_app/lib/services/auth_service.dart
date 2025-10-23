@@ -22,7 +22,9 @@ class MockUser {
 
 class AuthService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
-  static final GoogleSignIn _googleSignIn = GoogleSignIn();
+  static final GoogleSignIn _googleSignIn = GoogleSignIn(
+    serverClientId: '717196605259-uenjhr6urp1aanp209d1ujm5rngdn46l.apps.googleusercontent.com',
+  );
   
   // 개발용 로컬 상태 관리
   static MockUser? _currentMockUser;
@@ -52,7 +54,21 @@ class AuthService {
 
       // Firebase로 로그인
       final UserCredential userCredential = await _auth.signInWithCredential(credential);
-      return userCredential.user;
+      final user = userCredential.user;
+
+      // Mock 사용자 상태 업데이트 및 스트림에 알림
+      if (user != null) {
+        _currentMockUser = MockUser(
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          isAnonymous: false,
+        );
+        _authStateController.add(_currentMockUser);
+        if (kDebugMode) print('✅ Google 로그인 성공: ${user.email}');
+      }
+
+      return user;
     } catch (e) {
       if (kDebugMode) print('Google 로그인 오류: $e');
       rethrow;
@@ -82,7 +98,21 @@ class AuthService {
 
       // Firebase로 로그인
       final UserCredential userCredential = await _auth.signInWithCredential(oauthCredential);
-      return userCredential.user;
+      final user = userCredential.user;
+
+      // Mock 사용자 상태 업데이트 및 스트림에 알림
+      if (user != null) {
+        _currentMockUser = MockUser(
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          isAnonymous: false,
+        );
+        _authStateController.add(_currentMockUser);
+        if (kDebugMode) print('✅ Apple 로그인 성공: ${user.email}');
+      }
+
+      return user;
     } catch (e) {
       if (kDebugMode) print('Apple 로그인 오류: $e');
       rethrow;
@@ -177,7 +207,21 @@ class AuthService {
       );
 
       final UserCredential userCredential = await user.linkWithCredential(credential);
-      return userCredential.user;
+      final linkedUser = userCredential.user;
+
+      // Mock 사용자 상태 업데이트 및 스트림에 알림
+      if (linkedUser != null) {
+        _currentMockUser = MockUser(
+          uid: linkedUser.uid,
+          email: linkedUser.email,
+          displayName: linkedUser.displayName,
+          isAnonymous: false,
+        );
+        _authStateController.add(_currentMockUser);
+        if (kDebugMode) print('✅ Google 계정 연결 성공: ${linkedUser.email}');
+      }
+
+      return linkedUser;
     } catch (e) {
       if (kDebugMode) print('계정 연결 오류: $e');
       rethrow;
