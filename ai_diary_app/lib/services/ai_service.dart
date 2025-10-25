@@ -1,12 +1,15 @@
 import 'dart:developer';
 import 'dart:typed_data';
 import 'dart:convert';
+import 'dart:async';
+import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import '../models/image_options.dart';
 import '../models/perspective_options.dart';
 import '../models/image_time.dart';
@@ -52,21 +55,162 @@ class AIService {
   static const String _huggingFaceApiKey = 'hf_YOUR_API_KEY'; // Hugging Face API 키 (무료 가입 후 발급)
   static late GenerativeModel _textModel;
   static late GenerativeModel _imageModel;
-  
-  static void initialize() {
+  static String _currentImageModel = 'gemini-2.5-flash-image';
+  static Timer? _modelCheckTimer; // 주기적 모델 체크용 타이머
+
+  // 사용 가능한 이미지 생성 모델 자동 감지
+  static Future<String?> _detectImageModel() async {
+    try {
+      if (kDebugMode) print('=== 사용 가능한 Gemini 모델 조회 중... ===');
+
+      final response = await http.get(
+        Uri.parse('https://generativelanguage.googleapis.com/v1beta/models?key=$_geminiApiKey'),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('API 호출 실패: ${response.statusCode}');
+      }
+
+      // API 응답 구조 검증 (구조 변경 감지)
+      if (!response.body.contains('"models"')) {
+        // 구조 변경 감지 → Crashlytics에 리포팅
+        FirebaseCrashlytics.instance.recordError(
+          Exception('Gemini API 응답 구조 변경 감지 - 개발자 확인 필요'),
+          StackTrace.current,
+          reason: 'Response preview: ${response.body.substring(0, min(500, response.body.length))}',
+          fatal: false,
+        );
+
+        if (kDebugMode) print('⚠⚠⚠ API 구조 변경 감지! Crashlytics에 리포팅됨');
+        return null; // 기존 모델 유지
+      }
+
+      final data = jsonDecode(response.body);
+      final models = data['models'] as List;
+
+      if (kDebugMode) print('총 ${models.length}개 모델 발견');
+
+      // 이미지 생성 가능한 모델 필터링
+      final imageModels = models.where((model) {
+        final name = model['name'] as String;
+        final supportedActions = model['supportedGenerationMethods'] as List?;
+
+        // 'generateContent'를 지원하고 이름에 'image'가 포함된 모델
+        return supportedActions?.contains('generateContent') == true &&
+               (name.toLowerCase().contains('image') || name.toLowerCase().contains('imagen'));
+      }).toList();
+
+      if (kDebugMode) {
+        print('이미지 생성 가능 모델:');
+        for (var model in imageModels) {
+          final modelName = (model['name'] as String).replaceAll('models/', '');
+          print('  - $modelName');
+        }
+      }
+
+      // 첫 번째 이미지 모델 사용 (가장 최신 모델)
+      if (imageModels.isNotEmpty) {
+        final selectedModel = (imageModels.first['name'] as String).replaceAll('models/', '');
+        if (kDebugMode) print('✓ 선택된 이미지 모델: $selectedModel');
+        return selectedModel;
+      }
+
+      if (kDebugMode) print('⚠ 사용 가능한 이미지 모델 없음');
+      return null;
+
+    } catch (e, stackTrace) {
+      // 모든 에러를 Crashlytics에 리포팅
+      FirebaseCrashlytics.instance.recordError(
+        e,
+        stackTrace,
+        reason: 'Gemini 모델 감지 실패',
+        fatal: false,
+      );
+
+      if (kDebugMode) print('모델 조회 실패: $e');
+      return null; // 기존 모델 유지
+    }
+  }
+
+  // 네트워크 연결 확인
+  static Future<bool> _hasInternetConnection() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  // 모델 감지 및 업데이트
+  static Future<void> _detectAndUpdateModel() async {
+    try {
+      final newModel = await _detectImageModel();
+
+      if (newModel != null && newModel != _currentImageModel) {
+        if (kDebugMode) print('✓ 모델 자동 변경: $_currentImageModel → $newModel');
+        _currentImageModel = newModel;
+
+        // 모델 객체 재생성
+        _imageModel = GenerativeModel(
+          model: _currentImageModel,
+          apiKey: _geminiApiKey
+        );
+      }
+    } catch (e, stackTrace) {
+      // 실패 시 Crashlytics에 리포팅
+      FirebaseCrashlytics.instance.recordError(
+        e,
+        stackTrace,
+        reason: '모델 자동 감지/업데이트 실패',
+        fatal: false,
+      );
+
+      if (kDebugMode) print('모델 체크 실패 (기존 모델 유지): $e');
+    }
+  }
+
+  // 주기적 모델 체크 시작 (1시간마다)
+  static void _startPeriodicModelCheck() {
+    _modelCheckTimer = Timer.periodic(Duration(hours: 1), (_) async {
+      // 네트워크 없으면 스킵
+      if (!await _hasInternetConnection()) {
+        if (kDebugMode) print('네트워크 없음, 모델 체크 스킵');
+        return;
+      }
+
+      if (kDebugMode) print('=== 주기적 모델 체크 (1시간마다) ===');
+      await _detectAndUpdateModel();
+    });
+
+    if (kDebugMode) print('✓ 주기적 모델 체크 시작 (1시간마다)');
+  }
+
+  // 리소스 정리
+  static void dispose() {
+    _modelCheckTimer?.cancel();
+    _modelCheckTimer = null;
+    if (kDebugMode) print('✓ AIService 리소스 정리 완료');
+  }
+
+  static Future<void> initialize() async {
     if (kDebugMode) print('=== AI Service 초기화 ===');
-    if (kDebugMode) print('텍스트 모델명: gemini-2.0-flash-lite');
-    if (kDebugMode) print('이미지 생성 모델명: gemini-2.5-flash-image-preview');
     if (kDebugMode) print('API 키 설정됨: ${_geminiApiKey.substring(0, 10)}...');
 
+    // 텍스트 모델 초기화
     _textModel = GenerativeModel(
       model: 'gemini-2.0-flash-lite',
       apiKey: _geminiApiKey
     );
-    _imageModel = GenerativeModel(
-      model: 'gemini-2.5-flash-image-preview',
-      apiKey: _geminiApiKey
-    );
+    if (kDebugMode) print('텍스트 모델: gemini-2.0-flash-lite');
+
+    // 이미지 생성 모델 자동 감지
+    await _detectAndUpdateModel();
+
+    if (kDebugMode) print('✓ 이미지 생성 모델: $_currentImageModel');
+
+    // 주기적 모델 체크 시작
+    _startPeriodicModelCheck();
 
     if (kDebugMode) print('모델 초기화 완료');
   }
@@ -253,7 +397,7 @@ class AIService {
         if (kDebugMode) print('최종 강화된 프롬프트: $enhancedPrompt');
 
         final response = await http.post(
-          Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=$_geminiApiKey'),
+          Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/$_currentImageModel:generateContent?key=$_geminiApiKey'),
           headers: {
             'Content-Type': 'application/json',
           },
@@ -272,6 +416,7 @@ class AIService {
               'topK': 1,
               'topP': 1,
               'maxOutputTokens': 8192,
+              'response_modalities': ['IMAGE'],
             }
           }),
         );
@@ -394,6 +539,7 @@ JSON 형태로 답변해주세요:
   }
 
   static Future<Map<String, dynamic>> processEntry(
+    BuildContext context,
     String diaryContent,
     String style, [
     AdvancedImageOptions? advancedOptions,
@@ -417,14 +563,14 @@ JSON 형태로 답변해주세요:
       String photoAnalysis = '';
       if (userPhotos != null && userPhotos.isNotEmpty) {
         print('사용자 업로드 사진 분석 시작...');
-        photoAnalysis = await analyzePhotos(userPhotos);
+        photoAnalysis = await analyzePhotos(context, userPhotos);
         if (kDebugMode) print('사진 분석 완료: $photoAnalysis');
       }
 
       // 병렬로 감정 분석과 키워드 추출 실행
       if (kDebugMode) print('감정 분석 및 키워드 추출 시작...');
       final futures = await Future.wait([
-        analyzeEmotion(diaryContent),
+        analyzeEmotion(context, diaryContent),
         extractKeywords(diaryContent),
       ]);
 
@@ -437,6 +583,7 @@ JSON 형태로 답변해주세요:
       // 이미지 프롬프트 생성 (사진 분석 결과 포함)
       if (kDebugMode) print('이미지 프롬프트 생성 시작...');
       final imagePrompt = await generateImagePrompt(
+        context,
         diaryContent,
         emotion,
         keywords,
@@ -482,8 +629,8 @@ JSON 형태로 답변해주세요:
 
   // 감정 인사이트 생성
   static Future<String> generateEmotionInsight(BuildContext context, List<Map<String, dynamic>> diaryEntries, String periodType) async {
+    final l10n = AppLocalizations.of(context);
     try {
-      final l10n = AppLocalizations.of(context);
 
       // 일기 내용 요약 준비
       String diariesSummary = '';
