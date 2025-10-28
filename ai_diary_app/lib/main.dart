@@ -92,7 +92,7 @@ void main() async {
   await initializeDateFormatting('ko_KR', null);
 
   // AI 서비스 초기화
-  AIService.initialize();
+  await AIService.initialize();
 
   runApp(
     const ProviderScope(
@@ -183,10 +183,14 @@ GoRouter _createRouter(WidgetRef ref) {
       
       // 언어 변경 후 저장된 라우트가 있으면 해당 라우트로 이동
       final savedRoute = ref.read(currentRouteProvider);
-      if (savedRoute != null) {
+      if (savedRoute != null && savedRoute != currentLocation) {
         // Future를 사용하여 빌드 후에 상태 초기화
         Future.microtask(() => ref.read(currentRouteProvider.notifier).state = null);
         return savedRoute;
+      }
+      // savedRoute가 현재 위치와 같으면 초기화만 하고 리다이렉트하지 않음
+      if (savedRoute != null && savedRoute == currentLocation) {
+        Future.microtask(() => ref.read(currentRouteProvider.notifier).state = null);
       }
       
       // 로그인이 필요한 페이지들
