@@ -554,7 +554,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   }
 
   void _showDeleteDialog() {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -709,7 +709,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
     final subscription = ref.watch(subscriptionProvider);
     final selectedFont = ref.watch(fontProvider);
 

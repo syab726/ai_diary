@@ -155,7 +155,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
         return {
           'date': DateFormat('yyyy-MM-dd').format(entry.createdAt),
           'emotion': entry.emotion ?? '없음',
-          'keywords': entry.keywords ?? [],
+          'keywords': entry.keywords,
         };
       }).toList();
 

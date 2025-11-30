@@ -1401,7 +1401,6 @@ Output only the insights, no other explanations needed.''',
       'calendar': '日历',
       'diary_search': '日记搜索',
       'start_with_ai_diary': '开始您的AI绘图日记之旅',
-      'refresh': '刷新',
       'calendar_load_error': '无法加载日历',
       // Settings dialog content
       'theme_selection': '主题选择',
