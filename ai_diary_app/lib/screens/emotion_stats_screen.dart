@@ -1243,9 +1243,6 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
         : null;
 
     final totalDiaries = diaries.length;
-    final daysSinceFirst = totalDiaries > 0
-        ? DateTime.now().difference(diaries.first.createdAt).inDays
-        : 0;
 
     return Column(
       children: [
