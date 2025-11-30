@@ -505,7 +505,7 @@ class BackupRestoreScreen extends ConsumerWidget {
   }
 
   void _showCloudBackupDialog(BuildContext context) {
-    print('=== _showCloudBackupDialog 호출됨 ===');
+    debugPrint('=== _showCloudBackupDialog 호출됨 ===');
     final scaffoldContext = context;  // 원래 Scaffold context 저장
     showDialog(
       context: context,
@@ -571,13 +571,13 @@ class BackupRestoreScreen extends ConsumerWidget {
   }
 
   Future<void> _performCloudBackup(BuildContext context) async {
-    print('=== _performCloudBackup 시작 ===');
+    debugPrint('=== _performCloudBackup 시작 ===');
     try {
       // 로컬 Mock 사용자 확인 (테스트 모드)
       final mockUser = AuthService.currentUser;
       final isTestMode = mockUser != null && mockUser.uid.startsWith('local-mock-');
-      print('mockUser: ${mockUser?.uid}');
-      print('isTestMode: $isTestMode');
+      debugPrint('mockUser: ${mockUser?.uid}');
+      debugPrint('isTestMode: $isTestMode');
 
       // Firebase 사용자 또는 로컬 Mock 사용자가 있는지 확인
       User? firebaseUser;
@@ -589,7 +589,7 @@ class BackupRestoreScreen extends ConsumerWidget {
       }
 
       if (firebaseUser == null && mockUser == null) {
-        print('로그인 필요 - SnackBar 표시');
+        debugPrint('로그인 필요 - SnackBar 표시');
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -611,7 +611,7 @@ class BackupRestoreScreen extends ConsumerWidget {
 
       // 테스트 모드인 경우 시뮬레이션
       if (isTestMode) {
-        print('테스트 모드 - 백업 시뮬레이션 시작');
+        debugPrint('테스트 모드 - 백업 시뮬레이션 시작');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Row(

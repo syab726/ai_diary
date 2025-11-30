@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
@@ -31,9 +30,9 @@ class BackupRestoreScreen extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          '백업 및 복원',
-          style: TextStyle(
+        title: Text(
+          AppLocalizations.of(context).backupAndRestore,
+          style: const TextStyle(
             color: Color(0xFF2D3748),
             fontWeight: FontWeight.bold,
           ),
@@ -46,13 +45,13 @@ class BackupRestoreScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         children: [
           // 자동 백업 섹션
-          _buildSectionTitle(context, '자동 백업'),
+          _buildSectionTitle(context, AppLocalizations.of(context).autoBackup),
           _buildAutoBackupCard(context, ref),
 
           const SizedBox(height: 24),
 
           // 로컬 백업/복원 섹션
-          _buildSectionTitle(context, '로컬 백업/복원'),
+          _buildSectionTitle(context, AppLocalizations.of(context).localBackupRestore),
           SettingsTile(
             icon: Icons.backup,
             title: AppLocalizations.of(context).dataBackup,
@@ -69,7 +68,7 @@ class BackupRestoreScreen extends ConsumerWidget {
           const SizedBox(height: 24),
 
           // 클라우드 백업/복원 섹션
-          _buildSectionTitle(context, '클라우드 백업/복원'),
+          _buildSectionTitle(context, AppLocalizations.of(context).cloudBackupRestore),
           _buildCloudBackupRestoreCard(context, ref),
         ],
       ),
@@ -103,7 +102,7 @@ class BackupRestoreScreen extends ConsumerWidget {
           children: [
             Text(subscription.isPremium
               ? AppLocalizations.of(dialogContext).backupDescription
-              : '무료 사용자는 일기 제목, 내용, 날짜를 JSON 형식으로 백업할 수 있습니다.'),
+              : AppLocalizations.of(dialogContext).freeUserBackupDescription),
             const SizedBox(height: 12),
             Text(AppLocalizations.of(dialogContext).backupIncludes, style: const TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
@@ -128,7 +127,7 @@ class BackupRestoreScreen extends ConsumerWidget {
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        '프리미엄: 감정 분석, 생성 이미지, AI 프롬프트 포함',
+                        AppLocalizations.of(dialogContext).premiumBackupDescription,
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.amber.shade700,
@@ -202,7 +201,7 @@ class BackupRestoreScreen extends ConsumerWidget {
 
         // FilePicker를 사용하여 저장 위치 선택
         final String? outputPath = await FilePicker.platform.saveFile(
-          dialogTitle: '백업 파일 저장 위치 선택',
+          dialogTitle: AppLocalizations.of(context).selectBackupLocation,
           fileName: 'ai_diary_premium_backup_$timestamp.json',
           type: FileType.custom,
           allowedExtensions: ['json'],
@@ -214,8 +213,8 @@ class BackupRestoreScreen extends ConsumerWidget {
           if (context.mounted) {
             ScaffoldMessenger.of(context).clearSnackBars();
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('백업이 취소되었습니다'),
+              SnackBar(
+                content: Text(AppLocalizations.of(context).backupCanceled),
                 backgroundColor: Colors.orange,
               ),
             );
@@ -232,7 +231,7 @@ class BackupRestoreScreen extends ConsumerWidget {
                 children: [
                   const Icon(Icons.check_circle, color: Colors.white),
                   const SizedBox(width: 12),
-                  Text('${diaries.length}개 일기가 완전히 백업되었습니다'),
+                  Text(AppLocalizations.of(context).premiumBackupSuccessFormat.replaceAll('{count}', '${diaries.length}')),
                 ],
               ),
               backgroundColor: Colors.green,
@@ -248,7 +247,7 @@ class BackupRestoreScreen extends ConsumerWidget {
 
         // FilePicker를 사용하여 저장 위치 선택
         final String? outputPath = await FilePicker.platform.saveFile(
-          dialogTitle: '백업 파일 저장 위치 선택',
+          dialogTitle: AppLocalizations.of(context).selectBackupLocation,
           fileName: 'ai_diary_backup_$timestamp.json',
           type: FileType.custom,
           allowedExtensions: ['json'],
@@ -260,8 +259,8 @@ class BackupRestoreScreen extends ConsumerWidget {
           if (context.mounted) {
             ScaffoldMessenger.of(context).clearSnackBars();
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('백업이 취소되었습니다'),
+              SnackBar(
+                content: Text(AppLocalizations.of(context).backupCanceled),
                 backgroundColor: Colors.orange,
               ),
             );
@@ -278,7 +277,7 @@ class BackupRestoreScreen extends ConsumerWidget {
                 children: [
                   const Icon(Icons.check_circle, color: Colors.white),
                   const SizedBox(width: 12),
-                  Text('${diaries.length}개 일기가 백업되었습니다'),
+                  Text(AppLocalizations.of(context).backupSuccessFormat.replaceAll('{count}', '${diaries.length}')),
                 ],
               ),
               backgroundColor: Colors.green,
@@ -320,14 +319,14 @@ class BackupRestoreScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Colors.orange),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.warning, color: Colors.orange, size: 20),
-                  SizedBox(width: 8),
+                  const Icon(Icons.warning, color: Colors.orange, size: 20),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      '현재 저장된 데이터는 모두 삭제되고\n백업 파일로 대체됩니다',
-                      style: TextStyle(fontSize: 13, color: Colors.orange),
+                      AppLocalizations.of(context).restoreWarning,
+                      style: const TextStyle(fontSize: 13, color: Colors.orange),
                     ),
                   ),
                 ],
@@ -341,14 +340,14 @@ class BackupRestoreScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Colors.blue),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.blue, size: 20),
-                  SizedBox(width: 8),
+                  const Icon(Icons.info_outline, color: Colors.blue, size: 20),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      '파일 선택 화면에서 뒤로가기 버튼으로\n언제든지 취소할 수 있습니다',
-                      style: TextStyle(fontSize: 13, color: Colors.blue),
+                      AppLocalizations.of(context).cancelFileSelectionHint,
+                      style: const TextStyle(fontSize: 13, color: Colors.blue),
                     ),
                   ),
                 ],
@@ -366,7 +365,7 @@ class BackupRestoreScreen extends ConsumerWidget {
               Navigator.pop(dialogContext);
               await _performRestore(scaffoldContext);  // Scaffold context 사용
             },
-            child: const Text('파일 선택'),
+            child: Text(AppLocalizations.of(dialogContext).selectFile),
           ),
         ],
       ),
@@ -390,19 +389,19 @@ class BackupRestoreScreen extends ConsumerWidget {
       final jsonString = await file.readAsString();
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Row(
             children: [
-              SizedBox(
+              const SizedBox(
                 width: 16,
                 height: 16,
                 child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
               ),
-              SizedBox(width: 12),
-              Text('복원 중...'),
+              const SizedBox(width: 12),
+              Text(AppLocalizations.of(context).restoring),
             ],
           ),
-          duration: Duration(seconds: 10),
+          duration: const Duration(seconds: 10),
         ),
       );
 
@@ -419,7 +418,7 @@ class BackupRestoreScreen extends ConsumerWidget {
                 children: [
                   const Icon(Icons.check_circle, color: Colors.white),
                   const SizedBox(width: 12),
-                  Text('$restoredCount개 일기가 복원되었습니다'),
+                  Text(AppLocalizations.of(context).restoreSuccessFormat.replaceAll('{count}', '$restoredCount')),
                 ],
               ),
               backgroundColor: Colors.green,
@@ -428,16 +427,16 @@ class BackupRestoreScreen extends ConsumerWidget {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Row(
                 children: [
-                  Icon(Icons.info, color: Colors.white),
-                  SizedBox(width: 12),
-                  Text('복원된 일기가 없습니다'),
+                  const Icon(Icons.info, color: Colors.white),
+                  const SizedBox(width: 12),
+                  Text(AppLocalizations.of(context).noRestoredDiaries),
                 ],
               ),
               backgroundColor: Colors.orange,
-              duration: Duration(seconds: 3),
+              duration: const Duration(seconds: 3),
             ),
           );
         }
@@ -447,7 +446,7 @@ class BackupRestoreScreen extends ConsumerWidget {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('복원 실패: $e'),
+            content: Text(AppLocalizations.of(context).restoreFailedFormat.replaceAll('{error}', e.toString())),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
           ),
@@ -462,26 +461,26 @@ class BackupRestoreScreen extends ConsumerWidget {
     showDialog(
       context: scaffoldContext,
       builder: (dialogContext) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.cloud_upload, color: Colors.blue),
-            SizedBox(width: 8),
-            Text('Google Drive 백업'),
+            const Icon(Icons.cloud_upload, color: Colors.blue),
+            const SizedBox(width: 8),
+            Text(AppLocalizations.of(context).googleDriveBackup),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Google Drive에 일기 데이터를 안전하게 백업합니다.'),
+            Text(AppLocalizations.of(context).googleDriveBackupDescription),
             const SizedBox(height: 12),
-            const Text('포함 내용:', style: TextStyle(fontWeight: FontWeight.w600)),
+            Text(AppLocalizations.of(context).includedContent, style: const TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
-            _buildBackupItem('📝', '모든 일기 내용'),
-            _buildBackupItem('😊', '감정 분석 결과'),
-            _buildBackupItem('🖼️', '생성된 이미지 (base64)'),
-            _buildBackupItem('🎨', '이미지 스타일 및 설정'),
-            _buildBackupItem('📸', '업로드한 사진들'),
+            _buildBackupItem('📝', AppLocalizations.of(context).allDiaryContent),
+            _buildBackupItem('😊', AppLocalizations.of(context).emotionAnalysisResult),
+            _buildBackupItem('🖼️', AppLocalizations.of(context).generatedImagesBase64),
+            _buildBackupItem('🎨', AppLocalizations.of(context).imageStyleAndSettings),
+            _buildBackupItem('📸', AppLocalizations.of(context).uploadedPhotos),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(8),
@@ -489,14 +488,14 @@ class BackupRestoreScreen extends ConsumerWidget {
                 color: Colors.blue.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.info_outline, size: 16, color: Colors.blue),
-                  SizedBox(width: 8),
+                  const Icon(Icons.info_outline, size: 16, color: Colors.blue),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      '기존 백업이 있다면 덮어쓰기됩니다',
-                      style: TextStyle(fontSize: 12, color: Colors.blue),
+                      AppLocalizations.of(context).existingBackupWarning,
+                      style: const TextStyle(fontSize: 12, color: Colors.blue),
                     ),
                   ),
                 ],
@@ -507,7 +506,7 @@ class BackupRestoreScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('취소'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           FilledButton.icon(
             onPressed: () async {
@@ -515,7 +514,7 @@ class BackupRestoreScreen extends ConsumerWidget {
               await _performCloudBackup(scaffoldContext);  // Scaffold context 사용
             },
             icon: const Icon(Icons.cloud_upload),
-            label: const Text('백업 시작'),
+            label: Text(AppLocalizations.of(context).startBackup),
           ),
         ],
       ),
@@ -536,18 +535,18 @@ class BackupRestoreScreen extends ConsumerWidget {
         if (kDebugMode) print('로그인 필요 - SnackBar 표시');
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Row(
               children: [
-                Icon(Icons.error, color: Colors.white),
-                SizedBox(width: 12),
+                const Icon(Icons.error, color: Colors.white),
+                const SizedBox(width: 12),
                 Expanded(
-                  child: Text('로그인이 필요합니다.\n먼저 앱에 로그인해주세요.'),
+                  child: Text(AppLocalizations.of(context).loginRequiredMessage),
                 ),
               ],
             ),
             backgroundColor: Colors.orange,
-            duration: Duration(seconds: 4),
+            duration: const Duration(seconds: 4),
           ),
         );
         return;
@@ -557,19 +556,19 @@ class BackupRestoreScreen extends ConsumerWidget {
       if (isTestMode) {
         if (kDebugMode) print('테스트 모드 - 백업 시뮬레이션 시작');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Row(
               children: [
-                SizedBox(
+                const SizedBox(
                   width: 16,
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                 ),
-                SizedBox(width: 12),
-                Text('Google Drive 백업 중...'),
+                const SizedBox(width: 12),
+                Text(AppLocalizations.of(context).backingUpToGoogleDrive),
               ],
             ),
-            duration: Duration(seconds: 2),
+            duration: const Duration(seconds: 2),
           ),
         );
 
@@ -578,16 +577,16 @@ class BackupRestoreScreen extends ConsumerWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Row(
                 children: [
-                  Icon(Icons.check_circle, color: Colors.white),
-                  SizedBox(width: 12),
-                  Expanded(child: Text('백업 완료 (테스트 모드)')),
+                  const Icon(Icons.check_circle, color: Colors.white),
+                  const SizedBox(width: 12),
+                  Expanded(child: Text(AppLocalizations.of(context).backupCompleteTestMode)),
                 ],
               ),
               backgroundColor: Colors.green,
-              duration: Duration(seconds: 3),
+              duration: const Duration(seconds: 3),
             ),
           );
         }
@@ -595,19 +594,19 @@ class BackupRestoreScreen extends ConsumerWidget {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Row(
             children: [
-              SizedBox(
+              const SizedBox(
                 width: 16,
                 height: 16,
                 child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
               ),
-              SizedBox(width: 12),
-              Text('클라우드에 백업 중...'),
+              const SizedBox(width: 12),
+              Text(AppLocalizations.of(context).backingUpToCloud),
             ],
           ),
-          duration: Duration(seconds: 30),
+          duration: const Duration(seconds: 30),
         ),
       );
 
@@ -618,12 +617,12 @@ class BackupRestoreScreen extends ConsumerWidget {
 
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Row(
                 children: [
-                  Icon(Icons.check_circle, color: Colors.white),
-                  SizedBox(width: 12),
-                  Text('클라우드 백업이 완료되었습니다'),
+                  const Icon(Icons.check_circle, color: Colors.white),
+                  const SizedBox(width: 12),
+                  Text(AppLocalizations.of(context).cloudBackupComplete),
                 ],
               ),
               backgroundColor: Colors.green,
@@ -632,16 +631,16 @@ class BackupRestoreScreen extends ConsumerWidget {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Row(
                 children: [
-                  Icon(Icons.error, color: Colors.white),
-                  SizedBox(width: 12),
-                  Text('클라우드 백업에 실패했습니다'),
+                  const Icon(Icons.error, color: Colors.white),
+                  const SizedBox(width: 12),
+                  Text(AppLocalizations.of(context).cloudBackupFailed),
                 ],
               ),
               backgroundColor: Colors.red,
-              duration: Duration(seconds: 3),
+              duration: const Duration(seconds: 3),
             ),
           );
         }
@@ -651,7 +650,7 @@ class BackupRestoreScreen extends ConsumerWidget {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('클라우드 백업 오류: $e'),
+            content: Text(AppLocalizations.of(context).cloudBackupErrorFormat(e.toString())),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
           ),
@@ -673,18 +672,18 @@ class BackupRestoreScreen extends ConsumerWidget {
         showDialog(
           context: scaffoldContext,
           builder: (dialogContext) => AlertDialog(
-            title: const Row(
+            title: Row(
               children: [
-                Icon(Icons.error, color: Colors.orange),
-                SizedBox(width: 8),
-                Text('로그인 필요'),
+                const Icon(Icons.error, color: Colors.orange),
+                const SizedBox(width: 8),
+                Text(AppLocalizations.of(context).loginRequiredTitle),
               ],
             ),
-            content: const Text('클라우드 복원을 사용하려면 먼저 앱에 로그인해주세요.'),
+            content: Text(AppLocalizations.of(context).cloudRestoreLoginMessage),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('확인'),
+                child: Text(AppLocalizations.of(context).ok),
               ),
             ],
           ),
@@ -699,28 +698,28 @@ class BackupRestoreScreen extends ConsumerWidget {
         showDialog(
           context: scaffoldContext,
           builder: (dialogContext) => AlertDialog(
-            title: const Row(
+            title: Row(
               children: [
-                Icon(Icons.cloud_download, color: Colors.green),
-                SizedBox(width: 8),
+                const Icon(Icons.cloud_download, color: Colors.green),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    '[테스트] 복원',
-                    style: TextStyle(fontSize: 18),
+                    AppLocalizations.of(context).testRestoreTitle,
+                    style: const TextStyle(fontSize: 18),
                   ),
                 ),
               ],
             ),
-            content: const SingleChildScrollView(
+            content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('테스트 모드에서 복원을 시뮬레이션합니다.'),
-                  SizedBox(height: 8),
+                  Text(AppLocalizations.of(context).testModeRestoreSimulation),
+                  const SizedBox(height: 8),
                   Text(
-                    '실제 환경에서는 Google Drive에서 복원합니다.',
-                    style: TextStyle(fontSize: 11, color: Colors.grey),
+                    AppLocalizations.of(context).realEnvironmentGoogleDriveRestore,
+                    style: const TextStyle(fontSize: 11, color: Colors.grey),
                   ),
                 ],
               ),
@@ -728,7 +727,7 @@ class BackupRestoreScreen extends ConsumerWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('취소'),
+                child: Text(AppLocalizations.of(context).cancel),
               ),
               FilledButton.icon(
                 onPressed: () async {
@@ -736,7 +735,7 @@ class BackupRestoreScreen extends ConsumerWidget {
                   await _performCloudRestoreSimulation(scaffoldContext);  // Scaffold context 사용
                 },
                 icon: const Icon(Icons.cloud_download),
-                label: const Text('시작'),
+                label: Text(AppLocalizations.of(context).startButton),
                 style: FilledButton.styleFrom(backgroundColor: Colors.green),
               ),
             ],
@@ -753,18 +752,18 @@ class BackupRestoreScreen extends ConsumerWidget {
         showDialog(
           context: scaffoldContext,
           builder: (dialogContext) => AlertDialog(
-            title: const Row(
+            title: Row(
               children: [
-                Icon(Icons.info_outline, color: Colors.orange),
-                SizedBox(width: 8),
-                Text('백업 없음'),
+                const Icon(Icons.info_outline, color: Colors.orange),
+                const SizedBox(width: 8),
+                Text(AppLocalizations.of(context).noBackupTitle),
               ],
             ),
-            content: const Text('클라우드에 저장된 백업이 없습니다.\n먼저 백업을 생성해주세요.'),
+            content: Text(AppLocalizations.of(context).noCloudBackupMessage),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('확인'),
+                child: Text(AppLocalizations.of(context).ok),
               ),
             ],
           ),
@@ -777,18 +776,18 @@ class BackupRestoreScreen extends ConsumerWidget {
       showDialog(
         context: scaffoldContext,
         builder: (dialogContext) => AlertDialog(
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.cloud_download, color: Colors.green),
-              SizedBox(width: 8),
-              Text('클라우드 복원'),
+              const Icon(Icons.cloud_download, color: Colors.green),
+              const SizedBox(width: 8),
+              Text(AppLocalizations.of(context).cloudRestoreTitle),
             ],
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Firebase에서 일기 데이터를 복원합니다.'),
+              Text(AppLocalizations.of(context).restoreFromFirebase),
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(12),
@@ -797,14 +796,14 @@ class BackupRestoreScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: Colors.orange),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.warning, color: Colors.orange, size: 20),
-                    SizedBox(width: 8),
+                    const Icon(Icons.warning, color: Colors.orange, size: 20),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '현재 저장된 데이터는 모두 삭제되고\n클라우드 백업 데이터로 대체됩니다',
-                        style: TextStyle(fontSize: 13, color: Colors.orange),
+                        AppLocalizations.of(context).allDataWillBeReplaced,
+                        style: const TextStyle(fontSize: 13, color: Colors.orange),
                       ),
                     ),
                   ],
@@ -815,7 +814,7 @@ class BackupRestoreScreen extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('취소'),
+              child: Text(AppLocalizations.of(context).cancelButton),
             ),
             FilledButton.icon(
               onPressed: () async {
@@ -823,7 +822,7 @@ class BackupRestoreScreen extends ConsumerWidget {
                 await _performCloudRestore(scaffoldContext);  // Scaffold context 사용
               },
               icon: const Icon(Icons.cloud_download),
-              label: const Text('복원 시작'),
+              label: Text(AppLocalizations.of(context).startRestoreButton),
               style: FilledButton.styleFrom(backgroundColor: Colors.green),
             ),
           ],
@@ -835,19 +834,19 @@ class BackupRestoreScreen extends ConsumerWidget {
   Future<void> _performCloudRestore(BuildContext context) async {
     try {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Row(
             children: [
-              SizedBox(
+              const SizedBox(
                 width: 16,
                 height: 16,
                 child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
               ),
-              SizedBox(width: 12),
-              Text('클라우드에서 복원 중...'),
+              const SizedBox(width: 12),
+              Text(AppLocalizations.of(context).restoringFromCloud),
             ],
           ),
-          duration: Duration(seconds: 30),
+          duration: const Duration(seconds: 30),
         ),
       );
 
@@ -863,7 +862,7 @@ class BackupRestoreScreen extends ConsumerWidget {
                 children: [
                   const Icon(Icons.check_circle, color: Colors.white),
                   const SizedBox(width: 12),
-                  Text('$restoredCount개 일기가 복원되었습니다'),
+                  Text(AppLocalizations.of(context).restoreSuccessFormat.replaceAll('{count}', '$restoredCount')),
                 ],
               ),
               backgroundColor: Colors.green,
@@ -872,16 +871,16 @@ class BackupRestoreScreen extends ConsumerWidget {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Row(
                 children: [
-                  Icon(Icons.error, color: Colors.white),
-                  SizedBox(width: 12),
-                  Text('클라우드 복원에 실패했습니다'),
+                  const Icon(Icons.error, color: Colors.white),
+                  const SizedBox(width: 12),
+                  Text(AppLocalizations.of(context).cloudRestoreFailed),
                 ],
               ),
               backgroundColor: Colors.red,
-              duration: Duration(seconds: 3),
+              duration: const Duration(seconds: 3),
             ),
           );
         }
@@ -891,7 +890,7 @@ class BackupRestoreScreen extends ConsumerWidget {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('클라우드 복원 오류: $e'),
+            content: Text(AppLocalizations.of(context).cloudRestoreErrorFormat(e.toString())),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
           ),
@@ -902,19 +901,19 @@ class BackupRestoreScreen extends ConsumerWidget {
 
   Future<void> _performCloudRestoreSimulation(BuildContext context) async {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Row(
           children: [
-            SizedBox(
+            const SizedBox(
               width: 16,
               height: 16,
               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
             ),
-            SizedBox(width: 12),
-            Text('[테스트 모드] 클라우드 복원 시뮬레이션 중...'),
+            const SizedBox(width: 12),
+            Text(AppLocalizations.of(context).testModeRestoreSimulation),
           ],
         ),
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
       ),
     );
 
@@ -923,16 +922,16 @@ class BackupRestoreScreen extends ConsumerWidget {
     if (context.mounted) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Row(
             children: [
-              Icon(Icons.check_circle, color: Colors.white),
-              SizedBox(width: 12),
-              Expanded(child: Text('복원 완료 (테스트 모드)')),
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(child: Text(AppLocalizations.of(context).restoreCompleteTestMode)),
             ],
           ),
           backgroundColor: Colors.green,
-          duration: Duration(seconds: 3),
+          duration: const Duration(seconds: 3),
         ),
       );
     }
@@ -942,18 +941,22 @@ class BackupRestoreScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.diamond, color: Colors.amber),
-            SizedBox(width: 8),
-            Text('프리미엄 전용 기능'),
+            const Icon(Icons.diamond, color: Colors.amber),
+            const SizedBox(width: 8),
+            Text(AppLocalizations.of(context).premiumOnlyFeature),
           ],
         ),
-        content: const Text('클라우드 백업/복원은 프리미엄 사용자만 사용할 수 있습니다.'),
+        content: Builder(
+          builder: (context) => Text(AppLocalizations.of(context).cloudBackupRestorePremiumOnly),
+        ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('확인'),
+          Builder(
+            builder: (context) => TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context).ok),
+            ),
           ),
         ],
       ),
@@ -995,22 +998,26 @@ class BackupRestoreScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '자동 클라우드 백업',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF2D3748),
-                        fontSize: 16,
+                    Builder(
+                      builder: (context) => Text(
+                        AppLocalizations.of(context).autoCloudBackup,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF2D3748),
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      subscription.isPremium
-                          ? '5분마다 자동으로 백업합니다'
-                          : '프리미엄 전용 기능',
-                      style: const TextStyle(
-                        color: Color(0xFF718096),
-                        fontSize: 13,
+                    Builder(
+                      builder: (context) => Text(
+                        subscription.isPremium
+                            ? AppLocalizations.of(context).autoBackupEveryFiveMinutes
+                            : AppLocalizations.of(context).premiumOnlyFeature,
+                        style: const TextStyle(
+                          color: Color(0xFF718096),
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ],
@@ -1026,7 +1033,7 @@ class BackupRestoreScreen extends ConsumerWidget {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                value ? '자동 백업이 활성화되었습니다' : '자동 백업이 비활성화되었습니다',
+                                value ? AppLocalizations.of(context).autoBackupEnabled : AppLocalizations.of(context).autoBackupDisabled,
                               ),
                               backgroundColor: value ? Colors.green : Colors.orange,
                               duration: const Duration(seconds: 2),
@@ -1067,27 +1074,33 @@ class BackupRestoreScreen extends ConsumerWidget {
                             : Colors.green,
                       ),
                       const SizedBox(width: 6),
-                      Text(
-                        autoBackupState.isBackingUp
-                            ? '백업 중...'
-                            : '백업 완료',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: autoBackupState.isBackingUp
-                              ? Colors.blue
-                              : Colors.green,
+                      Builder(
+                        builder: (context) => Text(
+                          autoBackupState.isBackingUp
+                              ? AppLocalizations.of(context).backingUp
+                              : AppLocalizations.of(context).backupComplete,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: autoBackupState.isBackingUp
+                                ? Colors.blue
+                                : Colors.green,
+                          ),
                         ),
                       ),
                     ],
                   ),
                   if (autoBackupState.lastBackupTime != null) ...[
                     const SizedBox(height: 6),
-                    Text(
-                      '마지막 백업: ${DateFormat('yyyy-MM-dd HH:mm').format(autoBackupState.lastBackupTime!)}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF718096),
+                    Builder(
+                      builder: (context) => Text(
+                        AppLocalizations.of(context).lastBackupTimeFormat(
+                          DateFormat('yyyy-MM-dd HH:mm').format(autoBackupState.lastBackupTime!)
+                        ),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF718096),
+                        ),
                       ),
                     ),
                   ],
@@ -1098,14 +1111,16 @@ class BackupRestoreScreen extends ConsumerWidget {
                         const Icon(Icons.error_outline, size: 14, color: Colors.red),
                         const SizedBox(width: 4),
                         Expanded(
-                          child: Text(
-                            '오류: ${autoBackupState.lastError}',
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: Colors.red,
+                          child: Builder(
+                            builder: (context) => Text(
+                              AppLocalizations.of(context).errorFormat(autoBackupState.lastError!),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Colors.red,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -1120,7 +1135,7 @@ class BackupRestoreScreen extends ConsumerWidget {
           if (!subscription.isPremium) ...[
             const SizedBox(height: 12),
             InkWell(
-              onTap: () => showPremiumRequiredDialog(context, featureName: '자동 클라우드 백업'),
+              onTap: () => showPremiumRequiredDialog(context, featureName: AppLocalizations.of(context).autoCloudBackupFeature),
               borderRadius: BorderRadius.circular(8),
               child: Container(
                 padding: const EdgeInsets.all(12),
@@ -1136,11 +1151,13 @@ class BackupRestoreScreen extends ConsumerWidget {
                     const Icon(Icons.lock, size: 16, color: Colors.amber),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(
-                        '프리미엄으로 업그레이드하여 자동 백업 기능을 사용하세요',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.amber.shade700,
+                      child: Builder(
+                        builder: (context) => Text(
+                          AppLocalizations.of(context).upgradeForAutoBackup,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.amber.shade700,
+                          ),
                         ),
                       ),
                     ),
@@ -1172,7 +1189,7 @@ class BackupRestoreScreen extends ConsumerWidget {
           InkWell(
             onTap: subscription.isPremium
                 ? () => _showCloudBackupDialog(context)
-                : () => showPremiumRequiredDialog(context, featureName: '클라우드 백업'),
+                : () => showPremiumRequiredDialog(context, featureName: AppLocalizations.of(context).cloudBackupFeature),
             borderRadius: BorderRadius.circular(8),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
@@ -1192,28 +1209,30 @@ class BackupRestoreScreen extends ConsumerWidget {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          '클라우드 백업',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF2D3748),
-                            fontSize: 16,
+                    child: Builder(
+                      builder: (context) => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context).cloudBackupFeature,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF2D3748),
+                              fontSize: 16,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          subscription.isPremium
-                              ? 'Google Drive에 일기를 백업합니다'
-                              : '프리미엄 전용 기능',
-                          style: const TextStyle(
-                            color: Color(0xFF718096),
-                            fontSize: 13,
+                          const SizedBox(height: 2),
+                          Text(
+                            subscription.isPremium
+                                ? AppLocalizations.of(context).cloudBackupToGoogleDrive
+                                : AppLocalizations.of(context).premiumFeatureShort,
+                            style: const TextStyle(
+                              color: Color(0xFF718096),
+                              fontSize: 13,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   Icon(
@@ -1232,7 +1251,7 @@ class BackupRestoreScreen extends ConsumerWidget {
           InkWell(
             onTap: subscription.isPremium
                 ? () => _showCloudRestoreDialog(context)
-                : () => showPremiumRequiredDialog(context, featureName: '클라우드 복원'),
+                : () => showPremiumRequiredDialog(context, featureName: AppLocalizations.of(context).cloudRestoreFeature),
             borderRadius: BorderRadius.circular(8),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
@@ -1252,28 +1271,30 @@ class BackupRestoreScreen extends ConsumerWidget {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          '클라우드 복원',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF2D3748),
-                            fontSize: 16,
+                    child: Builder(
+                      builder: (context) => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context).cloudRestoreFeature,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF2D3748),
+                              fontSize: 16,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          subscription.isPremium
-                              ? 'Google Drive에서 일기를 복원합니다'
-                              : '프리미엄 전용 기능',
-                          style: const TextStyle(
-                            color: Color(0xFF718096),
-                            fontSize: 13,
+                          const SizedBox(height: 2),
+                          Text(
+                            subscription.isPremium
+                                ? AppLocalizations.of(context).cloudRestoreFromGoogleDrive
+                                : AppLocalizations.of(context).premiumFeatureShort,
+                            style: const TextStyle(
+                              color: Color(0xFF718096),
+                              fontSize: 13,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   Icon(
@@ -1290,7 +1311,7 @@ class BackupRestoreScreen extends ConsumerWidget {
           if (!subscription.isPremium) ...[
             const SizedBox(height: 12),
             InkWell(
-              onTap: () => showPremiumRequiredDialog(context, featureName: '클라우드 백업/복원'),
+              onTap: () => showPremiumRequiredDialog(context, featureName: AppLocalizations.of(context).cloudBackupRestoreFeature),
               borderRadius: BorderRadius.circular(8),
               child: Container(
                 padding: const EdgeInsets.all(12),
@@ -1306,11 +1327,13 @@ class BackupRestoreScreen extends ConsumerWidget {
                     const Icon(Icons.lock, size: 16, color: Colors.amber),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(
-                        '프리미엄으로 업그레이드하여 클라우드 백업/복원 기능을 사용하세요',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.amber.shade700,
+                      child: Builder(
+                        builder: (context) => Text(
+                          AppLocalizations.of(context).upgradeForCloudBackupRestore,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.amber.shade700,
+                          ),
                         ),
                       ),
                     ),

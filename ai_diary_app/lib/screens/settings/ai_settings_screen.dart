@@ -155,9 +155,11 @@ class AiSettingsScreen extends ConsumerWidget {
                       const Icon(Icons.lock, color: Colors.amber, size: 20),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text(
-                          '${premiumStyles.length}개의 추가 스타일이 프리미엄에서 제공됩니다',
-                          style: const TextStyle(fontSize: 13),
+                        child: Builder(
+                          builder: (context) => Text(
+                            AppLocalizations.of(context).premiumStylesAvailableFormat.replaceAll('{count}', '${premiumStyles.length}'),
+                            style: const TextStyle(fontSize: 13),
+                          ),
                         ),
                       ),
                     ],
@@ -306,18 +308,24 @@ class AiSettingsScreen extends ConsumerWidget {
               size: 20,
             ),
           ),
-          title: Text(
-            '고급설정 자동설정',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: isLocked ? Colors.grey : const Color(0xFF2D3748),
+          title: Builder(
+            builder: (context) => Text(
+              AppLocalizations.of(context).autoAdvancedSettings,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: isLocked ? Colors.grey : const Color(0xFF2D3748),
+              ),
             ),
           ),
-          subtitle: Text(
-            isLocked ? '프리미엄 전용 기능' : '시간, 날씨, 계절 옵션을 자동으로 설정합니다',
-            style: TextStyle(
-              color: isLocked ? Colors.grey : const Color(0xFF718096),
-              fontSize: 13,
+          subtitle: Builder(
+            builder: (context) => Text(
+              isLocked
+                ? AppLocalizations.of(context).premiumOnlyFeature
+                : AppLocalizations.of(context).autoAdvancedSettingsDescription,
+              style: TextStyle(
+                color: isLocked ? Colors.grey : const Color(0xFF718096),
+                fontSize: 13,
+              ),
             ),
           ),
           trailing: subscription.isPremium
@@ -327,7 +335,9 @@ class AiSettingsScreen extends ConsumerWidget {
                   ref.read(autoAdvancedSettingsProvider.notifier).setAutoAdvancedSettings(value);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(value ? '고급설정 자동설정이 활성화되었습니다' : '고급설정 자동설정이 비활성화되었습니다'),
+                      content: Text(value
+                        ? AppLocalizations.of(context).autoAdvancedSettingsEnabled
+                        : AppLocalizations.of(context).autoAdvancedSettingsDisabled),
                       backgroundColor: value ? Colors.green : Colors.orange,
                     ),
                   );
@@ -346,7 +356,7 @@ class AiSettingsScreen extends ConsumerWidget {
             ? () {
                 ref.read(autoAdvancedSettingsProvider.notifier).toggle();
               }
-            : () => showPremiumRequiredDialog(context, featureName: '고급설정 자동설정'),
+            : () => showPremiumRequiredDialog(context, featureName: AppLocalizations.of(context).autoAdvancedSettings),
         ),
       ),
     );

@@ -13,7 +13,6 @@ import '../models/perspective_options.dart';
 import '../services/ai_service.dart';
 import '../services/database_service.dart';
 import '../services/ad_service.dart';
-import '../services/free_user_service.dart';
 import '../providers/diary_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../providers/image_style_provider.dart';
@@ -22,6 +21,7 @@ import '../widgets/tabbed_option_selector.dart';
 import '../providers/font_provider.dart';
 import '../providers/auto_advanced_settings_provider.dart';
 import '../models/font_family.dart';
+import '../l10n/app_localizations.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -107,7 +107,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         if (kDebugMode) print('DiaryCreateScreen: 기존 일기 로딩 오류: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('일기를 불러오는데 실패했습니다: $e')),
+            SnackBar(content: Text(AppLocalizations.of(context).failedToLoadDiary(e.toString()))),
           );
         }
       }
@@ -189,7 +189,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     setState(() {
       _isLoading = true;
       _isGeneratingImage = true;
-      _progressMessage = _selectedPhotos.isNotEmpty ? '사진 분석 중...' : '감정 분석 중...';
+      _progressMessage = _selectedPhotos.isNotEmpty ? AppLocalizations.of(context).analyzingPhoto : AppLocalizations.of(context).analyzingEmotion;
       if (kDebugMode) print('_isGeneratingImage = true 설정됨');
     });
 
@@ -207,19 +207,20 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         await Future.delayed(const Duration(milliseconds: 500));
       }
 
-      setState(() => _progressMessage = '감정 분석 중...');
+      setState(() => _progressMessage = AppLocalizations.of(context).analyzingEmotion);
       await Future.delayed(const Duration(milliseconds: 300));
 
-      setState(() => _progressMessage = '키워드 추출 중...');
+      setState(() => _progressMessage = AppLocalizations.of(context).extractingKeywords);
       await Future.delayed(const Duration(milliseconds: 300));
 
-      setState(() => _progressMessage = '이미지 프롬프트 생성 중...');
+      setState(() => _progressMessage = AppLocalizations.of(context).generatingPrompt);
       await Future.delayed(const Duration(milliseconds: 300));
 
-      setState(() => _progressMessage = 'AI 이미지 생성 중...\n\n(사용자가 많을 경우 대기 시간이 길어질 수 있습니다)');
+      setState(() => _progressMessage = AppLocalizations.of(context).generatingAiImageNotice);
 
       // AI 서비스를 통한 이미지 생성
       final Map<String, dynamic> result = await AIService.processEntry(
+        context,
         _contentController.text.trim(),
         selectedStyle.displayName,
         subscription.isPremium ? effectiveAdvancedOptions : null,
@@ -307,7 +308,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('일기가 성공적으로 저장되었습니다!')),
+          SnackBar(content: Text(AppLocalizations.of(context).diarySavedSuccessfully)),
         );
         context.go('/detail/$diaryId');
       }
@@ -390,7 +391,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('일기가 성공적으로 저장되었습니다!')),
+          SnackBar(content: Text(AppLocalizations.of(context).diarySavedSuccessfully)),
         );
         context.go('/detail/$diaryId');
       }
@@ -434,19 +435,20 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
         await Future.delayed(const Duration(milliseconds: 500));
       }
 
-      setState(() => _progressMessage = '감정 분석 중...');
+      setState(() => _progressMessage = AppLocalizations.of(context).analyzingEmotion);
       await Future.delayed(const Duration(milliseconds: 300));
 
-      setState(() => _progressMessage = '키워드 추출 중...');
+      setState(() => _progressMessage = AppLocalizations.of(context).extractingKeywords);
       await Future.delayed(const Duration(milliseconds: 300));
 
-      setState(() => _progressMessage = '이미지 프롬프트 생성 중...');
+      setState(() => _progressMessage = AppLocalizations.of(context).generatingPrompt);
       await Future.delayed(const Duration(milliseconds: 300));
 
-      setState(() => _progressMessage = 'AI 이미지 생성 중...\n\n(사용자가 많을 경우 대기 시간이 길어질 수 있습니다)');
+      setState(() => _progressMessage = AppLocalizations.of(context).generatingAiImageNotice);
 
       // AI 서비스를 통한 이미지 재생성
       final Map<String, dynamic> result = await AIService.processEntry(
+        context,
         _contentController.text.trim(),
         style.displayName,
         subscription.isPremium ? advancedOptions : null,
@@ -552,15 +554,16 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   }
 
   void _showDeleteDialog() {
+    final localizations = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('일기 삭제'),
-        content: const Text('정말로 이 일기를 삭제하시겠습니까?'),
+        title: Text(localizations.deleteDiary),
+        content: Text(localizations.confirmDeleteDiary),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('취소'),
+            child: Text(localizations.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -570,19 +573,19 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                 ref.invalidate(diaryEntriesProvider);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('일기가 삭제되었습니다.')),
+                    SnackBar(content: Text(localizations.diaryDeleted)),
                   );
                   context.go('/list');
                 }
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('삭제 실패: $e')),
+                    SnackBar(content: Text('${localizations.deleteFailed}: $e')),
                   );
                 }
               }
             },
-            child: const Text('삭제', style: TextStyle(color: Colors.red)),
+            child: Text(localizations.delete, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -706,13 +709,14 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     final subscription = ref.watch(subscriptionProvider);
     final selectedFont = ref.watch(fontProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _isEditMode ? '일기 수정' : '새 일기 작성',
+          _isEditMode ? localizations.editDiary : localizations.createNewDiary,
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -777,7 +781,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    _progressMessage.isEmpty ? '이미지 생성중입니다' : _progressMessage,
+                    _progressMessage.isEmpty ? localizations.generatingImage : _progressMessage,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -812,7 +816,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                             controller: _titleController,
                             style: selectedFont.getTextStyle(fontSize: 16),
                             decoration: InputDecoration(
-                              labelText: '제목',
+                              labelText: localizations.titleLabel,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -823,7 +827,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return '제목을 입력해주세요';
+                                return localizations.pleaseEnterTitle;
                               }
                               return null;
                             },
@@ -835,7 +839,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                             controller: _contentController,
                             style: selectedFont.getTextStyle(fontSize: 16),
                             decoration: InputDecoration(
-                              labelText: '내용',
+                              labelText: localizations.contentLabel,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -847,7 +851,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                             maxLines: 8,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return '내용을 입력해주세요';
+                                return localizations.pleaseEnterContent;
                               }
                               return null;
                             },
@@ -856,8 +860,8 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                           // 생성된 이미지와 사용자 사진 갤러리 표시
                           if (_generatedImageUrl != null || _selectedPhotos.isNotEmpty) ...[
                             const SizedBox(height: 16),
-                            const Text(
-                              '이미지 갤러리',
+                            Text(
+                              localizations.imageGallery,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -900,8 +904,8 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                             children: [
                               const Icon(Icons.add_photo_alternate, size: 20, color: Color(0xFF667EEA)),
                               const SizedBox(width: 8),
-                              const Text(
-                                '사진 업로드',
+                              Text(
+                                localizations.photoUpload,
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -936,7 +940,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
-                                  subscription.isPremium ? '최대 3장' : '1장',
+                                  subscription.isPremium ? localizations.max3Photos : localizations.onePhoto,
                                   style: TextStyle(
                                     color: subscription.isPremium
                                         ? Colors.blue[700]
@@ -958,7 +962,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                               child: ElevatedButton.icon(
                                 onPressed: _pickPhotos,
                                 icon: const Icon(Icons.add_photo_alternate, size: 18),
-                                label: const Text('사진 선택'),
+                                label: Text(localizations.selectPhoto),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.blue[50],
                                   foregroundColor: Colors.blue[700],
@@ -993,7 +997,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      '사진을 선택해보세요',
+                                      localizations.pleaseSelectPhoto,
                                       style: TextStyle(
                                         color: Colors.grey[600],
                                         fontSize: 14,
@@ -1013,8 +1017,8 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                                       ),
                                       child: Text(
                                         subscription.isPremium
-                                            ? '최대 3장까지 업로드 가능'
-                                            : '무료 버전: 1장만 선택 가능',
+                                            ? localizations.max3PhotosUpload
+                                            : localizations.freeVersion1PhotoOnly,
                                         style: TextStyle(
                                           color: subscription.isPremium
                                               ? Colors.blue[700]
@@ -1082,18 +1086,18 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                                                 color: Colors.blue.withOpacity(0.9),
                                                 borderRadius: BorderRadius.circular(12),
                                               ),
-                                              child: const Row(
+                                              child: Row(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
-                                                  Icon(
+                                                  const Icon(
                                                     Icons.photo,
                                                     size: 12,
                                                     color: Colors.white,
                                                   ),
-                                                  SizedBox(width: 4),
+                                                  const SizedBox(width: 4),
                                                   Text(
-                                                    '내 사진',
-                                                    style: TextStyle(
+                                                    localizations.myPhoto,
+                                                    style: const TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 11,
                                                       fontWeight: FontWeight.bold,
@@ -1258,7 +1262,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                                     side: const BorderSide(color: Colors.grey),
                                     foregroundColor: Colors.grey,
                                   ),
-                                  child: const Text('취소'),
+                                  child: Text(localizations.cancel),
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -1270,7 +1274,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                                     side: const BorderSide(color: Color(0xFF667EEA)),
                                     foregroundColor: const Color(0xFF667EEA),
                                   ),
-                                  child: const Text('일기만 수정'),
+                                  child: Text(localizations.editDiaryOnly),
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -1286,8 +1290,8 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                                     padding: const EdgeInsets.symmetric(vertical: 16),
                                   ),
                                   child: _isGeneratingImage
-                                      ? const Text(
-                                          '생성중...',
+                                      ? Text(
+                                          localizations.generating,
                                           style: TextStyle(
                                             color: Colors.white,
                                             fontSize: 12,
@@ -1296,8 +1300,8 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                                         )
                                       : Text(
                                           _existingEntry?.hasBeenRegenerated == true
-                                              ? '재생성 완료'
-                                              : '그림+일기 수정',
+                                              ? localizations.regenerationComplete
+                                              : localizations.editImageAndDiary,
                                           style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 12,
@@ -1320,7 +1324,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                                     side: const BorderSide(color: Colors.grey),
                                     foregroundColor: Colors.grey,
                                   ),
-                                  child: const Text('취소'),
+                                  child: Text(localizations.cancel),
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -1332,7 +1336,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                                     backgroundColor: const Color(0xFF667EEA),
                                     padding: const EdgeInsets.symmetric(vertical: 16),
                                   ),
-                                  child: const Text('수정'),
+                                  child: Text(localizations.edit),
                                 ),
                               ),
                             ],
@@ -1350,7 +1354,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                               side: const BorderSide(color: Colors.grey),
                               foregroundColor: Colors.grey,
                             ),
-                            child: const Text('취소'),
+                            child: Text(localizations.cancel),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -1363,15 +1367,15 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                               padding: const EdgeInsets.symmetric(vertical: 16),
                             ),
                             child: _isGeneratingImage
-                                ? const Text(
-                                    '이미지 생성중...',
+                                ? Text(
+                                    localizations.generatingImage,
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   )
-                                : const Text('AI 그림일기 생성'),
+                                : Text(localizations.createAiDiaryButton),
                           ),
                         ),
                       ],
@@ -2041,7 +2045,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(subscription.isPremium
-                ? '최대 ${maxPhotos}장까지만 선택할 수 있습니다. ${remainingSlots}장만 추가되었습니다'
+                ? '최대 $maxPhotos장까지만 선택할 수 있습니다. $remainingSlots장만 추가되었습니다'
                 : '무료 버전에서는 1장만 선택할 수 있습니다'),
               duration: const Duration(seconds: 3),
             ),

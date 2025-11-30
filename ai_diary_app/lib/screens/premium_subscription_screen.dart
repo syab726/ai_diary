@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/subscription_provider.dart';
 import '../models/user_subscription.dart';
+import '../l10n/app_localizations.dart';
 
 /// 프리미엄 구독 안내 및 가입 화면
 class PremiumSubscriptionScreen extends ConsumerWidget {
@@ -80,9 +81,9 @@ class PremiumSubscriptionScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            '당신의 일기를 더욱 특별하게',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).makeDiarySpecial,
+            style: const TextStyle(
               fontSize: 18,
               color: Color(0xFF718096),
             ),
@@ -110,9 +111,9 @@ class PremiumSubscriptionScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '프리미엄 기능',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).premiumFeatures,
+            style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Color(0xFF2D3748),
@@ -122,50 +123,50 @@ class PremiumSubscriptionScreen extends ConsumerWidget {
           _buildFeatureItem(
             icon: Icons.block,
             iconColor: Colors.red,
-            title: '광고 제거',
-            description: '모든 광고 없이\n쾌적한 일기 작성 경험',
+            title: AppLocalizations.of(context).adRemoval,
+            description: AppLocalizations.of(context).adRemovalDesc,
           ),
           _buildFeatureItem(
             icon: Icons.text_fields,
             iconColor: Colors.purple,
-            title: '프리미엄 글꼴',
-            description: '10가지 아름다운 한글 글꼴\n개구쟁이체, 독도체, 나눔손글씨 펜 등',
+            title: AppLocalizations.of(context).premiumFonts,
+            description: AppLocalizations.of(context).premiumFontsDesc,
           ),
           _buildFeatureItem(
             icon: Icons.palette,
             iconColor: Colors.pink,
-            title: '프리미엄 아트 스타일',
-            description: '6가지 추가 스타일\n일러스트, 스케치, 애니메이션, 인상파, 빈티지',
+            title: AppLocalizations.of(context).premiumArtStyles,
+            description: AppLocalizations.of(context).premiumArtStylesDesc,
           ),
           _buildFeatureItem(
             icon: Icons.auto_fix_high,
             iconColor: Colors.blue,
-            title: '고급 이미지 옵션',
-            description: '조명, 분위기, 색상, 구도 등\n세밀한 이미지 생성 설정',
+            title: AppLocalizations.of(context).advancedImageOptions,
+            description: AppLocalizations.of(context).advancedImageOptionsDesc,
           ),
           _buildFeatureItem(
             icon: Icons.wb_sunny,
             iconColor: Colors.orange,
-            title: '시간대/날씨/계절 설정',
-            description: '아침, 저녁, 비오는 날, 봄 등\n상황에 맞는 이미지 생성',
+            title: AppLocalizations.of(context).timeWeatherSeasonSettings,
+            description: AppLocalizations.of(context).timeWeatherSeasonSettingsDesc,
           ),
           _buildFeatureItem(
             icon: Icons.photo_library,
             iconColor: Colors.green,
-            title: '사진 업로드 (최대 3장)',
-            description: '내 사진을 바탕으로\nAI 이미지 생성 가능',
+            title: AppLocalizations.of(context).photoUploadMax3,
+            description: AppLocalizations.of(context).photoUploadMax3Desc,
           ),
           _buildFeatureItem(
             icon: Icons.cloud_sync,
             iconColor: Colors.indigo,
-            title: '클라우드 백업 & 자동 백업',
-            description: 'Google Drive 자동 백업\n소중한 일기를 안전하게 보관',
+            title: AppLocalizations.of(context).cloudBackupAuto,
+            description: AppLocalizations.of(context).cloudBackupAutoDesc,
           ),
           _buildFeatureItem(
             icon: Icons.all_inclusive,
             iconColor: Colors.teal,
-            title: '무제한 이미지 생성',
-            description: '하루 3개 제한 없이\n무제한으로 일기 생성 가능',
+            title: AppLocalizations.of(context).unlimitedImageGeneration,
+            description: AppLocalizations.of(context).unlimitedImageGenerationDesc,
           ),
         ],
       ),
@@ -230,9 +231,9 @@ class PremiumSubscriptionScreen extends ConsumerWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
-          const Text(
-            '구독 옵션',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context).subscriptionOptions,
+            style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Color(0xFF2D3748),
@@ -245,12 +246,12 @@ class PremiumSubscriptionScreen extends ConsumerWidget {
             context: context,
             ref: ref,
             subscription: subscription,
-            title: '월간 구독',
+            title: AppLocalizations.of(context).monthlySubscription,
             price: '\$4.99',
             period: '/ 월',
             features: [
-              '모든 프리미엄 기능',
-              '언제든지 취소 가능',
+              AppLocalizations.of(context).allPremiumFeatures,
+              AppLocalizations.of(context).cancelAnytime,
             ],
             isPopular: false,
             onTap: () => _handleSubscription(context, ref, '월간'),
@@ -263,15 +264,15 @@ class PremiumSubscriptionScreen extends ConsumerWidget {
             context: context,
             ref: ref,
             subscription: subscription,
-            title: '연간 구독',
+            title: AppLocalizations.of(context).yearlySubscription,
             price: '\$49.99',
             period: '/ 년',
             originalPrice: '\$59.88',
             discount: '17% 할인',
             features: [
-              '모든 프리미엄 기능',
+              AppLocalizations.of(context).allPremiumFeatures,
               '월 \$4.17 (약 \$10 절약)',
-              '언제든지 취소 가능',
+              AppLocalizations.of(context).cancelAnytime,
             ],
             isPopular: true,
             onTap: () => _handleSubscription(context, ref, '연간'),
@@ -284,17 +285,17 @@ class PremiumSubscriptionScreen extends ConsumerWidget {
             context: context,
             ref: ref,
             subscription: subscription,
-            title: '평생 구독',
+            title: AppLocalizations.of(context).lifetimeSubscription,
             price: '\$99.99',
             period: '',
             features: [
-              '모든 프리미엄 기능',
-              '평생 사용 가능',
-              '단 한 번의 결제',
-              '최고의 가치',
+              AppLocalizations.of(context).allPremiumFeatures,
+              AppLocalizations.of(context).lifetimeAccess,
+              AppLocalizations.of(context).oneTimePayment,
+              AppLocalizations.of(context).bestValue,
             ],
             isPopular: false,
-            badge: '최고 가치',
+            badge: AppLocalizations.of(context).bestValue,
             badgeColor: Colors.purple,
             onTap: () => _handleSubscription(context, ref, '평생'),
           ),
@@ -484,7 +485,7 @@ class PremiumSubscriptionScreen extends ConsumerWidget {
                       elevation: 0,
                     ),
                     child: Text(
-                      subscription.isPremium ? '현재 구독 중' : '구독하기',
+                      subscription.isPremium ? AppLocalizations.of(context).currentlySubscribed : AppLocalizations.of(context).subscribe,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -506,7 +507,7 @@ class PremiumSubscriptionScreen extends ConsumerWidget {
       child: Column(
         children: [
           Text(
-            '• 구독은 언제든지 취소할 수 있습니다\n• 취소 시 다음 결제일까지 프리미엄 기능을 사용할 수 있습니다\n• 자동 갱신은 결제일 24시간 전에 취소할 수 있습니다',
+            AppLocalizations.of(context).subscriptionFooter,
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 12,
@@ -524,8 +525,8 @@ class PremiumSubscriptionScreen extends ConsumerWidget {
 
     if (subscription.isPremium) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('이미 프리미엄 사용자입니다'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).alreadyPremium),
           backgroundColor: Colors.green,
         ),
       );
@@ -536,20 +537,20 @@ class PremiumSubscriptionScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.info_outline, color: Colors.blue),
-            SizedBox(width: 8),
-            Text('테스트 모드'),
+            const Icon(Icons.info_outline, color: Colors.blue),
+            const SizedBox(width: 8),
+            Text(AppLocalizations.of(context).testMode),
           ],
         ),
         content: Text(
-          '$type 구독을 진행하시겠습니까?\n\n테스트 모드에서는 실제 결제 없이 프리미엄 기능을 바로 사용할 수 있습니다.',
+          AppLocalizations.of(context).testModeMessage,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('취소'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           FilledButton(
             onPressed: () {
@@ -563,7 +564,7 @@ class PremiumSubscriptionScreen extends ConsumerWidget {
                     children: [
                       const Icon(Icons.check_circle, color: Colors.white),
                       const SizedBox(width: 12),
-                      Text('$type 구독이 완료되었습니다!'),
+                      Text(AppLocalizations.of(context).subscriptionCompleted),
                     ],
                   ),
                   backgroundColor: Colors.green,
@@ -574,7 +575,7 @@ class PremiumSubscriptionScreen extends ConsumerWidget {
             style: FilledButton.styleFrom(
               backgroundColor: Colors.amber,
             ),
-            child: const Text('구독하기 (테스트)'),
+            child: Text(AppLocalizations.of(context).subscribeTest),
           ),
         ],
       ),

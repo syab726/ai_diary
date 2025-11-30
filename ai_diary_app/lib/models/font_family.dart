@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../l10n/app_localizations.dart';
-
 enum FontFamily {
   notoSans('Noto Sans', 'system', '시스템 기본체', false),
   gaegu('Gaegu', 'handwriting', '개구쟁이체', true),

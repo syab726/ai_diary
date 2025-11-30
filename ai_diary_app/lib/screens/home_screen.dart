@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import '../providers/diary_provider.dart';
-import '../models/diary_entry.dart';
 import '../widgets/diary_card.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {

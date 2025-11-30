@@ -21,9 +21,9 @@ class PersonalizationSettingsScreen extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          '개인화',
-          style: TextStyle(
+        title: Text(
+          AppLocalizations.of(context).personalization,
+          style: const TextStyle(
             color: Color(0xFF2D3748),
             fontWeight: FontWeight.bold,
           ),
@@ -49,20 +49,20 @@ class PersonalizationSettingsScreen extends ConsumerWidget {
           ),
           _buildSettingsTile(
             icon: Icons.text_fields,
-            title: '글꼴',
-            subtitle: '일기 작성에 사용할 글꼴을 선택하세요',
+            title: AppLocalizations.of(context).font,
+            subtitle: AppLocalizations.of(context).selectFontDescription,
             onTap: () => _showFontDialog(context, ref),
           ),
           _buildSettingsTile(
             icon: Icons.schedule,
-            title: '날짜 포맷',
-            subtitle: '날짜 표시 형식을 선택하세요',
+            title: AppLocalizations.of(context).dateFormat,
+            subtitle: AppLocalizations.of(context).selectDateFormatDescription,
             onTap: () => _showDateFormatDialog(context, ref),
           ),
           _buildSettingsTile(
             icon: Icons.access_time,
-            title: '타임존',
-            subtitle: '시간대를 선택하세요',
+            title: AppLocalizations.of(context).timezone,
+            subtitle: AppLocalizations.of(context).selectTimezoneDescription,
             onTap: () => _showTimezoneDialog(context, ref),
           ),
         ],
@@ -255,13 +255,13 @@ class PersonalizationSettingsScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('글꼴 선택'),
+        title: Text(AppLocalizations.of(context).selectFont),
         content: SizedBox(
           width: double.maxFinite,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('일기 작성에 사용할 글꼴을 선택하세요'),
+              Text(AppLocalizations.of(context).selectFontDescription),
               const SizedBox(height: 16),
               SizedBox(
                 height: 300,
@@ -284,11 +284,13 @@ class PersonalizationSettingsScreen extends ConsumerWidget {
                             color: isLocked ? Colors.grey : null,
                           ),
                         ),
-                        subtitle: Text(
-                          isLocked ? '프리미엄 전용 글꼴' : font.category,
-                          style: TextStyle(
-                            color: isLocked ? Colors.grey : const Color(0xFF718096),
-                            fontSize: 13,
+                        subtitle: Builder(
+                          builder: (context) => Text(
+                            isLocked ? AppLocalizations.of(context).premiumOnlyFont : font.category,
+                            style: TextStyle(
+                              color: isLocked ? Colors.grey : const Color(0xFF718096),
+                              fontSize: 13,
+                            ),
                           ),
                         ),
                         leading: isSelected
@@ -336,9 +338,11 @@ class PersonalizationSettingsScreen extends ConsumerWidget {
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('취소'),
+          Builder(
+            builder: (context) => TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context).cancel),
+            ),
           ),
         ],
       ),
@@ -352,56 +356,56 @@ class PersonalizationSettingsScreen extends ConsumerWidget {
     if (context.mounted) {
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('날짜 포맷 선택'),
+        builder: (dialogContext) => AlertDialog(
+          title: Text(AppLocalizations.of(context).selectDateFormat),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('날짜 표시 형식을 선택하세요'),
+              Text(AppLocalizations.of(context).selectDateFormatDescription),
               const SizedBox(height: 16),
               RadioListTile<String>(
-                title: const Text('년/월/일 (2024/12/25)'),
+                title: Text(AppLocalizations.of(context).dateFormatYmd),
                 value: 'yyyy/MM/dd',
                 groupValue: currentFormat,
                 onChanged: (value) async {
                   if (value != null) {
                     await prefs.setString('date_format', value);
                     if (context.mounted) {
-                      Navigator.pop(context);
+                      Navigator.pop(dialogContext);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('날짜 포맷이 변경되었습니다')),
+                        SnackBar(content: Text(AppLocalizations.of(context).dateFormatChanged)),
                       );
                     }
                   }
                 },
               ),
               RadioListTile<String>(
-                title: const Text('일/월/년 (25/12/2024)'),
+                title: Text(AppLocalizations.of(context).dateFormatDmy),
                 value: 'dd/MM/yyyy',
                 groupValue: currentFormat,
                 onChanged: (value) async {
                   if (value != null) {
                     await prefs.setString('date_format', value);
                     if (context.mounted) {
-                      Navigator.pop(context);
+                      Navigator.pop(dialogContext);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('날짜 포맷이 변경되었습니다')),
+                        SnackBar(content: Text(AppLocalizations.of(context).dateFormatChanged)),
                       );
                     }
                   }
                 },
               ),
               RadioListTile<String>(
-                title: const Text('월/일/년 (12/25/2024)'),
+                title: Text(AppLocalizations.of(context).dateFormatMdy),
                 value: 'MM/dd/yyyy',
                 groupValue: currentFormat,
                 onChanged: (value) async {
                   if (value != null) {
                     await prefs.setString('date_format', value);
                     if (context.mounted) {
-                      Navigator.pop(context);
+                      Navigator.pop(dialogContext);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('날짜 포맷이 변경되었습니다')),
+                        SnackBar(content: Text(AppLocalizations.of(context).dateFormatChanged)),
                       );
                     }
                   }
@@ -410,9 +414,11 @@ class PersonalizationSettingsScreen extends ConsumerWidget {
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('취소'),
+            Builder(
+              builder: (context) => TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: Text(AppLocalizations.of(context).cancel),
+              ),
             ),
           ],
         ),
@@ -424,28 +430,28 @@ class PersonalizationSettingsScreen extends ConsumerWidget {
     final prefs = await SharedPreferences.getInstance();
     final currentTimezone = prefs.getString('timezone') ?? DateTime.now().timeZoneName;
 
-    final timezones = [
-      {'name': '서울 (KST)', 'value': 'Asia/Seoul'},
-      {'name': '도쿄 (JST)', 'value': 'Asia/Tokyo'},
-      {'name': '베이징 (CST)', 'value': 'Asia/Shanghai'},
-      {'name': '뉴욕 (EST)', 'value': 'America/New_York'},
-      {'name': '로스앤젤레스 (PST)', 'value': 'America/Los_Angeles'},
-      {'name': '런던 (GMT)', 'value': 'Europe/London'},
-      {'name': '파리 (CET)', 'value': 'Europe/Paris'},
-    ];
-
     if (context.mounted) {
+      final timezones = [
+        {'name': AppLocalizations.of(context).timezoneSeoul, 'value': 'Asia/Seoul'},
+        {'name': AppLocalizations.of(context).timezoneTokyo, 'value': 'Asia/Tokyo'},
+        {'name': AppLocalizations.of(context).timezoneBeijing, 'value': 'Asia/Shanghai'},
+        {'name': AppLocalizations.of(context).timezoneNewYork, 'value': 'America/New_York'},
+        {'name': AppLocalizations.of(context).timezoneLosAngeles, 'value': 'America/Los_Angeles'},
+        {'name': AppLocalizations.of(context).timezoneLondon, 'value': 'Europe/London'},
+        {'name': AppLocalizations.of(context).timezoneParis, 'value': 'Europe/Paris'},
+      ];
+
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('타임존 선택'),
+        builder: (dialogContext) => AlertDialog(
+          title: Text(AppLocalizations.of(context).selectTimezone),
           content: SizedBox(
             width: double.maxFinite,
             height: 400,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('시간대를 선택하세요'),
+                Text(AppLocalizations.of(context).selectTimezoneDescription),
                 const SizedBox(height: 16),
                 Expanded(
                   child: ListView.builder(
@@ -460,9 +466,13 @@ class PersonalizationSettingsScreen extends ConsumerWidget {
                           if (value != null) {
                             await prefs.setString('timezone', value);
                             if (context.mounted) {
-                              Navigator.pop(context);
+                              Navigator.pop(dialogContext);
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('타임존이 ${timezone['name']}으로 변경되었습니다')),
+                                SnackBar(
+                                  content: Text(
+                                    AppLocalizations.of(context).timezoneChangedFormat.replaceAll('{name}', timezone['name']!),
+                                  ),
+                                ),
                               );
                             }
                           }
@@ -475,9 +485,11 @@ class PersonalizationSettingsScreen extends ConsumerWidget {
             ),
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('취소'),
+            Builder(
+              builder: (context) => TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: Text(AppLocalizations.of(context).cancel),
+              ),
             ),
           ],
         ),

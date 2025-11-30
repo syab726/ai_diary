@@ -133,7 +133,7 @@ class FreeUserService {
     final minutes = duration.inMinutes.remainder(60);
 
     if (hours > 0) {
-      return '$hours시간 ${minutes}분 후';
+      return '$hours시간 $minutes분 후';
     } else {
       return '$minutes분 후';
     }

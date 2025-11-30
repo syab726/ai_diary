@@ -18,9 +18,9 @@ class DeleteSettingsScreen extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          '데이터 삭제',
-          style: TextStyle(
+        title: Text(
+          AppLocalizations.of(context).deleteData,
+          style: const TextStyle(
             color: Color(0xFF2D3748),
             fontWeight: FontWeight.bold,
           ),
@@ -47,7 +47,7 @@ class DeleteSettingsScreen extends ConsumerWidget {
                     Icon(Icons.warning, color: Colors.red.shade700),
                     const SizedBox(width: 8),
                     Text(
-                      '주의사항',
+                      AppLocalizations.of(context).warningNotice,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.red.shade700,
@@ -58,7 +58,7 @@ class DeleteSettingsScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  '• 모든 일기가 영구적으로 삭제됩니다\n• 삭제된 데이터는 복구할 수 없습니다\n• 삭제 전에 반드시 백업을 권장합니다',
+                  AppLocalizations.of(context).deleteWarningMessage,
                   style: TextStyle(
                     color: Colors.red.shade900,
                     fontSize: 14,
@@ -71,8 +71,8 @@ class DeleteSettingsScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           _buildSettingsTile(
             icon: Icons.cleaning_services,
-            title: '캐시 삭제',
-            subtitle: '저장된 이미지 캐시를 삭제하여 저장 공간 확보',
+            title: AppLocalizations.of(context).clearCache,
+            subtitle: AppLocalizations.of(context).clearCacheDescription,
             onTap: () => _showClearCacheDialog(context),
             isDestructive: false,
           ),
@@ -89,13 +89,13 @@ class DeleteSettingsScreen extends ConsumerWidget {
   }
 
   // 캐시 크기 계산
-  Future<String> _calculateCacheSize() async {
+  Future<String> _calculateCacheSize(BuildContext context) async {
     try {
       final directory = await getApplicationDocumentsDirectory();
       final imagesDir = Directory(path.join(directory.path, 'diary_images'));
 
       if (!await imagesDir.exists()) {
-        return '0 MB';
+        return AppLocalizations.of(context).cacheZero;
       }
 
       int totalBytes = 0;
@@ -108,7 +108,7 @@ class DeleteSettingsScreen extends ConsumerWidget {
       final megaBytes = totalBytes / (1024 * 1024);
       return '${megaBytes.toStringAsFixed(2)} MB';
     } catch (e) {
-      return '계산 실패';
+      return AppLocalizations.of(context).calculationFailed;
     }
   }
 
@@ -136,24 +136,21 @@ class DeleteSettingsScreen extends ConsumerWidget {
   }
 
   void _showClearCacheDialog(BuildContext context) async {
-    final cacheSize = await _calculateCacheSize();
+    final cacheSize = await _calculateCacheSize(context);
 
     if (!context.mounted) return;
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('캐시 삭제'),
+        title: Text(AppLocalizations.of(context).clearCache),
         content: Text(
-          '이미지 캐시를 삭제하시겠습니까?\n\n'
-          '현재 캐시 크기: $cacheSize\n\n'
-          '참고: 일기 데이터는 삭제되지 않으며,\n'
-          '필요 시 이미지가 다시 생성됩니다.',
+          AppLocalizations.of(context).clearCacheConfirmMessage.replaceAll('{size}', cacheSize),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('취소'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           FilledButton(
             onPressed: () async {
@@ -161,9 +158,9 @@ class DeleteSettingsScreen extends ConsumerWidget {
 
               // 진행 상태 표시
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('캐시 삭제 중...'),
-                  duration: Duration(seconds: 1),
+                SnackBar(
+                  content: Text(AppLocalizations.of(context).clearingCache),
+                  duration: const Duration(seconds: 1),
                 ),
               );
 
@@ -174,15 +171,15 @@ class DeleteSettingsScreen extends ConsumerWidget {
                   SnackBar(
                     content: Text(
                       success
-                          ? '캐시가 성공적으로 삭제되었습니다'
-                          : '캐시 삭제 중 오류가 발생했습니다',
+                          ? AppLocalizations.of(context).cacheDeletedSuccess
+                          : AppLocalizations.of(context).cacheDeleteError,
                     ),
                     backgroundColor: success ? Colors.green : Colors.red,
                   ),
                 );
               }
             },
-            child: const Text('삭제'),
+            child: Text(AppLocalizations.of(context).deleteButton),
           ),
         ],
       ),
@@ -258,8 +255,8 @@ class DeleteSettingsScreen extends ConsumerWidget {
                 if (context.mounted) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('모든 데이터가 삭제되었습니다'),
+                    SnackBar(
+                      content: Text(AppLocalizations.of(context).allDataDeleted),
                       backgroundColor: Colors.green,
                     ),
                   );
@@ -269,7 +266,9 @@ class DeleteSettingsScreen extends ConsumerWidget {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('삭제 중 오류가 발생했습니다: $e'),
+                      content: Text(
+                        AppLocalizations.of(context).deleteErrorFormat.replaceAll('{error}', e.toString()),
+                      ),
                       backgroundColor: Colors.red,
                     ),
                   );

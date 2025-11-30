@@ -8,7 +8,6 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import '../models/diary_entry.dart';
 import '../services/database_service.dart';
@@ -16,8 +15,8 @@ import '../providers/diary_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../widgets/image_viewer.dart';
 import '../models/font_family.dart';
-import '../providers/font_provider.dart';
 import '../providers/theme_provider.dart';
+import '../l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/foundation.dart';
 
@@ -61,7 +60,7 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('일기를 불러오는 중 오류가 발생했습니다: $e')),
+          SnackBar(content: Text('${AppLocalizations.of(context).errorLoadingDiary}: $e')),
         );
       }
     }
@@ -77,14 +76,14 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
 
     if (_diary == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('일기 상세')),
-        body: const Center(
+        appBar: AppBar(title: Text(AppLocalizations.of(context).diaryDetailTitle)),
+        body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, size: 64, color: Colors.grey),
-              SizedBox(height: 16),
-              Text('일기를 찾을 수 없습니다'),
+              const Icon(Icons.error_outline, size: 64, color: Colors.grey),
+              const SizedBox(height: 16),
+              Text(AppLocalizations.of(context).diaryNotFound),
             ],
           ),
         ),
@@ -194,14 +193,14 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    DateFormat('yyyy년 M월 d일 EEEE', 'ko_KR').format(_diary!.createdAt),
+                    DateFormat(AppLocalizations.of(context).dateFormatFull, AppLocalizations.of(context).locale.languageCode).format(_diary!.createdAt),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Colors.grey[600],
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '작성: ${DateFormat('yyyy.MM.dd HH:mm').format(_diary!.createdAt)}',
+                    '${AppLocalizations.of(context).writtenLabel} ${DateFormat('yyyy.MM.dd HH:mm').format(_diary!.createdAt)}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Colors.grey[500],
                     ),
@@ -234,7 +233,7 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
-                                  _getEmotionText(_diary!.emotion!),
+                                  AppLocalizations.of(context).getEmotionName(_diary!.emotion!),
                                   style: TextStyle(
                                     color: _getEmotionColor(_diary!.emotion!),
                                     fontWeight: FontWeight.bold,
@@ -291,7 +290,7 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
                   if (_diary!.updatedAt != null) ...[
                     const SizedBox(height: 16),
                     Text(
-                      '마지막 수정: ${DateFormat('yyyy.MM.dd HH:mm').format(_diary!.updatedAt!)}',
+                      '${AppLocalizations.of(context).lastModifiedLabel} ${DateFormat('yyyy.MM.dd HH:mm').format(_diary!.updatedAt!)}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Colors.grey[500],
                       ),
@@ -415,14 +414,14 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
   Widget _buildImagePlaceholder() {
     return Container(
       color: Colors.grey[200],
-      child: const Column(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.image_outlined, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
+          const Icon(Icons.image_outlined, size: 64, color: Colors.grey),
+          const SizedBox(height: 16),
           Text(
-            'AI가 그린 이미지가 없습니다',
-            style: TextStyle(color: Colors.grey),
+            AppLocalizations.of(context).noAiImageAvailable,
+            style: const TextStyle(color: Colors.grey),
           ),
         ],
       ),
@@ -434,10 +433,10 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
 
     String shareText = '${_diary!.title}\n\n${_diary!.content}';
     if (_diary!.emotion != null) {
-      shareText += '\n\n오늘의 감정: ${_getEmotionText(_diary!.emotion!)}';
+      shareText += '\n\n${AppLocalizations.of(context).todaysEmotionLabel} ${AppLocalizations.of(context).getEmotionName(_diary!.emotion!)}';
     }
-    shareText += '\n\n작성일: ${DateFormat('yyyy.MM.dd').format(_diary!.createdAt)}';
-    shareText += '\n\n#AI그림일기 #감정일기';
+    shareText += '\n\n${AppLocalizations.of(context).writtenDateLabel} ${DateFormat('yyyy.MM.dd').format(_diary!.createdAt)}';
+    shareText += '\n\n${AppLocalizations.of(context).hashtagAiDiary}';
 
     // 유료 사용자이고 이미지가 있는 경우 이미지와 함께 공유
     if (subscription.isPremium && _diary!.generatedImageUrl != null) {
@@ -506,12 +505,12 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('일기 삭제'),
-        content: const Text('정말로 이 일기를 삭제하시겠습니까?\n삭제된 일기는 복구할 수 없습니다.'),
+        title: Text(AppLocalizations.of(context).deleteDiaryTitle),
+        content: Text(AppLocalizations.of(context).deleteDiaryConfirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('취소'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           FilledButton(
             onPressed: () async {
@@ -519,16 +518,16 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
               final success = await ref.read(diaryEntriesProvider.notifier).deleteDiary(widget.entryId);
               if (success && mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('일기가 삭제되었습니다')),
+                  SnackBar(content: Text(AppLocalizations.of(context).diaryDeletedSuccess)),
                 );
                 context.go('/');
               } else if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('삭제 중 오류가 발생했습니다')),
+                  SnackBar(content: Text(AppLocalizations.of(context).diaryDeleteError)),
                 );
               }
             },
-            child: const Text('삭제'),
+            child: Text(AppLocalizations.of(context).delete),
           ),
         ],
       ),
@@ -589,32 +588,6 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
     }
   }
 
-  String _getEmotionText(String emotion) {
-    switch (emotion.toLowerCase()) {
-      case 'happy':
-        return '행복';
-      case 'sad':
-        return '슬픔';
-      case 'angry':
-        return '화남';
-      case 'excited':
-        return '흥분';
-      case 'peaceful':
-        return '평온';
-      case 'anxious':
-        return '불안';
-      case 'grateful':
-        return '감사';
-      case 'nostalgic':
-        return '그리움';
-      case 'romantic':
-        return '로맨틱';
-      case 'frustrated':
-        return '짜증';
-      default:
-        return '보통';
-    }
-  }
 
   TextStyle _getDiaryTextStyle(BuildContext context) {
     final fontSize = ref.watch(fontSizeProvider);
@@ -718,7 +691,7 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  isAI ? 'AI 생성' : '내 사진',
+                  isAI ? AppLocalizations.of(context).aiGeneratedBadge : AppLocalizations.of(context).userPhotoBadge,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 12,

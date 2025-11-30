@@ -63,7 +63,7 @@ class NetworkHelper {
       // Exponential backoff: 2초, 4초, 8초...
       final delaySeconds = 2 * attempt;
       if (attempt < maxAttempts) {
-        if (kDebugMode) print('[NetworkHelper] ${delaySeconds}초 후 재시도...');
+        if (kDebugMode) print('[NetworkHelper] $delaySeconds초 후 재시도...');
         await Future.delayed(Duration(seconds: delaySeconds));
       }
     }

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import '../models/diary_entry.dart';
 import '../services/database_service.dart';
 import '../services/ai_service.dart';
@@ -82,10 +83,10 @@ final aiProcessingProvider = StateNotifierProvider<AIProcessingNotifier, AsyncVa
 class AIProcessingNotifier extends StateNotifier<AsyncValue<Map<String, dynamic>?>> {
   AIProcessingNotifier() : super(const AsyncValue.data(null));
 
-  Future<void> processEntry(String content, String style) async {
+  Future<void> processEntry(BuildContext context, String content, String style) async {
     try {
       state = const AsyncValue.loading();
-      final result = await AIService.processEntry(content, style);
+      final result = await AIService.processEntry(context, content, style);
       state = AsyncValue.data(result);
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);

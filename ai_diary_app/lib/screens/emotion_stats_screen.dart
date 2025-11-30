@@ -10,6 +10,7 @@ import '../models/diary_entry.dart';
 import '../models/emotion_insight.dart';
 import '../services/ai_service.dart';
 import '../services/database_service.dart';
+import '../l10n/app_localizations.dart';
 
 class EmotionStatsScreen extends ConsumerStatefulWidget {
   const EmotionStatsScreen({super.key});
@@ -215,9 +216,9 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
-          '감정 통계',
-          style: TextStyle(
+        title: Text(
+          AppLocalizations.of(context).emotionStats,
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
@@ -226,10 +227,10 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
         elevation: 0,
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: '주별'),
-            Tab(text: '월별'),
-            Tab(text: '연간'),
+          tabs: [
+            Tab(text: AppLocalizations.of(context).weekly),
+            Tab(text: AppLocalizations.of(context).monthly),
+            Tab(text: AppLocalizations.of(context).yearly),
           ],
           indicatorColor: const Color(0xFF667EEA),
           labelColor: const Color(0xFF667EEA),
@@ -239,7 +240,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
       body: diariesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
-          child: Text('오류: $error'),
+          child: Text('${AppLocalizations.of(context).errorOccurred}: $error'),
         ),
         data: (diaries) {
           return TabBarView(
@@ -787,10 +788,10 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
 
       if (startMonth == endMonth) {
         // 같은 달인 경우
-        return '${startMonth}월${startDay}일~${endDay}일';
+        return '$startMonth월$startDay일~$endDay일';
       } else {
         // 다른 달인 경우
-        return '${startMonth}월${startDay}일~${endMonth}월${endDay}일';
+        return '$startMonth월$startDay일~$endMonth월$endDay일';
       }
     }
   }
@@ -1098,7 +1099,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
                             width: 80,
                             alignment: Alignment.center,
                             child: Text(
-                              '${selectedMonthNum}월',
+                              '$selectedMonthNum월',
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,

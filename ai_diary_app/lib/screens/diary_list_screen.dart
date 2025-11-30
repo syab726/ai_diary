@@ -10,8 +10,6 @@ import '../providers/subscription_provider.dart';
 import '../models/diary_entry.dart';
 import '../l10n/app_localizations.dart';
 import '../widgets/ad_banner_widget.dart';
-import '../services/free_user_service.dart';
-import '../services/database_service.dart';
 import 'package:flutter/foundation.dart';
 
 class DiaryListScreen extends ConsumerStatefulWidget {
@@ -169,17 +167,17 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
-                  _buildEmotionFilterChip(null, '전체', '😊', emotionFilter),
-                  _buildEmotionFilterChip('happy', '행복', '😊', emotionFilter),
-                  _buildEmotionFilterChip('sad', '슬픔', '😢', emotionFilter),
-                  _buildEmotionFilterChip('angry', '화남', '😠', emotionFilter),
-                  _buildEmotionFilterChip('excited', '흥분', '🎉', emotionFilter),
-                  _buildEmotionFilterChip('peaceful', '평온', '😌', emotionFilter),
-                  _buildEmotionFilterChip('anxious', '불안', '😰', emotionFilter),
-                  _buildEmotionFilterChip('grateful', '감사', '🙏', emotionFilter),
-                  _buildEmotionFilterChip('nostalgic', '그리움', '🥺', emotionFilter),
-                  _buildEmotionFilterChip('romantic', '로맨틱', '💕', emotionFilter),
-                  _buildEmotionFilterChip('frustrated', '짜증', '😤', emotionFilter),
+                  _buildEmotionFilterChip(null, AppLocalizations.of(context).emotionAll, '😊', emotionFilter),
+                  _buildEmotionFilterChip('happy', AppLocalizations.of(context).getEmotionName('happy'), '😊', emotionFilter),
+                  _buildEmotionFilterChip('sad', AppLocalizations.of(context).getEmotionName('sad'), '😢', emotionFilter),
+                  _buildEmotionFilterChip('angry', AppLocalizations.of(context).getEmotionName('angry'), '😠', emotionFilter),
+                  _buildEmotionFilterChip('excited', AppLocalizations.of(context).getEmotionName('excited'), '🎉', emotionFilter),
+                  _buildEmotionFilterChip('peaceful', AppLocalizations.of(context).getEmotionName('peaceful'), '😌', emotionFilter),
+                  _buildEmotionFilterChip('anxious', AppLocalizations.of(context).getEmotionName('anxious'), '😰', emotionFilter),
+                  _buildEmotionFilterChip('grateful', AppLocalizations.of(context).getEmotionName('grateful'), '🙏', emotionFilter),
+                  _buildEmotionFilterChip('nostalgic', AppLocalizations.of(context).getEmotionName('nostalgic'), '🥺', emotionFilter),
+                  _buildEmotionFilterChip('romantic', AppLocalizations.of(context).getEmotionName('romantic'), '💕', emotionFilter),
+                  _buildEmotionFilterChip('frustrated', AppLocalizations.of(context).getEmotionName('frustrated'), '😤', emotionFilter),
                 ],
               ),
             ),
@@ -209,7 +207,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                     Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
                     const SizedBox(height: 16),
                     Text(
-                      '오류가 발생했습니다',
+                      AppLocalizations.of(context).errorOccurred,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF2D3748),
@@ -233,7 +231,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text('다시 시도'),
+                      child: Text(AppLocalizations.of(context).retry),
                     ),
                   ],
                 ),
@@ -533,7 +531,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
           ),
           SizedBox(height: 12),
           Text(
-            'AI가 그린 이미지',
+            AppLocalizations.of(context).aiDrawnImage,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: const Color(0xFF9CA3AF),
             ),
@@ -592,9 +590,9 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
-                        '취소',
-                        style: TextStyle(color: Color(0xFF6B7280)),
+                      child: Text(
+                        AppLocalizations.of(context).cancel,
+                        style: const TextStyle(color: Color(0xFF6B7280)),
                       ),
                     ),
                   ),
@@ -610,7 +608,7 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text('검색'),
+                      child: Text(AppLocalizations.of(context).search),
                     ),
                   ),
                 ],
@@ -683,32 +681,6 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
     }
   }
 
-  String _getEmotionText(String emotion) {
-    switch (emotion.toLowerCase()) {
-      case 'happy':
-        return '행복';
-      case 'sad':
-        return '슬픔';
-      case 'angry':
-        return '화남';
-      case 'excited':
-        return '흥분';
-      case 'peaceful':
-        return '평온';
-      case 'anxious':
-        return '불안';
-      case 'grateful':
-        return '감사';
-      case 'nostalgic':
-        return '그리움';
-      case 'romantic':
-        return '로맨틱';
-      case 'frustrated':
-        return '짜증';
-      default:
-        return '보통';
-    }
-  }
 
   /// 프리미엄 업그레이드 배너 위젯
   Widget _buildPremiumUpgradeBanner() {
@@ -752,22 +724,22 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '프리미엄 업그레이드',
-                        style: TextStyle(
+                        AppLocalizations.of(context).premiumUpgrade,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
-                        '광고 없이 무제한으로 일기를 작성하세요',
-                        style: TextStyle(
+                        AppLocalizations.of(context).adFreeUnlimited,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 13,
                         ),
@@ -792,9 +764,9 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                   elevation: 0,
                 ),
                 icon: const Icon(Icons.workspace_premium, size: 20),
-                label: const Text(
-                  '프리미엄으로 무제한 생성',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                label: Text(
+                  AppLocalizations.of(context).upgradeToPremiumUnlimited,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
             ),

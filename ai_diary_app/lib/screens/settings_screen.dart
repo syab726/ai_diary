@@ -42,28 +42,28 @@ class SettingsScreen extends ConsumerWidget {
             context: context,
             icon: Icons.person,
             title: AppLocalizations.of(context).personalization,
-            subtitle: '언어, 글꼴, 날짜 포맷 설정',
+            subtitle: AppLocalizations.of(context).personalizationSubtitle,
             onTap: () => _navigateToPersonalization(context),
           ),
           _buildMenuTile(
             context: context,
             icon: Icons.auto_fix_high,
             title: AppLocalizations.of(context).aiSettings,
-            subtitle: '이미지 스타일, AI 가이드 설정',
+            subtitle: AppLocalizations.of(context).aiSettingsSubtitle,
             onTap: () => _navigateToAiSettings(context),
           ),
           _buildMenuTile(
             context: context,
             icon: Icons.backup,
-            title: '백업 및 복원',
-            subtitle: '데이터 백업 및 클라우드 동기화',
+            title: AppLocalizations.of(context).backupAndRestore,
+            subtitle: AppLocalizations.of(context).backupDescription,
             onTap: () => _navigateToBackupRestore(context),
           ),
           _buildMenuTile(
             context: context,
             icon: Icons.delete_forever,
-            title: '데이터 삭제',
-            subtitle: '모든 일기 데이터 삭제',
+            title: AppLocalizations.of(context).deleteData,
+            subtitle: AppLocalizations.of(context).deleteDataDescription,
             onTap: () => _navigateToDelete(context),
             isDestructive: true,
           ),
@@ -71,7 +71,7 @@ class SettingsScreen extends ConsumerWidget {
             context: context,
             icon: Icons.info,
             title: AppLocalizations.of(context).appInfo,
-            subtitle: '앱 버전, 개인정보처리방침',
+            subtitle: AppLocalizations.of(context).appInfoSubtitle,
             onTap: () => _navigateToAppInfo(context),
           ),
 
@@ -101,7 +101,7 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 16),
 
           // 테스트 모드 섹션
-          _buildSectionTitle(context, '테스트 모드'),
+          _buildSectionTitle(context, AppLocalizations.of(context).testMode),
           _buildTestModeTiles(ref),
 
           const SizedBox(height: 24),
@@ -215,27 +215,29 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '프리미엄 업그레이드',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+              Expanded(
+                child: Builder(
+                  builder: (context) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context).premiumUpgrade,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      '광고 없이 무제한으로 사용하세요',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
+                      const SizedBox(height: 4),
+                      Text(
+                        AppLocalizations.of(context).premiumUpgradeDescription,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -243,21 +245,23 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () => context.push('/premium-subscription'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: const Color(0xFFF97316),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+            child: Builder(
+              builder: (context) => ElevatedButton.icon(
+                onPressed: () => context.push('/premium-subscription'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: const Color(0xFFF97316),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
                 ),
-                elevation: 0,
-              ),
-              icon: const Icon(Icons.workspace_premium, size: 20),
-              label: const Text(
-                '프리미엄으로 무제한 생성',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                icon: const Icon(Icons.workspace_premium, size: 20),
+                label: Text(
+                  AppLocalizations.of(context).unlimitedWithPremium,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
             ),
           ),
@@ -390,11 +394,15 @@ class SettingsScreen extends ConsumerWidget {
                 color: subscription.isPremium ? Colors.green : Colors.orange,
               ),
               const SizedBox(width: 8),
-              Text(
-                subscription.isPremium ? '현재: 프리미엄 사용자' : '현재: 무료 사용자',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: subscription.isPremium ? Colors.green : Colors.orange,
+              Builder(
+                builder: (context) => Text(
+                  subscription.isPremium
+                    ? AppLocalizations.of(context).currentPremiumUser
+                    : AppLocalizations.of(context).currentFreeUser,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: subscription.isPremium ? Colors.green : Colors.orange,
+                  ),
                 ),
               ),
             ],
@@ -408,11 +416,11 @@ class SettingsScreen extends ConsumerWidget {
                     onPressed: subscription.isPremium ? null : () {
                       ref.read(subscriptionProvider.notifier).setPremiumUser();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('프리미엄 사용자로 전환됨')),
+                        SnackBar(content: Text(AppLocalizations.of(context).switchedToPremium)),
                       );
                     },
                     icon: const Icon(Icons.star),
-                    label: const Text('프리미엄'),
+                    label: Text(AppLocalizations.of(context).premium),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
@@ -427,11 +435,11 @@ class SettingsScreen extends ConsumerWidget {
                     onPressed: !subscription.isPremium ? null : () {
                       ref.read(subscriptionProvider.notifier).setFreeUser();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('무료 사용자로 전환됨')),
+                        SnackBar(content: Text(AppLocalizations.of(context).switchedToFree)),
                       );
                     },
                     icon: const Icon(Icons.person),
-                    label: const Text('무료'),
+                    label: Text(AppLocalizations.of(context).free),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                       foregroundColor: Colors.white,
@@ -446,7 +454,7 @@ class SettingsScreen extends ConsumerWidget {
             builder: (context) => ElevatedButton.icon(
               onPressed: () => _showLogoutDialog(context),
               icon: const Icon(Icons.logout),
-              label: const Text('로그아웃 (로그인 화면으로)'),
+              label: Text(AppLocalizations.of(context).logoutToLoginScreen),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
@@ -502,12 +510,12 @@ class SettingsScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('로그아웃'),
-        content: const Text('로그인 화면으로 돌아가시겠습니까?'),
+        title: Text(AppLocalizations.of(context).logout),
+        content: Text(AppLocalizations.of(context).returnToLoginConfirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('취소'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           FilledButton(
             onPressed: () async {
@@ -522,7 +530,7 @@ class SettingsScreen extends ConsumerWidget {
             style: FilledButton.styleFrom(
               backgroundColor: Colors.red,
             ),
-            child: const Text('로그아웃'),
+            child: Text(AppLocalizations.of(context).logout),
           ),
         ],
       ),
