@@ -4,7 +4,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:gal/gal.dart';
 import 'dart:io';
 import 'dart:convert';
-import 'dart:typed_data';
 
 class ImageViewer extends StatefulWidget {
   final String imageUrl;
