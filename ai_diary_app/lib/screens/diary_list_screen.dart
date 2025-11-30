@@ -654,32 +654,6 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
     }
   }
 
-  String _getEmotionEmoji(String emotion) {
-    switch (emotion.toLowerCase()) {
-      case 'happy':
-        return '😊';
-      case 'sad':
-        return '😢';
-      case 'angry':
-        return '😠';
-      case 'excited':
-        return '🎉';
-      case 'peaceful':
-        return '😌';
-      case 'anxious':
-        return '😰';
-      case 'grateful':
-        return '🙏';
-      case 'nostalgic':
-        return '🥺';
-      case 'romantic':
-        return '💕';
-      case 'frustrated':
-        return '😤';
-      default:
-        return '😐';
-    }
-  }
 
 
   /// 프리미엄 업그레이드 배너 위젯

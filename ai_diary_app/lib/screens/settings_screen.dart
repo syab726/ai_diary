@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/subscription_provider.dart';
 import '../services/auth_service.dart';
-import '../services/free_user_service.dart';
 import 'settings/personalization_settings_screen.dart';
 import 'settings/ai_settings_screen.dart';
 import 'settings/backup_restore_screen.dart';
@@ -270,62 +269,6 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showPremiumDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.diamond, color: Colors.orange[400]),
-            const SizedBox(width: 8),
-            Text(AppLocalizations.of(context).premiumUpgradeTitle),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(AppLocalizations.of(context).premiumBenefits),
-            const SizedBox(height: 16),
-            _buildFeatureItem(context, '✨', AppLocalizations.of(context).unlimitedAiImages),
-            _buildFeatureItem(context, '🎨', AppLocalizations.of(context).advancedImageStyles),
-            _buildFeatureItem(context, '📱', AppLocalizations.of(context).noAds),
-            _buildFeatureItem(context, '☁️', AppLocalizations.of(context).cloudBackup),
-            _buildFeatureItem(context, '🔒', AppLocalizations.of(context).advancedSecurity),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context).later),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(AppLocalizations.of(context).premiumComingSoon)),
-              );
-            },
-            child: Text(AppLocalizations.of(context).monthlyPrice),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFeatureItem(BuildContext context, String emoji, String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Text(emoji, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(width: 12),
-          Text(text, style: Theme.of(context).textTheme.bodyMedium),
-        ],
-      ),
-    );
-  }
-
   Widget _buildSubscriptionStatusTile(WidgetRef ref) {
     final subscription = ref.watch(subscriptionProvider);
 
@@ -538,14 +481,4 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   /// 일일 진행 상황 데이터 가져오기
-  Future<Map<String, dynamic>> _getDailyProgress() async {
-    final freeUserService = FreeUserService();
-    final dailyCount = await freeUserService.getDailyAdCount();
-    final resetTime = freeUserService.getTimeUntilResetString();
-
-    return {
-      'count': dailyCount,
-      'resetTime': resetTime,
-    };
-  }
 }

@@ -937,31 +937,6 @@ class BackupRestoreScreen extends ConsumerWidget {
     }
   }
 
-  void _showPremiumRequiredDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(Icons.diamond, color: Colors.amber),
-            const SizedBox(width: 8),
-            Text(AppLocalizations.of(context).premiumOnlyFeature),
-          ],
-        ),
-        content: Builder(
-          builder: (context) => Text(AppLocalizations.of(context).cloudBackupRestorePremiumOnly),
-        ),
-        actions: [
-          Builder(
-            builder: (context) => TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(AppLocalizations.of(context).ok),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   /// 자동 백업 카드
   Widget _buildAutoBackupCard(BuildContext context, WidgetRef ref) {

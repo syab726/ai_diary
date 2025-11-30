@@ -14,10 +14,7 @@ import '../services/database_service.dart';
 import '../providers/diary_provider.dart';
 import '../providers/subscription_provider.dart';
 import '../widgets/image_viewer.dart';
-import '../models/font_family.dart';
-import '../providers/theme_provider.dart';
 import '../l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/foundation.dart';
 
 class DiaryDetailScreen extends ConsumerStatefulWidget {
@@ -589,32 +586,6 @@ class _DiaryDetailScreenState extends ConsumerState<DiaryDetailScreen> {
   }
 
 
-  TextStyle _getDiaryTextStyle(BuildContext context) {
-    final fontSize = ref.watch(fontSizeProvider);
-
-    // 기본 텍스트 스타일 설정
-    TextStyle baseStyle = TextStyle(
-      fontSize: fontSize,
-      height: 1.6,
-      color: Colors.black87,
-    );
-
-    // 일기에 저장된 글꼴이 있으면 해당 글꼴을 사용
-    if (_diary != null && _diary!.fontFamily != FontFamily.notoSans) {
-      final fontFamily = _diary!.fontFamily;
-      try {
-        return GoogleFonts.getFont(
-          fontFamily.name,
-          textStyle: baseStyle,
-        );
-      } catch (e) {
-        if (kDebugMode) print('폰트 로드 실패: ${fontFamily.name}, 기본 폰트 사용');
-        return baseStyle;
-      }
-    }
-
-    return baseStyle;
-  }
 
   // 이미지 섹션 (AI 이미지 + 사용자 사진 갤러리)
   Widget _buildImageSection() {
