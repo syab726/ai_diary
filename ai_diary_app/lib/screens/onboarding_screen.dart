@@ -57,7 +57,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         final loc = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${loc.error}: ${e.toString()}'),
+            content: Text('Error: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );

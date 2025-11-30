@@ -51,7 +51,6 @@ class AIService {
     }
   }
   static late GenerativeModel _textModel;
-  static late GenerativeModel _imageModel;
   static String _currentImageModel = 'gemini-2.5-flash-image';
   static Timer? _modelCheckTimer; // 주기적 모델 체크용 타이머
 
@@ -147,12 +146,6 @@ class AIService {
       if (newModel != null && newModel != _currentImageModel) {
         if (kDebugMode) debugPrint('✓ 모델 자동 변경: $_currentImageModel → $newModel');
         _currentImageModel = newModel;
-
-        // 모델 객체 재생성
-        _imageModel = GenerativeModel(
-          model: _currentImageModel,
-          apiKey: _geminiApiKey
-        );
       }
     } catch (e, stackTrace) {
       // 실패 시 Crashlytics에 리포팅
@@ -652,6 +645,55 @@ JSON 형태로 답변해주세요:
     } catch (e) {
       if (kDebugMode) debugPrint('감정 인사이트 생성 오류: $e');
       return l10n.aiFallbackInsight;
+    }
+  }
+
+  /// 연간 요약 생성
+  static Future<String> generateAnnualSummary(Map<String, dynamic> summaryData) async {
+    try {
+      final year = summaryData['year'] as int;
+      final totalDiaries = summaryData['totalDiaries'] as int;
+      final topEmotions = summaryData['topEmotions'] as List;
+      final topKeywords = summaryData['topKeywords'] as List<String>;
+
+      // 감정 분포 텍스트 생성
+      String emotionText = '';
+      for (var emotion in topEmotions) {
+        final emotionName = emotion['emotion'] as String;
+        final count = emotion['count'] as int;
+        emotionText += '$emotionName: $count회, ';
+      }
+      emotionText = emotionText.substring(0, emotionText.length - 2);
+
+      // 키워드 텍스트 생성
+      String keywordText = topKeywords.join(', ');
+
+      final prompt = '''
+당신은 감성적이고 따뜻한 일기 분석 전문가입니다.
+$year년 한 해 동안 작성된 일기들을 분석하여 의미 있는 요약을 작성해주세요.
+
+데이터:
+- 총 일기 개수: $totalDiaries개
+- 주요 감정 분포: $emotionText
+- 자주 등장한 키워드: $keywordText
+
+다음 형식으로 3-4문장의 따뜻하고 의미 있는 요약을 작성해주세요:
+1. 한 해의 전반적인 감정 흐름
+2. 가장 인상적인 키워드나 패턴
+3. 긍정적인 메시지나 격려
+
+요약:
+''';
+
+      final content = [Content.text(prompt)];
+      final response = await _textModel.generateContent(content);
+
+      return response.text ?? '$year년 한 해 동안 $totalDiaries개의 소중한 일기를 작성하셨습니다. 당신의 감정 여정이 담긴 아름다운 기록입니다.';
+    } catch (e) {
+      if (kDebugMode) debugPrint('연간 요약 생성 오류: $e');
+      final year = summaryData['year'] as int;
+      final totalDiaries = summaryData['totalDiaries'] as int;
+      return '$year년 한 해 동안 $totalDiaries개의 일기를 작성하셨습니다.';
     }
   }
 }
