@@ -181,7 +181,7 @@ class _TabbedOptionSelectorState extends ConsumerState<TabbedOptionSelector> {
   // 기본 설정 내용
   Widget _buildBasicSettingsContent() {
     final selectedPresetId = ref.watch(themePresetProvider);
-    final selectedStyle = ref.watch(defaultImageStyleProvider);
+    ref.watch(defaultImageStyleProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

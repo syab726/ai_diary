@@ -55,8 +55,6 @@ class PurchaseService {
 
       // iOS 플랫폼 설정
       if (Platform.isIOS) {
-        final InAppPurchaseStoreKitPlatformAddition iosAddition =
-            _inAppPurchase.getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>();
         AppLogger.log('iOS 인앱 결제 설정 완료');
       }
 

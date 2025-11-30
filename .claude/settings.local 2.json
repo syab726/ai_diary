@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/Users/kimjaeheung/Desktop/Desktop/Dev/flutter/bin/flutter analyze /Users/kimjaeheung/Desktop/Desktop/Dev/project7_diary/ai_diary_app)",
+      "Read(//private/tmp/**)",
+      "Bash(~/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell dumpsys window windows)",
+      "Read(//tmp/**)",
+      "Bash(~/Library/Android/sdk/platform-tools/adb logcat -t 50)",
+      "Bash(jobs:*)",
+      "Bash(xargs:*)",
+      "Bash(/Users/kimjaeheung/Desktop/Desktop/Dev/flutter/bin/flutter pub cache repair)",
+      "Bash(pgrep:*)",
+      "Bash(pkill:*)",
+      "Bash(~/Library/Android/sdk/platform-tools/adb:*)",
+      "Bash(/Users/kimjaeheung/Desktop/Desktop/Dev/flutter/bin/flutter emulators --launch Medium_Phone_API_36.0)",
+      "Bash(/Users/kimjaeheung/Desktop/Desktop/Dev/flutter/bin/flutter run -d emulator-5554)",
+      "Bash(git reset:*)",
+      "Bash(/Users/kimjaeheung/Desktop/Desktop/Dev/flutter/bin/flutter clean)",
+      "Bash(kill:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "717196605259",
+    "project_id": "artdiary-ai",
+    "storage_bucket": "artdiary-ai.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:717196605259:android:8f19097f423d85ebe19ace",
+        "android_client_info": {
+          "package_name": "com.aidiary.app.ai_diary_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDL03F0-wS7lYto4NS-NGy7hbOGk6D4M40"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

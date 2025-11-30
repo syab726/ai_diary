@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 그라디언트 배경 -->
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667EEA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764BA2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#F8FAFC;stop-opacity:0.8" />
+    </linearGradient>
+  </defs>
+
+  <!-- 둥근 사각형 배경 -->
+  <rect width="1024" height="1024" rx="180" ry="180" fill="url(#bg-gradient)"/>
+
+  <!-- 중앙 아이콘 영역 -->
+  <g transform="translate(512, 512)">
+    <!-- 메인 아이콘 (auto_awesome + 일기장) -->
+    <!-- 일기장 배경 -->
+    <rect x="-120" y="-140" width="240" height="280" rx="20" ry="20" fill="url(#icon-gradient)" opacity="0.9"/>
+
+    <!-- 일기장 선들 -->
+    <line x1="-80" y1="-100" x2="80" y2="-100" stroke="#667EEA" stroke-width="4" opacity="0.6"/>
+    <line x1="-80" y1="-60" x2="80" y2="-60" stroke="#667EEA" stroke-width="4" opacity="0.6"/>
+    <line x1="-80" y1="-20" x2="80" y2="-20" stroke="#667EEA" stroke-width="4" opacity="0.6"/>
+    <line x1="-80" y1="20" x2="40" y2="20" stroke="#667EEA" stroke-width="4" opacity="0.6"/>
+
+    <!-- AI 별 아이콘 -->
+    <g transform="translate(0, -30)">
+      <!-- 중앙 별 -->
+      <polygon points="0,-25 7,-7 25,-7 12,3 18,21 0,11 -18,21 -12,3 -25,-7 -7,-7" fill="#667EEA"/>
+
+      <!-- 작은 별들 -->
+      <polygon points="35,-35 38,-30 43,-30 39,-26 41,-21 35,-24 29,-21 31,-26 27,-30 32,-30" fill="#764BA2" opacity="0.8"/>
+      <polygon points="-35,35 -32,40 -27,40 -31,44 -29,49 -35,46 -41,49 -39,44 -43,40 -38,40" fill="#764BA2" opacity="0.8"/>
+      <polygon points="45,25 47,28 50,28 48,31 49,34 45,32 41,34 42,31 40,28 43,28" fill="#764BA2" opacity="0.6"/>
+    </g>
+
+    <!-- 펜 아이콘 -->
+    <g transform="translate(60, 60) rotate(45)">
+      <rect x="-3" y="-30" width="6" height="60" rx="3" fill="#667EEA"/>
+      <polygon points="-3,-30 3,-30 0,-40" fill="#764BA2"/>
+    </g>
+  </g>
+
+  <!-- 장식적 요소들 -->
+  <circle cx="200" cy="200" r="8" fill="white" opacity="0.3"/>
+  <circle cx="824" cy="300" r="6" fill="white" opacity="0.2"/>
+  <circle cx="150" cy="824" r="10" fill="white" opacity="0.25"/>
+  <circle cx="874" cy="750" r="7" fill="white" opacity="0.3"/>
+</svg>

@@ -1,0 +1,112 @@
+name: ai_diary_app
+description: "AI-powered emotional diary app with image generation"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  
+  # UI and Navigation
+  go_router: ^14.6.2
+  flutter_riverpod: ^2.6.1
+  flutter_hooks: ^0.20.5
+  hooks_riverpod: ^2.6.1
+  
+  # UI Components
+  google_fonts: ^6.2.1
+  flutter_staggered_grid_view: ^0.7.0
+  cached_network_image: ^3.4.1
+  image_picker: ^1.1.2
+  share_plus: ^10.1.2
+  table_calendar: ^3.1.2
+  gal: ^2.3.0
+  fl_chart: ^0.69.0
+  
+  # Authentication
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.1
+  google_sign_in: ^6.2.1
+  sign_in_with_apple: ^6.1.3
+  cloud_firestore: ^5.4.4
+  firebase_storage: ^12.3.4
+
+  # In-App Purchase
+  in_app_purchase: ^3.2.0
+
+  # Storage & Database
+  sqflite: ^2.4.1
+  shared_preferences: ^2.3.3
+  path_provider: ^2.1.5
+  path: ^1.9.0
+  file_picker: ^8.1.4
+  
+  # Network & API
+  http: ^1.2.2
+  flutter_dotenv: ^5.2.1
+  connectivity_plus: ^6.1.2
+  url_launcher: ^6.3.1
+  # Utils
+  # Date & Time
+  intl: ^0.20.2
+  # Utils
+  uuid: ^4.5.1
+  flutter_native_splash: ^2.4.1
+  # AI & Text Processing
+  google_generative_ai: ^0.4.7
+  
+  # AI & Text Processing
+  dart_openai: ^5.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
+    - .env
+
+# Flutter Native Splash Configuration
+flutter_native_splash:
+  color: "#667EEA"
+  color_dark: "#2D3748"
+  image: assets/images/splash_logo.png
+  image_dark: assets/images/splash_logo_dark.png
+
+  android_12:
+    image: assets/images/splash_logo.png
+    icon_background_color: "#667EEA"
+    image_dark: assets/images/splash_logo_dark.png
+    icon_background_color_dark: "#2D3748"
+
+  web: false
+
+# Flutter Launcher Icons Configuration
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/app_icon.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: "assets/images/app_icon.png"
+    background_color: "#667EEA"
+    theme_color: "#667EEA"
+  windows:
+    generate: true
+    image_path: "assets/images/app_icon.png"
+    icon_size: 48 # min:48, max:256, default: 48

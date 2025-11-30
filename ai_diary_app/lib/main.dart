@@ -105,7 +105,7 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = ref.watch(localeProvider);
-    final appTheme = ref.watch(themeProvider);
+    ref.watch(themeProvider);
     final fontSize = ref.watch(fontSizeProvider);
     final selectedFont = ref.watch(fontProvider);
 

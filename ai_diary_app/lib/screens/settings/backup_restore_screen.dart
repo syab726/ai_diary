@@ -21,7 +21,7 @@ class BackupRestoreScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final subscription = ref.watch(subscriptionProvider);
+    ref.watch(subscriptionProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),

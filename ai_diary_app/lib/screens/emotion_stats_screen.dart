@@ -1246,9 +1246,6 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
     final daysSinceFirst = totalDiaries > 0
         ? DateTime.now().difference(diaries.first.createdAt).inDays
         : 0;
-    final averagePerMonth = totalDiaries > 0 && daysSinceFirst > 0
-        ? (totalDiaries / daysSinceFirst * 30).round()
-        : 0;
 
     return Column(
       children: [

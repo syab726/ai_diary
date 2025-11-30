@@ -1,0 +1,1108 @@
+import 'dart:math' as math;
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import '../providers/diary_provider.dart';
+import '../models/diary_entry.dart';
+
+class DetailedEmotionStatsScreen extends ConsumerStatefulWidget {
+  final int initialTabIndex;
+  const DetailedEmotionStatsScreen({super.key, this.initialTabIndex = 0});
+
+  @override
+  ConsumerState<DetailedEmotionStatsScreen> createState() => _DetailedEmotionStatsScreenState();
+}
+
+class _DetailedEmotionStatsScreenState extends ConsumerState<DetailedEmotionStatsScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  int _selectedWeek = 0; // 현재 주를 기준으로 0, -1, -2 (이전 주들)
+  int _selectedMonth = 0; // 현재 월을 기준으로 0, -1, -2 (이전 월들)
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this, initialIndex: widget.initialTabIndex);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final diariesAsync = ref.watch(diaryEntriesProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('감정 인사이트'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: '주별'),
+            Tab(text: '월별'),
+            Tab(text: '전체'),
+          ],
+        ),
+      ),
+      body: diariesAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Text('오류: $error'),
+        ),
+        data: (diaries) {
+          return TabBarView(
+            controller: _tabController,
+            children: [
+              _buildWeeklyView(diaries),
+              _buildMonthlyView(diaries),
+              _buildAllTimeView(diaries),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildWeeklyView(List<DiaryEntry> diaries) {
+    final now = DateTime.now();
+    final startOfSelectedWeek = now.subtract(Duration(days: now.weekday - 1 + (_selectedWeek * 7)));
+    final endOfSelectedWeek = startOfSelectedWeek.add(const Duration(days: 6));
+
+    final weeklyDiaries = diaries.where((diary) {
+      return diary.createdAt.isAfter(startOfSelectedWeek.subtract(const Duration(days: 1))) &&
+             diary.createdAt.isBefore(endOfSelectedWeek.add(const Duration(days: 1)));
+    }).toList();
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          _buildWeekSelector(),
+          const SizedBox(height: 24),
+          _buildWeeklyInsight(weeklyDiaries, startOfSelectedWeek, endOfSelectedWeek),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMonthlyView(List<DiaryEntry> diaries) {
+    final now = DateTime.now();
+    final selectedDate = DateTime(now.year, now.month + _selectedMonth);
+    final startOfMonth = DateTime(selectedDate.year, selectedDate.month, 1);
+    final endOfMonth = DateTime(selectedDate.year, selectedDate.month + 1, 0);
+
+    final monthlyDiaries = diaries.where((diary) {
+      return diary.createdAt.isAfter(startOfMonth.subtract(const Duration(days: 1))) &&
+             diary.createdAt.isBefore(endOfMonth.add(const Duration(days: 1)));
+    }).toList();
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          _buildMonthSelector(),
+          const SizedBox(height: 24),
+          _buildMonthlyInsight(monthlyDiaries, startOfMonth, endOfMonth),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeekSelector() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFF6B73FF).withOpacity(0.1),
+            const Color(0xFF9B59B6).withOpacity(0.1),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFF6B73FF).withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                _selectedWeek--;
+              });
+            },
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.chevron_left, color: Color(0xFF6B73FF)),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: _showWeekPicker,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.calendar_today,
+                      color: Color(0xFF6B73FF), size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      _getWeekDisplayText(),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF2D3748),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          IconButton(
+            onPressed: _selectedWeek < 0 ? () {
+              setState(() {
+                _selectedWeek++;
+              });
+            } : null,
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: _selectedWeek < 0 ? Colors.white : Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: _selectedWeek < 0 ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ] : null,
+              ),
+              child: Icon(
+                Icons.chevron_right,
+                color: _selectedWeek < 0 ? const Color(0xFF6B73FF) : Colors.grey,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMonthSelector() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFF667EEA).withOpacity(0.1),
+            const Color(0xFF764BA2).withOpacity(0.1),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFF667EEA).withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                _selectedMonth--;
+              });
+            },
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.chevron_left, color: Color(0xFF667EEA)),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: _showMonthPicker,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.date_range,
+                      color: Color(0xFF667EEA), size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      _getMonthDisplayText(),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF2D3748),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          IconButton(
+            onPressed: _selectedMonth < 0 ? () {
+              setState(() {
+                _selectedMonth++;
+              });
+            } : null,
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: _selectedMonth < 0 ? Colors.white : Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: _selectedMonth < 0 ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ] : null,
+              ),
+              child: Icon(
+                Icons.chevron_right,
+                color: _selectedMonth < 0 ? const Color(0xFF667EEA) : Colors.grey,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeeklyInsight(List<DiaryEntry> diaries, DateTime startDate, DateTime endDate) {
+    final periodText = '${DateFormat('M/d').format(startDate)} ~ ${DateFormat('M/d').format(endDate)}';
+
+    if (diaries.isEmpty) {
+      return _buildEmptyInsight('$periodText\n이 기간에 작성된 일기가 없습니다.');
+    }
+
+    final emotions = diaries.map((d) => d.emotion).where((e) => e != null).cast<String>().toList();
+    final emotionCounts = <String, int>{};
+    for (final emotion in emotions) {
+      emotionCounts[emotion] = (emotionCounts[emotion] ?? 0) + 1;
+    }
+
+    final mostFrequentEmotion = emotionCounts.entries.reduce((a, b) => a.value > b.value ? a : b);
+    final avgEntriesPerDay = diaries.length / 7;
+
+    return _buildInsightCard(
+      title: '주간 감정 인사이트 ($periodText)',
+      insights: [
+        InsightItem(
+          icon: Icons.favorite,
+          title: '가장 많이 느낀 감정',
+          value: mostFrequentEmotion.key,
+          subtitle: '${mostFrequentEmotion.value}번 기록됨',
+          color: const Color(0xFF6B73FF),
+        ),
+        InsightItem(
+          icon: Icons.edit_note,
+          title: '일기 작성 빈도',
+          value: '${diaries.length}편',
+          subtitle: '하루 평균 ${avgEntriesPerDay.toStringAsFixed(1)}편',
+          color: const Color(0xFF9B59B6),
+        ),
+        InsightItem(
+          icon: Icons.trending_up,
+          title: '감정 다양성',
+          value: '${emotionCounts.length}가지',
+          subtitle: '다양한 감정을 경험하셨네요',
+          color: const Color(0xFF00D4AA),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMonthlyInsight(List<DiaryEntry> diaries, DateTime startDate, DateTime endDate) {
+    final periodText = DateFormat('yyyy년 M월').format(startDate);
+
+    if (diaries.isEmpty) {
+      return _buildEmptyInsight('$periodText\n이 기간에 작성된 일기가 없습니다.');
+    }
+
+    final emotions = diaries.map((d) => d.emotion).where((e) => e != null).cast<String>().toList();
+    final emotionCounts = <String, int>{};
+    for (final emotion in emotions) {
+      emotionCounts[emotion] = (emotionCounts[emotion] ?? 0) + 1;
+    }
+
+    final mostFrequentEmotion = emotionCounts.entries.reduce((a, b) => a.value > b.value ? a : b);
+    final daysInMonth = endDate.day;
+    final avgEntriesPerDay = diaries.length / daysInMonth;
+
+    return _buildInsightCard(
+      title: '월간 감정 인사이트 ($periodText)',
+      insights: [
+        InsightItem(
+          icon: Icons.psychology,
+          title: '이달의 주요 감정',
+          value: mostFrequentEmotion.key,
+          subtitle: '${mostFrequentEmotion.value}번 기록됨',
+          color: const Color(0xFF667EEA),
+        ),
+        InsightItem(
+          icon: Icons.calendar_month,
+          title: '월간 일기 작성',
+          value: '${diaries.length}편',
+          subtitle: '하루 평균 ${avgEntriesPerDay.toStringAsFixed(1)}편',
+          color: const Color(0xFF764BA2),
+        ),
+        InsightItem(
+          icon: Icons.palette,
+          title: '감정 스펙트럼',
+          value: '${emotionCounts.length}가지',
+          subtitle: '풍부한 감정을 표현하셨어요',
+          color: const Color(0xFFFF6B6B),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInsightCard({required String title, required List<InsightItem> insights}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF2D3748),
+            ),
+          ),
+          const SizedBox(height: 20),
+          ...insights.map((insight) => _buildInsightRow(insight)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInsightRow(InsightItem insight) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: insight.color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: insight.color.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: insight.color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              insight.icon,
+              color: insight.color,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  insight.title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  insight.value,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2D3748),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  insight.subtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyInsight(String message) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.insights,
+            size: 48,
+            color: Colors.grey.shade400,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey.shade600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getWeekDisplayText() {
+    final now = DateTime.now();
+    final currentWeekStart = _getWeekStart(now);
+    final selectedWeekStart = currentWeekStart.add(Duration(days: _selectedWeek * 7));
+    final selectedWeekEnd = selectedWeekStart.add(const Duration(days: 6));
+
+    if (_selectedWeek == 0) {
+      return '이번 주';
+    } else if (_selectedWeek == -1) {
+      return '지난 주';
+    } else {
+      // 날짜 범위 형태로 표시 (10월5일~10월11일)
+      final startMonth = selectedWeekStart.month;
+      final startDay = selectedWeekStart.day;
+      final endMonth = selectedWeekEnd.month;
+      final endDay = selectedWeekEnd.day;
+
+      if (startMonth == endMonth) {
+        // 같은 달인 경우
+        return '${startMonth}월${startDay}일~${endDay}일';
+      } else {
+        // 다른 달인 경우
+        return '${startMonth}월${startDay}일~${endMonth}월${endDay}일';
+      }
+    }
+  }
+
+  DateTime _getWeekStart(DateTime date) {
+    final weekday = date.weekday;
+    return date.subtract(Duration(days: weekday - 1));
+  }
+
+  String _getMonthDisplayText() {
+    final now = DateTime.now();
+    final selectedDate = DateTime(now.year, now.month + _selectedMonth);
+
+    if (_selectedMonth == 0) {
+      return '이번 달';
+    } else if (_selectedMonth == -1) {
+      return '지난 달';
+    } else {
+      return '${selectedDate.year}년 ${selectedDate.month}월';
+    }
+  }
+
+  void _showWeekPicker() async {
+    final now = DateTime.now();
+    final currentWeekStart = _getWeekStart(now);
+    final selectedWeekStart = currentWeekStart.add(Duration(days: _selectedWeek * 7));
+
+    int selectedYear = selectedWeekStart.year;
+    int selectedWeekOfYear = _getWeekOfYear(selectedWeekStart);
+
+    final result = await showDialog<int>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('년도/주차 선택'),
+          content: SizedBox(
+            width: 300,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Year selector
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade200),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        onPressed: selectedYear > now.year - 2 ? () {
+                          setDialogState(() {
+                            selectedYear--;
+                            selectedWeekOfYear = math.min(selectedWeekOfYear, _getWeeksInYear(selectedYear));
+                          });
+                        } : null,
+                        icon: Icon(
+                          Icons.chevron_left,
+                          color: selectedYear > now.year - 2 ? const Color(0xFF6B73FF) : Colors.grey,
+                        ),
+                      ),
+                      Text(
+                        '$selectedYear년',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF2D3748),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: selectedYear < now.year ? () {
+                          setDialogState(() {
+                            selectedYear++;
+                            selectedWeekOfYear = math.min(selectedWeekOfYear, _getWeeksInYear(selectedYear));
+                          });
+                        } : null,
+                        icon: Icon(
+                          Icons.chevron_right,
+                          color: selectedYear < now.year ? const Color(0xFF6B73FF) : Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Week selector
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade200),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        onPressed: selectedWeekOfYear > 1 ? () {
+                          setDialogState(() {
+                            selectedWeekOfYear--;
+                          });
+                        } : null,
+                        icon: Icon(
+                          Icons.chevron_left,
+                          color: selectedWeekOfYear > 1 ? const Color(0xFF6B73FF) : Colors.grey,
+                        ),
+                      ),
+                      Text(
+                        '$selectedWeekOfYear주차',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF2D3748),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: selectedWeekOfYear < _getWeeksInYear(selectedYear) ? () {
+                          setDialogState(() {
+                            selectedWeekOfYear++;
+                          });
+                        } : null,
+                        icon: Icon(
+                          Icons.chevron_right,
+                          color: selectedWeekOfYear < _getWeeksInYear(selectedYear) ? const Color(0xFF6B73FF) : Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Selected date display
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF6B73FF).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: () {
+                    final weekStart = _getWeekStartFromYearWeek(selectedYear, selectedWeekOfYear);
+                    final weekEnd = weekStart.add(const Duration(days: 6));
+                    return Text(
+                      '선택: ${weekStart.month}월${weekStart.day}일 ~ ${weekEnd.month}월${weekEnd.day}일',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF6B73FF),
+                      ),
+                    );
+                  }(),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                final weekStart = _getWeekStartFromYearWeek(selectedYear, selectedWeekOfYear);
+                final weekDifference = weekStart.difference(currentWeekStart).inDays ~/ 7;
+                Navigator.of(context).pop(weekDifference);
+              },
+              child: const Text('확인'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        _selectedWeek = result;
+      });
+    }
+  }
+
+  void _showMonthPicker() async {
+    final now = DateTime.now();
+    final currentMonth = DateTime(now.year, now.month);
+    final selectedMonthDate = DateTime(now.year, now.month + _selectedMonth);
+
+    int selectedYear = selectedMonthDate.year;
+    int selectedMonthNum = selectedMonthDate.month;
+
+    final result = await showDialog<int>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text(
+            '년월 선택',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF2D3748),
+            ),
+          ),
+          content: SizedBox(
+            width: 300,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 년도 선택
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade200),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        '년도',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF2D3748),
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          IconButton(
+                            onPressed: selectedYear > now.year - 2 ? () {
+                              setDialogState(() {
+                                selectedYear--;
+                              });
+                            } : null,
+                            icon: Icon(
+                              Icons.chevron_left,
+                              color: selectedYear > now.year - 2 ? const Color(0xFF6B73FF) : Colors.grey,
+                            ),
+                          ),
+                          Container(
+                            width: 80,
+                            alignment: Alignment.center,
+                            child: Text(
+                              '$selectedYear',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF2D3748),
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: selectedYear < now.year ? () {
+                              setDialogState(() {
+                                selectedYear++;
+                              });
+                            } : null,
+                            icon: Icon(
+                              Icons.chevron_right,
+                              color: selectedYear < now.year ? const Color(0xFF6B73FF) : Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // 월 선택
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade200),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        '월',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF2D3748),
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              setDialogState(() {
+                                if (selectedMonthNum > 1) {
+                                  selectedMonthNum--;
+                                } else {
+                                  selectedMonthNum = 12;
+                                  selectedYear--;
+                                }
+                              });
+                            },
+                            icon: const Icon(
+                              Icons.chevron_left,
+                              color: Color(0xFF6B73FF),
+                            ),
+                          ),
+                          Container(
+                            width: 80,
+                            alignment: Alignment.center,
+                            child: Text(
+                              '${selectedMonthNum}월',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF2D3748),
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              setDialogState(() {
+                                final nextDate = DateTime(selectedYear, selectedMonthNum + 1);
+                                if (nextDate.isBefore(now) || nextDate.isAtSameMomentAs(DateTime(now.year, now.month))) {
+                                  if (selectedMonthNum < 12) {
+                                    selectedMonthNum++;
+                                  } else {
+                                    selectedMonthNum = 1;
+                                    selectedYear++;
+                                  }
+                                }
+                              });
+                            },
+                            icon: Icon(
+                              Icons.chevron_right,
+                              color: DateTime(selectedYear, selectedMonthNum + 1).isAfter(now)
+                                ? Colors.grey
+                                : const Color(0xFF6B73FF),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // 현재 선택된 날짜 표시
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF6B73FF).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '선택: $selectedYear년 $selectedMonthNum월',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF6B73FF),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                '취소',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                final selectedDate = DateTime(selectedYear, selectedMonthNum);
+                final monthDifference = (selectedDate.year - currentMonth.year) * 12 +
+                                      (selectedDate.month - currentMonth.month);
+                Navigator.of(context).pop(monthDifference);
+              },
+              child: const Text(
+                '확인',
+                style: TextStyle(
+                  color: Color(0xFF6B73FF),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        _selectedMonth = result;
+      });
+    }
+  }
+
+  // 주별 날짜 계산을 위한 헬퍼 메서드들
+  int _getWeekOfYear(DateTime date) {
+    final firstDayOfYear = DateTime(date.year, 1, 1);
+    final firstMondayOfYear = _getWeekStart(firstDayOfYear);
+    final daysSinceFirstMonday = date.difference(firstMondayOfYear).inDays;
+    return (daysSinceFirstMonday / 7).floor() + 1;
+  }
+
+  int _getWeeksInYear(int year) {
+    final lastDayOfYear = DateTime(year, 12, 31);
+    return _getWeekOfYear(lastDayOfYear);
+  }
+
+  Widget _buildAllTimeView(List<DiaryEntry> diaries) {
+    if (diaries.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.insights_outlined,
+                size: 80,
+                color: Colors.grey,
+              ),
+              SizedBox(height: 16),
+              Text(
+                '아직 작성된 일기가 없습니다.',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                '일기를 작성하면 전체 감정 통계를 확인할 수 있습니다.',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          _buildAllTimeInsight(diaries),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAllTimeInsight(List<DiaryEntry> diaries) {
+    // 전체 감정 분석
+    final emotionCounts = <String, int>{};
+    for (final diary in diaries) {
+      if (diary.emotion != null && diary.emotion!.isNotEmpty) {
+        emotionCounts[diary.emotion!] = (emotionCounts[diary.emotion!] ?? 0) + 1;
+      }
+    }
+
+    final mostFrequentEmotion = emotionCounts.isNotEmpty
+        ? emotionCounts.entries.reduce((a, b) => a.value > b.value ? a : b)
+        : null;
+
+    final totalDiaries = diaries.length;
+    final averagePerMonth = totalDiaries > 0
+        ? (totalDiaries / DateTime.now().difference(diaries.first.createdAt).inDays * 30).round()
+        : 0;
+
+    return _buildInsightCard(
+      title: '전체 감정 인사이트',
+      insights: [
+        InsightItem(
+          icon: Icons.book_outlined,
+          title: '총 일기 수',
+          value: '$totalDiaries개',
+          subtitle: '지금까지 작성한 모든 일기',
+          color: const Color(0xFF6B73FF),
+        ),
+        if (mostFrequentEmotion != null)
+          InsightItem(
+            icon: Icons.favorite_outlined,
+            title: '가장 많은 감정',
+            value: mostFrequentEmotion.key,
+            subtitle: '${mostFrequentEmotion.value}회 (${((mostFrequentEmotion.value / totalDiaries) * 100).round()}%)',
+            color: const Color(0xFFE53E3E),
+          ),
+        if (averagePerMonth > 0)
+          InsightItem(
+            icon: Icons.timeline_outlined,
+            title: '월평균 작성 수',
+            value: '${averagePerMonth}개',
+            subtitle: '꾸준한 일기 작성 습관',
+            color: const Color(0xFF38A169),
+          ),
+        if (emotionCounts.length > 1)
+          InsightItem(
+            icon: Icons.palette_outlined,
+            title: '감정 다양성',
+            value: '${emotionCounts.length}가지',
+            subtitle: '다양한 감정을 표현하고 있어요',
+            color: const Color(0xFFD69E2E),
+          ),
+      ],
+    );
+  }
+
+  DateTime _getWeekStartFromYearWeek(int year, int weekOfYear) {
+    final firstDayOfYear = DateTime(year, 1, 1);
+    final firstMondayOfYear = _getWeekStart(firstDayOfYear);
+    return firstMondayOfYear.add(Duration(days: (weekOfYear - 1) * 7));
+  }
+
+}
+
+class InsightItem {
+  final IconData icon;
+  final String title;
+  final String value;
+  final String subtitle;
+  final Color color;
+
+  InsightItem({
+    required this.icon,
+    required this.title,
+    required this.value,
+    required this.subtitle,
+    required this.color,
+  });
+}
