@@ -208,8 +208,6 @@ class ImageStyleSelector extends StatelessWidget {
         return Icons.landscape;
       case ImageStyle.vintage:
         return Icons.filter_vintage;
-      default:
-        return Icons.image;
     }
   }
   

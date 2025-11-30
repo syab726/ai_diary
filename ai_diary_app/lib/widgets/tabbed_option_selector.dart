@@ -8,7 +8,6 @@ import '../models/perspective_options.dart';
 import '../models/theme_preset.dart';
 import '../providers/image_style_provider.dart';
 import '../providers/theme_preset_provider.dart';
-import '../screens/premium_subscription_screen.dart';
 
 class TabbedOptionSelector extends ConsumerStatefulWidget {
   final bool isPremium;

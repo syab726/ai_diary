@@ -60,7 +60,6 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
   String? _selectedThemePresetId;
   FontFamily _selectedFont = FontFamily.notoSans;
   ImageStyle _selectedImageStyle = ImageStyle.illustration;
-  bool _isAutoConfigEnabled = false;
 
   // 사진 업로드 관련
   final ImagePicker _imagePicker = ImagePicker();

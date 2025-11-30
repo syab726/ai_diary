@@ -50,10 +50,7 @@ class AIService {
       return '';
     }
   }
-  static const String _openaiApiKey = 'sk-proj-YOUR_OPENAI_API_KEY'; // OpenAI API 키를 여기에 입력하세요
-  static const String _huggingFaceApiKey = 'hf_YOUR_API_KEY'; // Hugging Face API 키 (무료 가입 후 발급)
   static late GenerativeModel _textModel;
-  static late GenerativeModel _imageModel;
   static String _currentImageModel = 'gemini-2.5-flash-image';
   static Timer? _modelCheckTimer; // 주기적 모델 체크용 타이머
 
