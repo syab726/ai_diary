@@ -35,12 +35,12 @@ class PremiumSubscriptionScreen extends ConsumerWidget {
         child: Column(
           children: [
             // 헤더
-            _buildHeader(),
+            _buildHeader(context),
 
             const SizedBox(height: 24),
 
             // 프리미엄 기능 목록
-            _buildFeaturesList(),
+            _buildFeaturesList(context),
 
             const SizedBox(height: 32),
 
@@ -50,7 +50,7 @@ class PremiumSubscriptionScreen extends ConsumerWidget {
             const SizedBox(height: 24),
 
             // 하단 안내
-            _buildFooter(),
+            _buildFooter(context),
 
             const SizedBox(height: 32),
           ],
@@ -59,7 +59,7 @@ class PremiumSubscriptionScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -93,7 +93,7 @@ class PremiumSubscriptionScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildFeaturesList() {
+  Widget _buildFeaturesList(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(24),
@@ -501,7 +501,7 @@ class PremiumSubscriptionScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildFooter() {
+  Widget _buildFooter(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(
