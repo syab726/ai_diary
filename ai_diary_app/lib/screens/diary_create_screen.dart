@@ -780,7 +780,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    _progressMessage.isEmpty ? localizations.generatingImage : _progressMessage,
+                    _progressMessage.isEmpty ? localizations.generatingImage('') : _progressMessage,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -1367,7 +1367,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
                             ),
                             child: _isGeneratingImage
                                 ? Text(
-                                    localizations.generatingImage,
+                                    localizations.generatingImage(''),
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,

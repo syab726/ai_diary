@@ -51,6 +51,7 @@ class AIService {
     }
   }
   static late GenerativeModel _textModel;
+  static late GenerativeModel _imageModel;
   static String _currentImageModel = 'gemini-2.5-flash-image';
   static Timer? _modelCheckTimer; // 주기적 모델 체크용 타이머
 
