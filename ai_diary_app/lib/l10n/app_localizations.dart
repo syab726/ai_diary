@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -83,6 +84,21 @@ class AppLocalizations {
       'diary_updated': '일기가 수정되었습니다',
       'image_generation_error': '이미지 생성 중 오류가 발생했습니다: {error}',
       'save_error': '저장 중 오류가 발생했습니다: {error}',
+      'failed_to_load_diary': '일기를 불러오는데 실패했습니다: {error}',
+      'analyzing_photo': '사진 분석 중...',
+      'analyzing_emotion': '감정 분석 중...',
+      'extracting_keywords': '키워드 추출 중...',
+      'generating_prompt': '이미지 프롬프트 생성 중...',
+      'generating_ai_image_notice': 'AI 이미지 생성 중...\n\n(사용자가 많을 경우 대기 시간이 길어질 수 있습니다)',
+      'diary_saved_successfully': '일기가 성공적으로 저장되었습니다!',
+      'image_gallery': '이미지 갤러리',
+      'photo_upload': '사진 업로드',
+      'select_photo': '사진 선택',
+      'my_photo': '내 사진',
+      'edit_diary_only': '일기만 수정',
+      'edit_image_and_diary': '그림+일기 수정',
+      'photo_upload_and_gallery': '사진 업로드 및 갤러리',
+      'photo_select_failed': '사진 선택 실패: {error}',
       // Login screen
       'login_title': 'ArtDiary AI',
       'login_description': 'AI가 그려주는 감동적인 그림일기',
@@ -106,6 +122,11 @@ class AppLocalizations {
       'emotion_romantic': '로맨틱',
       'emotion_frustrated': '짜증',
       'emotion_normal': '보통',
+      'all_emotions': '전체',
+      'error_occurred_general': '오류가 발생했습니다',
+      'retry_button': '다시 시도',
+      'search_button': '검색',
+      'ai_generated_image_placeholder': 'AI가 그린 이미지',
       // Premium features
       'premium_feature': '프리미엄 기능',
       'upgrade_to_premium': '프리미엄으로 업그레이드',
@@ -130,7 +151,6 @@ class AppLocalizations {
       'calendar': '캘린더',
       'diary_search': '일기 검색',
       'start_with_ai_diary': 'AI가 그림을 그려주는 특별한 일기를 시작해보세요',
-      'refresh': '새로고침',
       'calendar_load_error': '달력을 불러올 수 없습니다',
       // Settings dialog content
       'theme_selection': '테마 선택',
@@ -177,103 +197,120 @@ class AppLocalizations {
       'backup_image_style': '이미지 스타일 정보',
       'backup_start': '백업 시작',
       'backing_up': '백업 중...',
+      'ok': '확인',
+      'last_backup_time_format': '마지막 백업: {time}',
+      'error_format': '오류: {error}',
+      'auto_cloud_backup_feature': '자동 클라우드 백업',
+      'upgrade_for_auto_backup': '프리미엄으로 업그레이드하여 자동 백업 기능을 사용하세요',
+      'cloud_backup_feature': '클라우드 백업',
+      'cloud_backup_to_google_drive': 'Google Drive에 일기를 백업합니다',
+      'premium_feature_short': '프리미엄 전용 기능',
+      'cloud_restore_feature': '클라우드 복원',
+      'cloud_restore_from_google_drive': 'Google Drive에서 일기를 복원합니다',
+      'cloud_backup_restore_feature': '클라우드 백업/복원',
+      'upgrade_for_cloud_backup_restore': '프리미엄으로 업그레이드하여 클라우드 백업/복원 기능을 사용하세요',
+      'backup_complete': '백업 완료',
       'backup_completed': '백업 완료! 총 {count}개의 일기가 백업되었습니다.',
       'backup_failed': '백업 실패: {error}',
+      'last_backup_time': '마지막 백업: {time}',
+      'error_occurred': '오류: {error}',
+      'auto_cloud_backup': '자동 클라우드 백업',
+      'simple_cloud_backup': '클라우드 백업',
+      'simple_cloud_restore': '클라우드 복원',
+      'cloud_backup_and_restore': '클라우드 백업/복원',
+      'upgrade_for_cloud_features': '프리미엄으로 업그레이드하여 클라우드 백업/복원 기능을 사용하세요',
       'data_restore_title': '데이터 복원',
       'restore_description': '백업된 일기 데이터를 복원합니다.',
       'restore_start': '복원 시작',
       'delete_all_title': '모든 데이터 삭제',
       'delete_all_warning': '정말로 모든 일기 데이터를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.',
+
+      // Delete settings screen
+      'warning_notice': '주의사항',
+      'delete_warning_message': '• 모든 일기가 영구적으로 삭제됩니다\n• 삭제된 데이터는 복구할 수 없습니다\n• 삭제 전에 반드시 백업을 권장합니다',
+      'clear_cache': '캐시 삭제',
+      'clear_cache_description': '저장된 이미지 캐시를 삭제하여 저장 공간 확보',
+      'cache_zero': '0 MB',
+      'calculation_failed': '계산 실패',
+      'clear_cache_confirm_message': '이미지 캐시를 삭제하시겠습니까?\n\n현재 캐시 크기: {size}\n\n참고: 일기 데이터는 삭제되지 않으며,\n필요 시 이미지가 다시 생성됩니다.',
+      'clearing_cache': '캐시 삭제 중...',
+      'cache_deleted_success': '캐시가 성공적으로 삭제되었습니다',
+      'cache_delete_error': '캐시 삭제 중 오류가 발생했습니다',
+      'delete_button': '삭제',
+      'all_data_deleted': '모든 데이터가 삭제되었습니다',
+      'delete_error_format': '삭제 중 오류가 발생했습니다: {error}',
       'delete_all_confirm': '모든 데이터 삭제',
+      'app_info_subtitle': '앱 버전, 개인정보처리방침',
       'app_name': 'ArtDiary AI',
       'app_description': 'AI가 그려주는 특별한 그림일기 앱',
       'privacy_policy_title': '개인정보 처리방침',
       'privacy_policy_content': '''ArtDiary AI 개인정보 처리방침
-
 최종 업데이트: 2025년 1월
-
 1. 수집하는 정보
 • 일기 내용 및 제목
 • AI 생성 이미지
 • 감정 분석 데이터
 • 기기 식별 정보 (익명)
-
 2. 정보 사용 목적
 • 일기 작성 및 관리 서비스 제공
 • AI 이미지 생성 및 감정 분석
 • 앱 성능 개선 및 오류 수정
 • 사용자 경험 향상
-
 3. 정보 저장 및 보안
 • 모든 데이터는 기기 내부에 안전하게 저장됩니다
 • 클라우드 백업은 사용자 선택 시에만 활성화됩니다
 • 데이터 암호화 및 보안 조치를 적용합니다
-
 4. 제3자 제공
 • 사용자 동의 없이 제3자에게 정보를 제공하지 않습니다
 • AI 서비스 제공을 위해 Google Gemini API를 사용합니다
 • 광고 표시를 위해 Google AdMob을 사용합니다
-
 5. 사용자 권리
 • 언제든지 데이터 삭제 요청 가능
 • 개인정보 열람 및 수정 권한
 • 서비스 이용 동의 철회 가능
-
 6. 문의
 개인정보 관련 문의사항은 앱 내 문의 기능을 이용해 주세요.
-
 본 방침은 관련 법령 및 서비스 정책 변경에 따라 수정될 수 있습니다.''',
       'terms_title': '이용약관',
       'terms_content': '''ArtDiary AI 서비스 이용약관
-
 최종 업데이트: 2025년 1월
-
 1. 서비스 이용
 • 본 앱은 AI 기반 그림일기 작성 서비스입니다
 • 만 14세 이상 사용자를 대상으로 합니다
 • 불법적이거나 부적절한 콘텐츠 작성을 금지합니다
-
 2. 사용자 의무
 • 정확한 정보 제공
 • 타인의 권리 침해 금지
 • 서비스 악용 또는 남용 금지
 • 관련 법규 준수
-
 3. 서비스 제공
 • AI 이미지 생성 기능
 • 일기 작성 및 관리 기능
 • 감정 분석 및 통계 기능
 • 무료 및 프리미엄 서비스
-
 4. 프리미엄 서비스
 • 월간 또는 연간 구독 제공
 • 무제한 AI 이미지 생성
 • 고급 기능 및 글꼴 사용
 • 광고 제거
-
 5. 서비스 중단 및 변경
 • 시스템 점검 시 일시 중단 가능
 • 사전 공지 후 서비스 내용 변경 가능
 • 불가피한 경우 즉시 중단 가능
-
 6. 면책 조항
 • AI 생성 콘텐츠의 품질 보장 불가
 • 사용자 기기 문제로 인한 데이터 손실 책임 없음
 • 네트워크 장애로 인한 서비스 중단 책임 없음
-
 7. 지적 재산권
 • 사용자가 작성한 일기 내용은 사용자에게 귀속됨
 • AI 생성 이미지의 사용권은 사용자에게 있음
 • 앱 디자인 및 코드의 저작권은 개발자에게 있음
-
 8. 계약 해지
 • 사용자는 언제든지 서비스 이용을 중단할 수 있습니다
 • 약관 위반 시 서비스 이용이 제한될 수 있습니다
-
 본 약관은 대한민국 법률에 따라 규율되고 해석됩니다.''',
       'privacy_policy_subtitle': '개인정보 처리방침을 확인하세요',
       'terms_subtitle': '서비스 이용약관을 확인하세요',
-      'ok': '확인',
       // Subscription management
       'subscription_management_test': '구독 관리 (테스트)',
       'premium_user': '프리미엄 사용자',
@@ -307,7 +344,6 @@ class AppLocalizations {
       'ai_emotion_analysis_prompt': '''다음 일기 내용의 주요 감정을 분석해주세요.
 가능한 감정: happy, sad, angry, excited, peaceful, anxious, grateful, nostalgic, romantic, frustrated
 하나의 감정만 답변해주세요.
-
 일기 내용: {content}''',
       'ai_photo_analysis_prompt': '''이 사진들을 분석해서 다음 정보를 추출해주세요:
 - 전체적인 분위기와 느낌
@@ -315,388 +351,280 @@ class AppLocalizations {
 - 시간대 (아침, 낮, 저녁, 밤)
 - 장소와 환경 (실내/실외, 도시/자연 등)
 - 주요 피사체나 오브젝트
-
 2-3문장으로 간결하게 요약해주세요.''',
       'ai_image_prompt_base': '''다음 일기 내용을 바탕으로 이미지 생성 프롬프트를 만들어주세요.
 스타일: {style}
 감정적이고 아름다운 이미지가 되도록 작성해주세요.
-
 일기 내용: {content}
 주요 감정: {emotion}
 키워드: {keywords}
 {advanced}
-
 프롬프트는 영어로 작성하고, 일기의 감정과 내용을 잘 표현하는 따뜻하고 감성적인 이미지가 되도록 해주세요.
 구체적인 시각적 요소, 색감, 분위기를 포함해서 작성해주세요.''',
       'ai_advanced_option_prefix': '고급 옵션: {options}',
       'ai_auto_settings_prompt': '''다음 일기 내용을 분석해서 이미지 생성에 적합한 설정들을 추천해주세요.
 JSON 형태로 답변해주세요:
-
 {{
   "lighting": "natural|dramatic|warm|cool|sunset|night 중 하나",
   "mood": "peaceful|energetic|romantic|mysterious|joyful|melancholic 중 하나",
   "color": "vibrant|pastel|monochrome|warm|cool|earthy 중 하나",
   "composition": "centered|rule_of_thirds|symmetrical|dynamic|minimalist 중 하나"
 }}
-
 일기 내용: {content}
-
 일기의 분위기, 감정, 시간대, 날씨, 상황 등을 종합적으로 고려해서 가장 적합한 설정을 선택해주세요.''',
       'ai_emotion_insight_system': '''당신은 친절하고 공감 능력이 뛰어난 심리 상담 전문가입니다.
 사용자의 {period} 일기 데이터를 분석하여 감정 패턴과 인사이트를 제공해주세요.
-
 일기 데이터:
 {diaries}
-
 다음 지침을 따라 인사이트를 작성해주세요:
 1. 3-4문장으로 간결하게 작성
 2. 긍정적이고 공감적인 어조 사용
 3. 감정 패턴이나 변화에 대한 관찰 포함
 4. 실용적인 조언이나 격려의 메시지 포함
 5. 따뜻하고 친근한 말투 사용
-
 인사이트만 출력하고 다른 설명은 필요 없습니다.''',
       'ai_default_insight': '이번 {period}에는 다양한 감정을 경험하셨네요. 자신의 감정을 인식하고 기록하는 것만으로도 큰 의미가 있습니다.',
       'ai_fallback_insight': '이번 기간 동안의 감정 여정을 함께 기록해주셔서 감사합니다.',
+      // Settings screen
+      'personalization_subtitle': '언어, 글꼴, 날짜 포맷 설정',
+      'ai_settings_subtitle': '이미지 스타일, AI 가이드 설정',
+      'backup_and_restore': '백업 및 복원',
+      'delete_data': '데이터 삭제',
+      'delete_data_description': '모든 일기 데이터 삭제',
+      'premium_upgrade_description': '광고 없이 무제한으로 사용하세요',
+      'unlimited_with_premium': '프리미엄으로 무제한 생성',
+      'test_mode': '테스트 모드',
+      'current_premium_user': '현재: 프리미엄 사용자',
+      'current_free_user': '현재: 무료 사용자',
+      'switched_to_premium': '프리미엄 사용자로 전환됨',
+      'switched_to_free': '무료 사용자로 전환됨',
+      'free': '무료',
+      'logout_to_login_screen': '로그아웃 (로그인 화면으로)',
+      'logout': '로그아웃',
+      'return_to_login_confirmation': '로그인 화면으로 돌아가시겠습니까?',
+      // Personalization settings screen
+      'font': '글꼴',
+      'select_font_description': '일기 작성에 사용할 글꼴을 선택하세요',
+      'date_format': '날짜 포맷',
+      'select_date_format_description': '날짜 표시 형식을 선택하세요',
+      'timezone': '타임존',
+      'select_timezone_description': '시간대를 선택하세요',
+      'select_font': '글꼴 선택',
+      'premium_only_font': '프리미엄 전용 글꼴',
+      'select_date_format': '날짜 포맷 선택',
+      'date_format_ymd': '년/월/일 (2024/12/25)',
+      'date_format_dmy': '일/월/년 (25/12/2024)',
+      'date_format_mdy': '월/일/년 (12/25/2024)',
+      'date_format_changed': '날짜 포맷이 변경되었습니다',
+      'select_timezone': '타임존 선택',
+      'timezone_changed_format': '타임존이 {name}으로 변경되었습니다',
+      'timezone_seoul': '서울 (KST)',
+      'timezone_tokyo': '도쿄 (JST)',
+      'timezone_beijing': '베이징 (CST)',
+      'timezone_new_york': '뉴욕 (EST)',
+      'timezone_los_angeles': '로스앤젤레스 (PST)',
+      'timezone_london': '런던 (GMT)',
+      'timezone_paris': '파리 (CET)',
+
+      // AI settings screen
+      'auto_advanced_settings': '고급설정 자동설정',
+      'premium_only_feature': '프리미엄 전용 기능',
+      'auto_advanced_settings_description': '시간, 날씨, 계절 옵션을 자동으로 설정합니다',
+      'auto_advanced_settings_enabled': '고급설정 자동설정이 활성화되었습니다',
+      'auto_advanced_settings_disabled': '고급설정 자동설정이 비활성화되었습니다',
+      'premium_styles_available_format': '{count}개의 추가 스타일이 프리미엄에서 제공됩니다',
+
+      // Backup and restore screen
+      'auto_backup': '자동 백업',
+      'local_backup_restore': '로컬 백업/복원',
+      'cloud_backup_restore': '클라우드 백업/복원',
+      'free_user_backup_description': '무료 사용자는 일기 제목, 내용, 날짜를 JSON 형식으로 백업할 수 있습니다.',
+      'premium_backup_description': '프리미엄: 감정 분석, 생성 이미지, AI 프롬프트 포함',
+      'select_backup_location': '백업 파일 저장 위치 선택',
+      'backup_canceled': '백업이 취소되었습니다',
+      'restore_warning': '현재 저장된 데이터는 모두 삭제되고\n백업 파일로 대체됩니다',
+      'select_file': '파일 선택',
+      'restoring': '복원 중...',
+      'no_restored_diaries': '복원된 일기가 없습니다',
+      'restore_failed_format': '복원 실패: {error}',
+      'included_content': '포함 내용:',
+      'all_diary_content': '모든 일기 내용',
+      'emotion_analysis_result': '감정 분석 결과',
+      'generated_images_base64': '생성된 이미지 (base64)',
+      'image_style_and_settings': '이미지 스타일 및 설정',
+      'uploaded_photos': '업로드한 사진들',
+      'existing_backup_warning': '기존 백업이 있다면 덮어쓰기됩니다',
+      'premium_backup_success_format': '{count}개 일기가 완전히 백업되었습니다',
+      'backup_success_format': '{count}개 일기가 백업되었습니다',
+      'cancel_file_selection_hint': '파일 선택 화면에서 뒤로가기 버튼으로\n언제든지 취소할 수 있습니다',
+      'restore_success_format': '{count}개 일기가 복원되었습니다',
+      'google_drive_backup': 'Google Drive 백업',
+      'google_drive_backup_description': 'Google Drive에 일기 데이터를 안전하게 백업합니다.',
+      'start_backup': '백업 시작',
+      'login_required_message': '로그인이 필요합니다.\n먼저 앱에 로그인해주세요.',
+      'backing_up_to_google_drive': 'Google Drive 백업 중...',
+      'backup_complete_test_mode': '백업 완료 (테스트 모드)',
+      'backing_up_to_cloud': '클라우드에 백업 중...',
+      'cloud_backup_complete': '클라우드 백업이 완료되었습니다',
+      'cloud_backup_failed': '클라우드 백업에 실패했습니다',
+      'cloud_backup_error_format': '클라우드 백업 오류: {error}',
+      'login_required_title': '로그인 필요',
+      'cloud_restore_login_message': '클라우드 복원을 사용하려면 먼저 앱에 로그인해주세요.',
+      'test_restore_title': '[테스트] 복원',
+      'test_mode_restore_simulation': '테스트 모드에서 복원을 시뮬레이션합니다.',
+      'real_environment_google_drive_restore': '실제 환경에서는 Google Drive에서 복원합니다.',
+      'start_button': '시작',
+      'no_backup_title': '백업 없음',
+      'no_cloud_backup_message': '클라우드에 저장된 백업이 없습니다.\n먼저 백업을 생성해주세요.',
+      'cloud_restore_title': '클라우드 복원',
+      'restore_from_firebase': 'Firebase에서 일기 데이터를 복원합니다.',
+      'all_data_will_be_replaced': '현재 저장된 데이터는 모두 삭제되고\n클라우드 백업 데이터로 대체됩니다',
+      'cancel_button': '취소',
+      'start_restore_button': '복원 시작',
+      'restoring_from_cloud': '클라우드에서 복원 중...',
+      'cloud_restore_failed': '클라우드 복원에 실패했습니다',
+      'cloud_restore_error_format': '클라우드 복원 오류: {error}',
+      'restore_complete_test_mode': '복원 완료 (테스트 모드)',
+      'cloud_backup_restore_premium_only': '클라우드 백업/복원은 프리미엄 사용자만 사용할 수 있습니다.',
+      'auto_backup_every_5_minutes': '5분마다 자동으로 백업합니다',
+      'auto_backup_enabled': '자동 백업이 활성화되었습니다',
+      'auto_backup_disabled': '자동 백업이 비활성화되었습니다',
+      // Diary detail screen
+      'error_loading_diary': '일기를 불러오는 중 오류가 발생했습니다',
+      'diary_detail_title': '일기 상세',
+      'diary_not_found': '일기를 찾을 수 없습니다',
+      'written_label': '작성:',
+      'last_modified_label': '마지막 수정:',
+      'no_ai_image_available': 'AI가 그린 이미지가 없습니다',
+      'todays_emotion_label': '오늘의 감정:',
+      'written_date_label': '작성일:',
+      'hashtag_ai_diary': '#AI그림일기 #감정일기',
+      'delete_diary_title': '일기 삭제',
+      'delete_diary_confirmation': '정말로 이 일기를 삭제하시겠습니까?\n삭제된 일기는 복구할 수 없습니다.',
+      'diary_deleted_success': '일기가 삭제되었습니다',
+      'diary_delete_error': '삭제 중 오류가 발생했습니다',
+      'delete_failed': '삭제 실패',
+      'generating': '생성 중...',
+      'regeneration_complete': '재생성 완료',
+      'edit': '수정',
+      'create_ai_diary_button': 'AI 일기 생성',
+      'ai_generated_badge': 'AI 생성',
+      'user_photo_badge': '내 사진',
+
+      // Common buttons and dialogs
+      'delete': '삭제',
+      'retry': '다시 시도',
+      'search': '검색',
+      'ai_drawn_image': 'AI가 그린 이미지',
+
+      // Emotion names
+      'emotion_all': '전체',
+
+      // Progress messages
+      'photo_mood_analyzing': '사진 분위기 분석 중...',
+      'photo_analyzing': '사진 분석 중...',
+
+      // Diary create/edit
+      'create_new_diary': '새 일기 작성',
+      'title_label': '제목',
+      'content_label': '내용',
+      'max_3_photos': '최대 3장',
+      '1_photo': '1장',
+      'please_select_photo': '사진을 선택해보세요',
+      'max_3_photos_upload': '최대 3장까지 업로드 가능',
+      'free_version_1_photo_only': '무료 버전: 1장만 선택 가능',
+      'load_failed': '로드 실패',
+      'save_failed': '저장 실패',
+      'generated_image': '생성된 이미지',
+      'cannot_load_image': '이미지를 불러올 수 없습니다',
+      'image_regenerated_success': '그림이 재생성되어 저장되었습니다',
+      'image_regeneration_failed': '그림 재생성 실패',
+      'really_delete_diary': '정말로 이 일기를 삭제하시겠습니까?',
+
+      // Diary list
+      'ad_free_unlimited': '광고 없이 무제한으로 일기를 작성하세요',
+      'upgrade_to_premium_unlimited': '프리미엄으로 무제한 생성',
+
+      // Premium dialog
+      'feature_requires_premium': '은(는) 프리미엄 사용자만 사용할 수 있습니다.',
+      'this_feature_requires_premium': '이 기능은 프리미엄 사용자만 사용할 수 있습니다.',
+
+      // Emotion stats
+      'emotion_stats': '감정 통계',
+      'weekly': '주별',
+      'monthly': '월별',
+      'yearly': '연간',
+      'no_diaries_in_period': '이 기간에 작성된 일기가 없습니다.',
+      'weekly_emotion_insight': '주간 감정 인사이트',
+      'monthly_emotion_insight': '월간 감정 인사이트',
+      'main_emotion': '주요 감정',
+      'diary_frequency': '일기 작성 빈도',
+      'emotion_diversity': '감정 다양성',
+      'times_recorded': '번 기록됨',
+      'diaries_count': '편',
+      'daily_avg': '하루 평균',
+      'diverse_emotions': '다양한 감정을 경험하셨네요',
+      'types': '가지',
+
+      // Premium subscription
+      'make_diary_special': '당신의 일기를 더욱 특별하게',
+      'premium_features': '프리미엄 기능',
+      'ad_removal': '광고 제거',
+      'ad_removal_desc': '모든 광고 없이\n쾌적한 일기 작성 경험',
+      'premium_fonts': '프리미엄 글꼴',
+      'premium_fonts_desc': '10가지 아름다운 한글 글꼴\n개구쟁이체, 독도체, 나눔손글씨 펜 등',
+      'premium_art_styles': '프리미엄 아트 스타일',
+      'premium_art_styles_desc': '6가지 추가 스타일\n일러스트, 스케치, 애니메이션, 인상파, 빈티지',
+      'advanced_image_options': '고급 이미지 옵션',
+      'advanced_image_options_desc': '조명, 분위기, 색상, 구도 등\n세밀한 이미지 생성 설정',
+      'time_weather_season_settings': '시간대/날씨/계절 설정',
+      'time_weather_season_settings_desc': '아침, 저녁, 비오는 날, 봄 등\n상황에 맞는 이미지 생성',
+      'photo_upload_max_3': '사진 업로드 (최대 3장)',
+      'photo_upload_max_3_desc': '내 사진을 바탕으로\nAI 이미지 생성 가능',
+      'cloud_backup_auto': '클라우드 백업 & 자동 백업',
+      'cloud_backup_auto_desc': 'Google Drive 자동 백업\n소중한 일기를 안전하게 보관',
+      'unlimited_image_generation': '무제한 이미지 생성',
+      'unlimited_image_generation_desc': '하루 3개 제한 없이\n무제한으로 일기 생성 가능',
+      'subscription_options': '구독 옵션',
+      'monthly_subscription': '월간 구독',
+      'yearly_subscription': '연간 구독',
+      'lifetime_subscription': '평생 구독',
+      'all_premium_features': '모든 프리미엄 기능',
+      'cancel_anytime': '언제든지 취소 가능',
+      'lifetime_access': '평생 사용 가능',
+      'one_time_payment': '단 한 번의 결제',
+      'best_value': '최고의 가치',
+      'popular': '인기',
+      'currently_subscribed': '현재 구독 중',
+      'subscribe': '구독하기',
+      'subscription_footer': '• 구독은 언제든지 취소할 수 있습니다\n• 취소 시 다음 결제일까지 프리미엄 기능을 사용할 수 있습니다\n• 자동 갱신은 결제일 24시간 전에 취소할 수 있습니다',
+      'already_premium': '이미 프리미엄 사용자입니다',
+      'test_mode_message': '구독을 진행하시겠습니까?\n\n테스트 모드에서는 실제 결제 없이 프리미엄 기능을 바로 사용할 수 있습니다.',
+      'subscription_completed': '구독이 완료되었습니다!',
+      'subscribe_test': '구독하기 (테스트)',
+
+      // Date formats
+      'date_format_full': 'yyyy년 M월 d일 EEEE',
+      'date_format_month': 'yyyy년 M월',
     },
     'ja': {
-      'app_title': 'ArtDiary AI',
-      'settings': '設定',
-      'personalization': 'カスタマイズ',
-      'theme': 'テーマ',
-      'theme_subtitle': 'アプリテーマを変更',
-      'language': '言語',
-      'language_subtitle': 'アプリ言語を変更',
-      'font_size': 'フォントサイズ',
-      'font_size_subtitle': '日記テキストサイズを調節',
-      'notifications': '通知設定',
-      'notifications_subtitle': '日記作成リマインダー設定',
-      'ai_settings': 'AI設定',
-      'default_image_style': 'デフォルト画像スタイル',
-      'default_image_style_subtitle': '新しい日記のデフォルト画像スタイル',
-      'ai_analysis_strength': 'AI分析強度',
-      'ai_analysis_strength_subtitle': '感情・キーワード分析精度',
-      'ai_image_guide': 'AI画像ガイド',
-      'ai_image_guide_subtitle': '効果的なプロンプト作成法とコツ',
-      'data_privacy': 'データとプライバシー',
-      'data_backup': 'データバックアップ',
-      'data_backup_subtitle': '日記データをバックアップ',
-      'data_restore': 'データ復元',
-      'data_restore_subtitle': 'バックアップした日記データを復元',
-      'delete_all_data': 'すべてのデータを削除',
-      'delete_all_data_subtitle': 'すべての日記データを削除',
-      'premium': 'プレミアム',
-      'premium_upgrade': 'プレミアムアップグレード',
-      'premium_upgrade_subtitle': '無制限画像 • プレミアムスタイル • 広告なし',
-      'app_info': 'アプリ情報',
-      'app_version': 'アプリバージョン',
-      'privacy_policy': 'プライバシーポリシー',
-      'terms_of_service': '利用規約',
-      'cancel': 'キャンセル',
-      'confirm': 'OK',
-      'close': '閉じる',
-      'save': '保存',
-      'back': '戻る',
-      'refresh': '更新',
-      'today': '今日',
-      'no_diary_on_date': 'この日には日記がありません',
-      'write_diary': '日記を書く',
-      'cannot_load_calendar': 'カレンダーを読み込めません',
-      'cannot_load_diary': '日記を読み込めません',
-      'tags_count': 'タグ',
-      'new_diary': '新しい日記',
-      'edit_diary': '日記編集',
-      'title': 'タイトル',
-      'title_hint': '今日のタイトルを入力',
-      'diary_content': '日記内容',
-      'diary_content_hint': '今日あったことや感情を自由に書いてください。\nAIがあなたの物語を美しい絵に描きます。',
-      'please_enter_title': 'タイトルを入力してください',
-      'please_enter_content': '日記内容を入力してください',
-      'content_too_short': 'もっと詳しく書いてください（最低10文字）',
-      'image_style': '画像スタイル',
-      'ai_drawing_complete': '保存完了！AIが描いた絵',
-      'ai_drawing': 'AIが描いた絵',
-      'generate_image': '画像生成',
-      'generating_image': 'AIが{style}スタイルで\nあなたの物語を絵に描いています...',
-      'please_wait': 'しばらくお待ちください',
-      'saving': '保存中...',
-      'saved_successfully': '保存完了',
-      'diary_saved': '日記が保存されました',
-      'diary_updated': '日記が更新されました',
-      'image_generation_error': '画像生成エラー: {error}',
-      'save_error': '保存エラー: {error}',
-      'login_title': 'ArtDiary AI',
-      'login_description': 'AIが描く感動の絵日記',
-      'login_tagline': '大切な日々の瞬間を\nAIが美しい絵に変えます',
-      'start_with_google': 'Googleで始める',
-      'continue_as_guest': 'ゲストで続ける',
-      'welcome_user': 'ようこそ、{name}さん!',
-      'user': 'ユーザー',
-      'google_login_failed': 'Googleログイン失敗: {error}',
-      'guest_login_message': 'ゲストモードで開始します（データはこのデバイスにのみ保存されます）',
-      'login_failed': 'ログイン失敗: {error}',
-      'emotion_happy': '幸せ',
-      'emotion_sad': '悲しい',
-      'emotion_angry': '怒り',
-      'emotion_excited': '興奮',
-      'emotion_peaceful': '平穏',
-      'emotion_anxious': '不安',
-      'emotion_grateful': '感謝',
-      'emotion_nostalgic': '懐かしさ',
-      'emotion_romantic': 'ロマンティック',
-      'emotion_frustrated': 'いらいら',
-      'emotion_normal': '普通',
-      'premium_feature': 'プレミアム機能',
-      'upgrade_to_premium': 'プレミアムにアップグレード',
-      'free_user_limit': '無料ユーザーは画像修正できません',
-      'image_modification_limit': '画像修正上限を超えました',
-      'regenerate_image': '画像再生成',
-      'keep_existing_image': '現在の画像を保持',
-      'image_modification_dialog_title': '画像修正',
-      'image_modification_dialog_content': '日記内容を修正しました。\n新しい内容に合わせて画像を再生成しますか？',
-      'remaining_generations': '残り生成回数: {count}回',
-      'remaining_modifications': '残り修正回数: {count}回',
-      'unlimited': '無制限',
       // Search
-      'search_hint': '検索内容を入力してください',
-      'search_label': '検索',
-      'no_entries': 'まだ日記が書かれていません',
-      'create_first_entry': '最初の日記を書いてみましょう！',
-      'empty_search': '検索結果がありません',
-      'try_different_keyword': '別のキーワードで検索してみてください',
       // Navigation & UI
-      'diary_list': '日記一覧',
-      'calendar': 'カレンダー',
-      'diary_search': '日記検索',
-      'start_with_ai_diary': 'AIが絵を描いてくれる特別な日記を始めてみましょう',
-      'refresh': '更新',
-      'calendar_load_error': 'カレンダーを読み込めません',
       // Settings dialog content
-      'theme_selection': 'テーマ選択',
-      'light_theme': 'ライトテーマ',
-      'dark_theme': 'ダークテーマ',
-      'system_theme': 'システム設定',
-      'font_size_setting': 'フォントサイズ設定',
-      'font_size_description': '日記テキストのサイズを選択してください',
-      'font_small': '小さく',
-      'font_medium': '標準',
-      'font_large': '大きく',
-      'font_xlarge': '非常に大きく',
-      'font_size_changed': 'フォントサイズが「{size}」に設定されました。',
-      'notification_settings': '通知設定',
-      'notification_description': '日記作成を見逃さないように通知を受け取ってください。',
-      'daily_reminder': '日々のリマインダー',
-      'daily_reminder_time': '毎日夜9時に通知',
-      'weekly_summary': '週間要約',
-      'weekly_summary_time': '毎週日曜日午前10時',
-      'notification_enabled': '通知が有効化されました。',
-      'notification_disabled': '通知が無効化されました。',
-      'weekly_notification_enabled': '週間要約通知が有効化されました。',
-      'weekly_notification_disabled': '週間要約通知が無効化されました。',
-      'premium_upgrade_title': 'プレミアムアップグレード',
-      'premium_benefits': 'プレミアムにアップグレードすると:',
-      'unlimited_ai_images': '無制限AI画像生成',
-      'advanced_image_styles': '50+高級画像スタイル',
-      'no_ads': '広告完全除去',
-      'cloud_backup': 'クラウド自動バックアップ',
-      'advanced_security': '高級セキュリティ機能',
-      'later': '後で',
-      'monthly_price': '月額￥4,900',
-      'premium_coming_soon': 'プレミアム購読は近日提供予定です！',
-      'default_image_style_setting': 'デフォルト画像スタイル設定',
-      'image_style_description': '新しい日記作成時にデフォルトで選択される画像スタイルを設定してください。',
-      'default_style_set': 'デフォルトスタイルが「{style}」に設定されました。',
-      'data_backup_title': 'データバックアップ',
-      'backup_description': 'すべての日記データをJSONファイルとしてバックアップします。',
-      'backup_includes': '含まれる内容:',
-      'backup_diary_content': '日記タイトルおよび内容',
-      'backup_date_time': '作成日時',
-      'backup_emotion_analysis': '感情分析結果',
-      'backup_generated_images': '生成された画像 (Base64)',
-      'backup_image_style': '画像スタイル情報',
-      'backup_start': 'バックアップ開始',
-      'backing_up': 'バックアップ中...',
-      'backup_completed': 'バックアップ完了！合計{count}件の日記がバックアップされました。',
-      'backup_failed': 'バックアップ失敗: {error}',
-      'data_restore_title': 'データ復元',
-      'restore_description': 'バックアップされた日記データを復元します。',
-      'restore_start': '復元開始',
-      'delete_all_title': 'すべてのデータを削除',
-      'delete_all_warning': '本当にすべての日記データを削除しますか？\nこの操作は元に戻すことができません。',
-      'delete_all_confirm': 'すべてのデータを削除',
-      'app_name': 'ArtDiary AI',
-      'app_description': 'AIが描いてくれる特別な絵日記アプリ',
-      'privacy_policy_title': 'プライバシーポリシー',
-      'privacy_policy_content': '''ArtDiary AI プライバシーポリシー
 
-最終更新: 2025年1月
-
-1. 収集する情報
-• 日記の内容とタイトル
-• AI生成画像
-• 感情分析データ
-• デバイス識別情報（匿名）
-
-2. 情報利用目的
-• 日記作成・管理サービスの提供
-• AI画像生成と感情分析
-• アプリのパフォーマンス改善とエラー修正
-• ユーザーエクスペリエンスの向上
-
-3. 情報保存とセキュリティ
-• すべてのデータはデバイス内部に安全に保存されます
-• クラウドバックアップはユーザーが選択した場合にのみ有効化されます
-• データ暗号化とセキュリティ対策を適用します
-
-4. 第三者への提供
-• ユーザーの同意なしに第三者に情報を提供しません
-• AIサービス提供のためにGoogle Gemini APIを使用します
-• 広告表示のためにGoogle AdMobを使用します
-
-5. ユーザーの権利
-• いつでもデータ削除のリクエストが可能
-• 個人情報の閲覧・修正権限
-• サービス利用同意の撤回が可能
-
-6. お問い合わせ
-個人情報に関するお問い合わせは、アプリ内のお問い合わせ機能をご利用ください。
-
-本方針は、関連法令およびサービスポリシーの変更に応じて修正される場合があります。''',
-      'terms_title': '利用規約',
-      'terms_content': '''ArtDiary AI サービス利用規約
-
-最終更新: 2025年1月
-
-1. サービス利用
-• 本アプリはAIベースの絵日記作成サービスです
-• 満14歳以上のユーザーを対象とします
-• 違法または不適切なコンテンツの作成を禁止します
-
-2. ユーザーの義務
-• 正確な情報の提供
-• 他者の権利侵害の禁止
-• サービスの悪用・濫用の禁止
-• 関連法規の遵守
-
-3. サービス提供
-• AI画像生成機能
-• 日記作成・管理機能
-• 感情分析・統計機能
-• 無料・プレミアムサービス
-
-4. プレミアムサービス
-• 月間または年間サブスクリプションの提供
-• 無制限AI画像生成
-• 高度な機能とフォントの使用
-• 広告削除
-
-5. サービス中断・変更
-• システムメンテナンス時に一時中断する場合があります
-• 事前通知後にサービス内容を変更する場合があります
-• やむを得ない場合は即時中断する場合があります
-
-6. 免責事項
-• AI生成コンテンツの品質は保証できません
-• ユーザーのデバイス問題によるデータ損失については責任を負いません
-• ネットワーク障害によるサービス中断については責任を負いません
-
-7. 知的財産権
-• ユーザーが作成した日記内容はユーザーに帰属します
-• AI生成画像の使用権はユーザーにあります
-• アプリのデザインとコードの著作権は開発者にあります
-
-8. 契約解除
-• ユーザーはいつでもサービスの利用を中止できます
-• 規約違反時にサービスの利用が制限される場合があります
-
-本規約は大韓民国の法律に従って規律され解釈されます。''',
-      'privacy_policy_subtitle': 'プライバシーポリシーをご確認ください',
-      'terms_subtitle': 'サービス利用規約をご確認ください',
-      'ok': '確認',
+      // Delete settings screen
       // Subscription management
-      'subscription_management_test': '購読管理 (テスト)',
-      'premium_user': 'プレミアムユーザー',
-      'free_user': '無料ユーザー',
-      'image_generations': '画像生成',
-      'image_modifications': '画像修正',
-      'set_to_free': '無料ユーザーに設定されました',
-      'set_to_premium': 'プレミアムに設定されました',
-      'set_free_plan': '無料に設定',
-      'set_premium_plan': 'プレミアムに設定',
       // Image styles
-      'style_auto': '自動選択',
-      'style_realistic': 'リアルスタイル',
-      'style_watercolor': '水彩スタイル',
-      'style_illustration': 'イラストスタイル',
-      'style_sketch': 'スケッチスタイル',
-      'style_anime': 'アニメーションスタイル',
-      'style_impressionist': '印象派',
-      'style_vintage': 'ビンテージスタイル',
       
       // Advanced options
-      'advanced_options': '高度なオプション',
-      'lighting': 'ライティング',
-      'mood': 'ムード',
-      'color': 'カラー',
-      'composition': '構図',
-      'none': 'なし',
-      'clear_all_options': '自動選択',
 
       // AI Prompts
-      'ai_emotion_analysis_prompt': '''次の日記内容の主要な感情を分析してください。
-可能な感情: happy, sad, angry, excited, peaceful, anxious, grateful, nostalgic, romantic, frustrated
-1つの感情のみ回答してください。
+      // Settings screen
+      // Personalization settings screen
+      // AI settings screen
 
-日記内容: {content}''',
-      'ai_photo_analysis_prompt': '''この写真を分析して次の情報を抽出してください:
-- 全体的な雰囲気と感じ
-- 主要な色彩とトーン
-- 時間帯（朝、昼、夕方、夜）
-- 場所と環境（室内/屋外、都市/自然など）
-- 主要な被写体やオブジェクト
-
-2-3文で簡潔に要約してください。''',
-      'ai_image_prompt_base': '''次の日記内容を基にイメージ生成プロンプトを作成してください。
-スタイル: {style}
-感情的で美しいイメージになるように作成してください。
-
-日記内容: {content}
-主要感情: {emotion}
-キーワード: {keywords}
-{advanced}
-
-プロンプトは英語で作成し、日記の感情と内容をよく表現する温かく感性的なイメージになるようにしてください。
-具体的な視覚的要素、色彩、雰囲気を含めて作成してください。''',
-      'ai_advanced_option_prefix': '高度なオプション: {options}',
-      'ai_auto_settings_prompt': '''次の日記内容を分析して、イメージ生成に適した設定を推奨してください。
-JSON形式で回答してください:
-
-{{
-  "lighting": "natural|dramatic|warm|cool|sunset|night のいずれか",
-  "mood": "peaceful|energetic|romantic|mysterious|joyful|melancholic のいずれか",
-  "color": "vibrant|pastel|monochrome|warm|cool|earthy のいずれか",
-  "composition": "centered|rule_of_thirds|symmetrical|dynamic|minimalist のいずれか"
-}}
-
-日記内容: {content}
-
-日記の雰囲気、感情、時間帯、天気、状況などを総合的に考慮して最適な設定を選択してください。''',
-      'ai_emotion_insight_system': '''あなたは親切で共感力に優れた心理カウンセラーです。
-ユーザーの{period}日記データを分析して、感情パターンとインサイトを提供してください。
-
-日記データ:
-{diaries}
-
-次の指針に従ってインサイトを作成してください:
-1. 3-4文で簡潔に作成
-2. 肯定的で共感的な口調を使用
-3. 感情パターンや変化についての観察を含む
-4. 実用的なアドバイスや励ましのメッセージを含む
-5. 温かく親しみやすい口調を使用
-
-インサイトのみを出力し、他の説明は不要です。''',
-      'ai_default_insight': '今回の{period}には様々な感情を経験されましたね。自分の感情を認識し記録することだけでも大きな意味があります。',
-      'ai_fallback_insight': '今回の期間の感情の旅を一緒に記録してくださってありがとうございます。',
+      // Backup and restore screen
+      // Diary detail screen
     },
     'en': {
       'app_title': 'ArtDiary AI',
@@ -766,6 +694,21 @@ JSON形式で回答してください:
       'diary_updated': 'Diary has been updated',
       'image_generation_error': 'Error occurred while generating image: {error}',
       'save_error': 'Error occurred while saving: {error}',
+      'failed_to_load_diary': 'Failed to load diary: {error}',
+      'analyzing_photo': 'Analyzing photo...',
+      'analyzing_emotion': 'Analyzing emotion...',
+      'extracting_keywords': 'Extracting keywords...',
+      'generating_prompt': 'Generating image prompt...',
+      'generating_ai_image_notice': 'Generating AI image...\n\n(Wait time may be longer when there are many users)',
+      'diary_saved_successfully': 'Diary saved successfully!',
+      'image_gallery': 'Image Gallery',
+      'photo_upload': 'Photo Upload',
+      'select_photo': 'Select Photo',
+      'my_photo': 'My Photo',
+      'edit_diary_only': 'Edit Diary Only',
+      'edit_image_and_diary': 'Edit Image + Diary',
+      'photo_upload_and_gallery': 'Photo Upload & Gallery',
+      'photo_select_failed': 'Photo selection failed: {error}',
       // Login screen
       'login_title': 'ArtDiary AI',
       'login_description': 'AI-powered emotional diary with beautiful artwork',
@@ -789,6 +732,11 @@ JSON形式で回答してください:
       'emotion_romantic': 'Romantic',
       'emotion_frustrated': 'Frustrated',
       'emotion_normal': 'Normal',
+      'all_emotions': 'All',
+      'error_occurred_general': 'An error occurred',
+      'retry_button': 'Retry',
+      'search_button': 'Search',
+      'ai_generated_image_placeholder': 'AI Generated Image',
       // Premium features
       'premium_feature': 'Premium Feature',
       'upgrade_to_premium': 'Upgrade to Premium',
@@ -860,14 +808,51 @@ JSON形式で回答してください:
       'backup_image_style': 'Image style information',
       'backup_start': 'Start Backup',
       'backing_up': 'Backing up...',
+      'ok': 'OK',
+      'last_backup_time_format': 'Last backup: {time}',
+      'error_format': 'Error: {error}',
+      'auto_cloud_backup_feature': 'Auto Cloud Backup',
+      'upgrade_for_auto_backup': 'Upgrade to premium for auto backup feature',
+      'cloud_backup_feature': 'Cloud Backup',
+      'cloud_backup_to_google_drive': 'Backup your diary to Google Drive',
+      'premium_feature_short': 'Premium only feature',
+      'cloud_restore_feature': 'Cloud Restore',
+      'cloud_restore_from_google_drive': 'Restore your diary from Google Drive',
+      'cloud_backup_restore_feature': 'Cloud Backup/Restore',
+      'upgrade_for_cloud_backup_restore': 'Upgrade to premium for cloud backup/restore features',
+      'backup_complete': 'Backup complete',
       'backup_completed': 'Backup complete! {count} diary entries have been backed up.',
       'backup_failed': 'Backup failed: {error}',
+      'last_backup_time': 'Last backup: {time}',
+      'error_occurred': 'Error: {error}',
+      'auto_cloud_backup': 'Auto Cloud Backup',
+      'upgrade_for_auto_backup': 'Upgrade to premium for auto backup feature',
+      'simple_cloud_backup': 'Cloud Backup',
+      'simple_cloud_restore': 'Cloud Restore',
+      'cloud_backup_and_restore': 'Cloud Backup/Restore',
+      'upgrade_for_cloud_features': 'Upgrade to premium for cloud backup/restore features',
       'data_restore_title': 'Data Restore',
       'restore_description': 'Restore backed up diary data.',
       'restore_start': 'Start Restore',
       'delete_all_title': 'Delete All Data',
       'delete_all_warning': 'Are you sure you want to delete all diary data?\nThis action cannot be undone.',
       'delete_all_confirm': 'Delete All Data',
+
+      // Delete settings screen
+      'warning_notice': 'Warning Notice',
+      'delete_warning_message': '• All diary entries will be permanently deleted\n• Deleted data cannot be recovered\n• We strongly recommend backing up before deletion',
+      'clear_cache': 'Clear Cache',
+      'clear_cache_description': 'Delete stored image cache to free up storage space',
+      'cache_zero': '0 MB',
+      'calculation_failed': 'Calculation Failed',
+      'clear_cache_confirm_message': 'Would you like to delete the image cache?\n\nCurrent cache size: {size}\n\nNote: Diary data will not be deleted,\nand images will be regenerated when needed.',
+      'clearing_cache': 'Clearing cache...',
+      'cache_deleted_success': 'Cache successfully deleted',
+      'cache_delete_error': 'An error occurred while deleting cache',
+      'delete_button': 'Delete',
+      'all_data_deleted': 'All data has been deleted',
+      'delete_error_format': 'An error occurred during deletion: {error}',
+      'app_info_subtitle': 'App version, Privacy policy',
       'app_name': 'ArtDiary AI',
       'app_description': 'Special picture diary app drawn by AI',
       'privacy_policy_title': 'Privacy Policy',
@@ -1041,6 +1026,326 @@ Please write insights following these guidelines:
 Output only the insights, no other explanations needed.''',
       'ai_default_insight': 'You have experienced various emotions this {period}. Recognizing and recording your emotions is meaningful in itself.',
       'ai_fallback_insight': 'Thank you for recording your emotional journey during this period.',
+      // Settings screen
+      'personalization_subtitle': 'Language, font, and date format settings',
+      'ai_settings_subtitle': 'Image style and AI guide settings',
+      'backup_and_restore': 'Backup & Restore',
+      'backup_description': 'Data backup and cloud sync',
+      'delete_data': 'Delete Data',
+      'delete_data_description': 'Delete all diary data',
+      'premium_upgrade_description': 'Unlimited access without ads',
+      'unlimited_with_premium': 'Unlimited with Premium',
+      'test_mode': 'Test Mode',
+      'current_premium_user': 'Current: Premium User',
+      'current_free_user': 'Current: Free User',
+      'switched_to_premium': 'Switched to Premium User',
+      'switched_to_free': 'Switched to Free User',
+      'free': 'Free',
+      'logout_to_login_screen': 'Logout (Return to Login Screen)',
+      'logout': 'Logout',
+      'return_to_login_confirmation': 'Return to login screen?',
+      // Personalization settings screen
+      'font': 'Font',
+      'select_font_description': 'Select the font for diary writing',
+      'date_format': 'Date Format',
+      'select_date_format_description': 'Select date display format',
+      'timezone': 'Timezone',
+      'select_timezone_description': 'Select timezone',
+      'select_font': 'Select Font',
+      'premium_only_font': 'Premium Only Font',
+      'select_date_format': 'Select Date Format',
+      'date_format_ymd': 'Year/Month/Day (2024/12/25)',
+      'date_format_dmy': 'Day/Month/Year (25/12/2024)',
+      'date_format_mdy': 'Month/Day/Year (12/25/2024)',
+      'date_format_changed': 'Date format changed',
+      'select_timezone': 'Select Timezone',
+      'timezone_changed_format': 'Timezone changed to {name}',
+      'timezone_seoul': 'Seoul (KST)',
+      'timezone_tokyo': 'Tokyo (JST)',
+      'timezone_beijing': 'Beijing (CST)',
+      'timezone_new_york': 'New York (EST)',
+      'timezone_los_angeles': 'Los Angeles (PST)',
+      'timezone_london': 'London (GMT)',
+      'timezone_paris': 'Paris (CET)',
+      // AI settings screen
+      'auto_advanced_settings': 'Auto Advanced Settings',
+      'premium_only_feature': 'Premium Only Feature',
+      'auto_advanced_settings_description': 'Automatically sets time, weather, and season options',
+      'auto_advanced_settings_enabled': 'Auto Advanced Settings enabled',
+      'auto_advanced_settings_disabled': 'Auto Advanced Settings disabled',
+      'premium_styles_available_format': '{count} additional styles are available in Premium',
+
+      // Backup and restore screen
+      'backup_and_restore': 'Backup and Restore',
+      'auto_backup': 'Auto Backup',
+      'local_backup_restore': 'Local Backup/Restore',
+      'cloud_backup_restore': 'Cloud Backup/Restore',
+      'free_user_backup_description': 'Free users can backup diary titles, content, and dates in JSON format.',
+      'premium_backup_description': 'Premium: Includes emotion analysis, generated images, AI prompts',
+      'select_backup_location': 'Select backup file save location',
+      'backup_canceled': 'Backup canceled',
+      'restore_warning': 'All currently saved data will be deleted\nand replaced with the backup file',
+      'select_file': 'Select file',
+      'restoring': 'Restoring...',
+      'no_restored_diaries': 'No diaries restored',
+      'restore_failed_format': 'Restore failed: {error}',
+      'included_content': 'Included content:',
+      'all_diary_content': 'All diary content',
+      'emotion_analysis_result': 'Emotion analysis result',
+      'generated_images_base64': 'Generated images (base64)',
+      'image_style_and_settings': 'Image style and settings',
+      'uploaded_photos': 'Uploaded photos',
+      'existing_backup_warning': 'Existing backup will be overwritten',
+      'premium_backup_success_format': '{count} diaries fully backed up',
+      'backup_success_format': '{count} diaries backed up',
+      'cancel_file_selection_hint': 'You can cancel anytime using the\nback button on the file selection screen',
+      'restore_success_format': '{count} diaries restored',
+      'google_drive_backup': 'Google Drive Backup',
+      'google_drive_backup_description': 'Safely backup your diary data to Google Drive.',
+      'start_backup': 'Start Backup',
+      'login_required_message': 'Login required.\nPlease log in to the app first.',
+      'backing_up_to_google_drive': 'Backing up to Google Drive...',
+      'backup_complete_test_mode': 'Backup Complete (Test Mode)',
+      'backing_up_to_cloud': 'Backing up to cloud...',
+      'cloud_backup_complete': 'Cloud backup completed',
+      'cloud_backup_failed': 'Cloud backup failed',
+      'cloud_backup_error_format': 'Cloud backup error: {error}',
+      'login_required_title': 'Login Required',
+      'cloud_restore_login_message': 'Please log in to the app first to use cloud restore.',
+      'test_restore_title': '[Test] Restore',
+      'test_mode_restore_simulation': 'Simulating restore in test mode.',
+      'real_environment_google_drive_restore': 'In real environment, restores from Google Drive.',
+      'start_button': 'Start',
+      'no_backup_title': 'No Backup',
+      'no_cloud_backup_message': 'No backup saved to cloud.\nPlease create a backup first.',
+      'ok': 'OK',
+      'cloud_restore_title': 'Cloud Restore',
+      'restore_from_firebase': 'Restore diary data from Firebase.',
+      'all_data_will_be_replaced': 'All currently saved data will be deleted\nand replaced with cloud backup data',
+      'cancel_button': 'Cancel',
+      'start_restore_button': 'Start Restore',
+      'restoring_from_cloud': 'Restoring from cloud...',
+      'cloud_restore_failed': 'Cloud restore failed',
+      'cloud_restore_error_format': 'Cloud restore error: {error}',
+      'test_mode_restore_simulation': '[Test Mode] Cloud restore simulation in progress...',
+      'restore_complete_test_mode': 'Restore complete (Test Mode)',
+      'premium_only_feature': 'Premium Only Feature',
+      'cloud_backup_restore_premium_only': 'Cloud backup/restore is available to premium users only.',
+      'auto_cloud_backup': 'Auto Cloud Backup',
+      'auto_backup_every_5_minutes': 'Automatic backup every 5 minutes',
+      'auto_backup_enabled': 'Auto backup has been enabled',
+      'auto_backup_disabled': 'Auto backup has been disabled',
+      'backing_up': 'Backing up...',
+      // Diary detail screen
+      'error_loading_diary': 'An error occurred while loading the diary',
+      'diary_detail_title': 'Diary Details',
+      'diary_not_found': 'Diary not found',
+      'written_label': 'Written:',
+      'last_modified_label': 'Last modified:',
+      'no_ai_image_available': 'No AI generated image available',
+      'todays_emotion_label': 'Today\'s emotion:',
+      'written_date_label': 'Written date:',
+      'hashtag_ai_diary': '#AIDiary #EmotionDiary',
+      'delete_diary_title': 'Delete Diary',
+      'delete_diary_confirmation': 'Are you sure you want to delete this diary?\nDeleted diaries cannot be recovered.',
+      'diary_deleted_success': 'Diary has been deleted',
+      'diary_delete_error': 'An error occurred during deletion',
+      'delete_failed': 'Delete Failed',
+      'generating': 'Generating...',
+      'regeneration_complete': 'Regeneration Complete',
+      'edit': 'Edit',
+      'create_ai_diary_button': 'Create AI Diary',
+      'ai_generated_badge': 'AI Generated',
+      'user_photo_badge': 'My Photo',
+
+      // Common buttons and dialogs
+      'cancel': 'Cancel',
+      'delete': 'Delete',
+      'confirm': 'Confirm',
+      'retry': 'Retry',
+      'search': 'Search',
+
+      // Emotion names
+      'emotion_all': 'All',
+      'emotion_happy': 'Happy',
+      'emotion_sad': 'Sad',
+      'emotion_angry': 'Angry',
+      'emotion_excited': 'Excited',
+      'emotion_peaceful': 'Peaceful',
+      'emotion_anxious': 'Anxious',
+      'emotion_grateful': 'Grateful',
+      'emotion_nostalgic': 'Nostalgic',
+      'emotion_romantic': 'Romantic',
+      'emotion_frustrated': 'Frustrated',
+      'emotion_normal': 'Normal',
+
+      // Progress messages
+      'photo_mood_analyzing': 'Analyzing photo mood...',
+      'photo_analyzing': 'Analyzing photo...',
+      'generating_image': 'Generating image...',
+
+      // Diary create/edit
+      'edit_diary': 'Edit Diary',
+      'create_new_diary': 'Create New Diary',
+      'title_label': 'Title',
+      'content_label': 'Content',
+      'please_enter_title': 'Please enter a title',
+      'please_enter_content': 'Please enter content',
+      'image_gallery': 'Image Gallery',
+      'photo_upload': 'Photo Upload',
+      'max_3_photos': 'Max 3',
+      '1_photo': '1 Photo',
+      'select_photo': 'Select Photo',
+      'please_select_photo': 'Please select a photo',
+      'max_3_photos_upload': 'Upload up to 3 photos',
+      'free_version_1_photo_only': 'Free version: 1 photo only',
+      'load_failed': 'Load Failed',
+      'save_failed': 'Save Failed',
+      'generated_image': 'Generated Image',
+      'cannot_load_image': 'Cannot load image',
+      'image_regenerated_success': 'Image regenerated and saved successfully',
+      'image_regeneration_failed': 'Image regeneration failed',
+      'really_delete_diary': 'Are you sure you want to delete this diary?',
+
+      // Diary list
+      'error_occurred': 'An error occurred',
+      'ai_drawn_image': 'AI Drawn Image',
+      'premium_upgrade': 'Premium Upgrade',
+      'ad_free_unlimited': 'Write unlimited diaries without ads',
+      'upgrade_to_premium_unlimited': 'Upgrade to Premium for Unlimited',
+
+      // Premium dialog
+      'premium_only_feature': 'Premium Only Feature',
+      'feature_requires_premium': 'is available for premium users only.',
+      'this_feature_requires_premium': 'This feature is available for premium users only.',
+
+      // Emotion stats
+      'emotion_stats': 'Emotion Statistics',
+      'weekly': 'Weekly',
+      'monthly': 'Monthly',
+      'yearly': 'Yearly',
+      'no_diaries_in_period': 'No diaries written in this period.',
+      'weekly_emotion_insight': 'Weekly Emotion Insight',
+      'monthly_emotion_insight': 'Monthly Emotion Insight',
+      'main_emotion': 'Main Emotion',
+      'diary_frequency': 'Diary Frequency',
+      'emotion_diversity': 'Emotion Diversity',
+      'times_recorded': 'times recorded',
+      'diaries_count': 'diaries',
+      'daily_avg': 'Daily Average',
+      'diverse_emotions': 'You experienced diverse emotions',
+      'types': 'types',
+
+      // Premium subscription
+      'make_diary_special': 'Make Your Diary More Special',
+      'premium_features': 'Premium Features',
+      'ad_removal': 'Ad Removal',
+      'ad_removal_desc': 'Enjoy a pleasant\ndiary writing experience\nwithout any ads',
+      'premium_fonts': 'Premium Fonts',
+      'premium_fonts_desc': '10 beautiful Korean fonts\nGaegujaengi, Dokdo, Nanum Pen, etc.',
+      'premium_art_styles': 'Premium Art Styles',
+      'premium_art_styles_desc': '6 additional styles\nIllustration, Sketch, Animation, Impressionist, Vintage',
+      'advanced_image_options': 'Advanced Image Options',
+      'advanced_image_options_desc': 'Lighting, mood, color, composition, etc.\nDetailed image generation settings',
+      'time_weather_season_settings': 'Time/Weather/Season Settings',
+      'time_weather_season_settings_desc': 'Morning, evening, rainy day, spring, etc.\nSituation-appropriate image generation',
+      'photo_upload_max_3': 'Photo Upload (Max 3)',
+      'photo_upload_max_3_desc': 'Generate AI images\nbased on your photos',
+      'cloud_backup_auto': 'Cloud Backup & Auto Backup',
+      'cloud_backup_auto_desc': 'Google Drive auto backup\nKeep your precious diaries safe',
+      'unlimited_image_generation': 'Unlimited Image Generation',
+      'unlimited_image_generation_desc': 'No daily limit of 3\nGenerate unlimited diaries',
+      'subscription_options': 'Subscription Options',
+      'monthly_subscription': 'Monthly Subscription',
+      'yearly_subscription': 'Yearly Subscription',
+      'lifetime_subscription': 'Lifetime Subscription',
+      'all_premium_features': 'All Premium Features',
+      'cancel_anytime': 'Cancel Anytime',
+      'lifetime_access': 'Lifetime Access',
+      'one_time_payment': 'One-Time Payment',
+      'best_value': 'Best Value',
+      'popular': 'Popular',
+      'currently_subscribed': 'Currently Subscribed',
+      'subscribe': 'Subscribe',
+      'subscription_footer': '• You can cancel your subscription at any time\n• After cancellation, you can use premium features until the next billing date\n• Auto-renewal can be canceled 24 hours before the billing date',
+      'already_premium': 'You are already a premium user',
+      'test_mode': 'Test Mode',
+      'test_mode_message': 'Would you like to proceed with the subscription?\n\nIn test mode, you can use premium features immediately without actual payment.',
+      'subscription_completed': 'Subscription completed!',
+      'subscribe_test': 'Subscribe (Test)',
+
+      // Date formats
+      'date_format_full': 'MMMM d, yyyy EEEE',
+      'date_format_month': 'MMMM yyyy',
+      'ad_free_unlimited': 'Ad-free Unlimited',
+      'ad_removal': 'Ad Removal',
+      'ad_removal_desc': 'Remove all ads for a clean experience',
+      'advanced_image_options': 'Advanced Image Options',
+      'advanced_image_options_desc': 'Detailed settings for lighting, mood, colors',
+      'ai_drawn_image': 'AI Drawn Image',
+      'all_premium_features': 'All Premium Features',
+      'already_premium': 'Already Premium Member',
+      'best_value': 'Best Value',
+      'cancel_anytime': 'Cancel Anytime',
+      'cloud_backup_auto': 'Automatic Cloud Backup',
+      'cloud_backup_auto_desc': 'Automatically backup diaries to cloud',
+      'confirm_delete_diary': 'Are you sure you want to delete this diary?',
+      'content_label': 'Content',
+      'create_ai_diary_button': 'Create AI Diary',
+      'create_new_diary': 'Create New Diary',
+      'currently_subscribed': 'Currently Subscribed',
+      'delete_diary': 'Delete Diary',
+      'delete_failed': 'Delete Failed',
+      'diary_deleted': 'Diary has been deleted',
+      'edit_diary_only': 'Edit Diary Only',
+      'edit_image_and_diary': 'Edit Image and Diary',
+      'emotion_all': 'All',
+      'emotion_stats': 'Emotion Statistics',
+      'error_occurred': 'An error occurred',
+      'free_version1_photo_only': 'Free version: 1 photo only',
+      'image_gallery': 'Image Gallery',
+      'lifetime_access': 'Lifetime Access',
+      'lifetime_subscription': 'Lifetime Subscription',
+      'make_diary_special': 'Make Your Diary Special',
+      'max3_photos': 'Up to 3 Photos',
+      'max3_photos_upload': 'Upload up to 3 photos',
+      'monthly_subscription': 'Monthly Subscription',
+      'my_photo': 'My Photo',
+      'onboarding_next': 'Next',
+      'onboarding_page1_desc': 'AI turns your diary into art',
+      'onboarding_page1_title': 'Welcome',
+      'onboarding_page2_desc': 'AI analyzes your diary and identifies emotions',
+      'onboarding_page2_title': 'Emotion Analysis',
+      'onboarding_page3_desc': 'Decorate your diary with 12 art styles',
+      'onboarding_page3_title': 'Various Styles',
+      'onboarding_page4_desc': 'Start your AI art diary now',
+      'onboarding_page4_title': 'Get Started',
+      'onboarding_skip': 'Skip',
+      'onboarding_start': 'Start',
+      'one_photo': '1 Photo',
+      'one_time_payment': 'One-time Payment',
+      'photo_upload': 'Photo Upload',
+      'photo_upload_max3': 'Upload Up to 3 Photos',
+      'photo_upload_max3_desc': 'Upload up to 3 photos per diary',
+      'please_select_photo': 'Please select a photo',
+      'premium_art_styles': 'Premium Art Styles',
+      'premium_art_styles_desc': 'Access 12 premium art styles',
+      'premium_features': 'Premium Features',
+      'premium_fonts': 'Premium Fonts',
+      'premium_fonts_desc': 'Use 10 premium fonts',
+      'regeneration_complete': 'Regeneration Complete',
+      'sample_diary_content': 'Today was a really good day',
+      'sample_diary_title': 'Sample Diary',
+      'select_photo': 'Select Photo',
+      'subscription_footer': 'Subscriptions can be cancelled at any time',
+      'subscription_options': 'Subscription Options',
+      'time_weather_season_settings': 'Time/Weather/Season Settings',
+      'time_weather_season_settings_desc': 'Freely set time, weather, and season',
+      'title_label': 'Title',
+      'unlimited_image_generation': 'Unlimited Image Generation',
+      'unlimited_image_generation_desc': 'Generate AI images without limits',
+      'upgrade_to_premium_unlimited': 'Upgrade to Premium for unlimited access',
+      'yearly_subscription': 'Yearly Subscription',
     },
     'zh': {
       'app_title': 'ArtDiary AI',
@@ -1110,6 +1415,21 @@ Output only the insights, no other explanations needed.''',
       'diary_updated': '日记已更新',
       'image_generation_error': '生成图像时发生错误：{error}',
       'save_error': '保存时发生错误：{error}',
+      'failed_to_load_diary': '日记加载失败: {error}',
+      'analyzing_photo': '照片分析中...',
+      'analyzing_emotion': '情感分析中...',
+      'extracting_keywords': '提取关键词中...',
+      'generating_prompt': '生成图像提示中...',
+      'generating_ai_image_notice': 'AI图像生成中...\n\n(用户较多时等待时间可能会更长)',
+      'diary_saved_successfully': '日记保存成功!',
+      'image_gallery': '图片库',
+      'photo_upload': '照片上传',
+      'select_photo': '选择照片',
+      'my_photo': '我的照片',
+      'edit_diary_only': '仅编辑日记',
+      'edit_image_and_diary': '编辑图片+日记',
+      'photo_upload_and_gallery': '照片上传及图片库',
+      'photo_select_failed': '照片选择失败: {error}',
       // Login screen
       'login_title': 'ArtDiary AI',
       'login_description': 'AI绘制的感动日记',
@@ -1133,6 +1453,11 @@ Output only the insights, no other explanations needed.''',
       'emotion_romantic': '浪漫',
       'emotion_frustrated': '沮丧',
       'emotion_normal': '正常',
+      'all_emotions': '全部',
+      'error_occurred_general': '发生错误',
+      'retry_button': '重试',
+      'search_button': '搜索',
+      'ai_generated_image_placeholder': 'AI生成的图像',
       // Premium features
       'premium_feature': '高级功能',
       'upgrade_to_premium': '升级到高级版',
@@ -1204,14 +1529,51 @@ Output only the insights, no other explanations needed.''',
       'backup_image_style': '图像风格信息',
       'backup_start': '开始备份',
       'backing_up': '备份中...',
+      'ok': '确认',
+      'last_backup_time_format': '最后备份：{time}',
+      'error_format': '错误：{error}',
+      'auto_cloud_backup_feature': '自动云备份',
+      'upgrade_for_auto_backup': '升级至高级版以使用自动备份功能',
+      'cloud_backup_feature': '云备份',
+      'cloud_backup_to_google_drive': '将日记备份到Google Drive',
+      'premium_feature_short': '高级版专属功能',
+      'cloud_restore_feature': '云恢复',
+      'cloud_restore_from_google_drive': '从Google Drive恢复日记',
+      'cloud_backup_restore_feature': '云备份/恢复',
+      'upgrade_for_cloud_backup_restore': '升级至高级版以使用云备份/恢复功能',
+      'backup_complete': '备份完成',
       'backup_completed': '备份完成！共备份了{count}篇日记。',
       'backup_failed': '备份失败：{error}',
+      'last_backup_time': '最后备份：{time}',
+      'error_occurred': '错误：{error}',
+      'auto_cloud_backup': '自动云备份',
+      'upgrade_for_auto_backup': '升级至高级版以使用自动备份功能',
+      'simple_cloud_backup': '云备份',
+      'simple_cloud_restore': '云恢复',
+      'cloud_backup_and_restore': '云备份/恢复',
+      'upgrade_for_cloud_features': '升级至高级版以使用云备份/恢复功能',
       'data_restore_title': '数据恢复',
       'restore_description': '恢复备份的日记数据。',
       'restore_start': '开始恢复',
       'delete_all_title': '删除所有数据',
       'delete_all_warning': '您确定要删除所有日记数据吗？\n此操作不可撤销。',
       'delete_all_confirm': '删除所有数据',
+
+      // Delete settings screen
+      'warning_notice': '注意事项',
+      'delete_warning_message': '• 所有日记将被永久删除\n• 已删除的数据无法恢复\n• 删除前强烈建议备份',
+      'clear_cache': '清除缓存',
+      'clear_cache_description': '删除已存储的图片缓存以释放存储空间',
+      'cache_zero': '0 MB',
+      'calculation_failed': '计算失败',
+      'clear_cache_confirm_message': '您要删除图片缓存吗？\n\n当前缓存大小：{size}\n\n注意：日记数据不会被删除，\n需要时会重新生成图片。',
+      'clearing_cache': '正在清除缓存...',
+      'cache_deleted_success': '缓存已成功删除',
+      'cache_delete_error': '删除缓存时发生错误',
+      'delete_button': '删除',
+      'all_data_deleted': '所有数据已删除',
+      'delete_error_format': '删除过程中发生错误：{error}',
+      'app_info_subtitle': '应用版本、隐私政策',
       'app_name': 'ArtDiary AI',
       'app_description': 'AI绘制的特殊图画日记应用',
       'privacy_policy_title': '隐私政策',
@@ -1385,6 +1747,132 @@ Output only the insights, no other explanations needed.''',
 只输出见解，不需要其他说明。''',
       'ai_default_insight': '在这个{period}中，您体验了各种情绪。认识并记录自己的情绪本身就很有意义。',
       'ai_fallback_insight': '感谢您记录这段时间的情感旅程。',
+      // Settings screen
+      'personalization_subtitle': '语言、字体和日期格式设置',
+      'ai_settings_subtitle': '图像风格和AI指南设置',
+      'backup_and_restore': '备份与恢复',
+      'backup_description': '数据备份和云同步',
+      'delete_data': '删除数据',
+      'delete_data_description': '删除所有日记数据',
+      'premium_upgrade_description': '无广告无限制使用',
+      'unlimited_with_premium': '高级版无限制生成',
+      'test_mode': '测试模式',
+      'current_premium_user': '当前：高级用户',
+      'current_free_user': '当前：免费用户',
+      'switched_to_premium': '已切换到高级用户',
+      'switched_to_free': '已切换到免费用户',
+      'free': '免费',
+      'logout_to_login_screen': '登出（返回登录页面）',
+      'logout': '登出',
+      'return_to_login_confirmation': '返回登录页面？',
+      // Personalization settings screen
+      'font': '字体',
+      'select_font_description': '选择日记书写字体',
+      'date_format': '日期格式',
+      'select_date_format_description': '选择日期显示格式',
+      'timezone': '时区',
+      'select_timezone_description': '选择时区',
+      'select_font': '选择字体',
+      'premium_only_font': '仅限高级会员字体',
+      'select_date_format': '选择日期格式',
+      'date_format_ymd': '年/月/日 (2024/12/25)',
+      'date_format_dmy': '日/月/年 (25/12/2024)',
+      'date_format_mdy': '月/日/年 (12/25/2024)',
+      'date_format_changed': '日期格式已更改',
+      'select_timezone': '选择时区',
+      'timezone_changed_format': '时区已更改为{name}',
+      'timezone_seoul': '首尔 (KST)',
+      'timezone_tokyo': '东京 (JST)',
+      'timezone_beijing': '北京 (CST)',
+      'timezone_new_york': '纽约 (EST)',
+      'timezone_los_angeles': '洛杉矶 (PST)',
+      'timezone_london': '伦敦 (GMT)',
+      'timezone_paris': '巴黎 (CET)',
+      // AI settings screen
+      'auto_advanced_settings': '高级设置自动配置',
+      'premium_only_feature': '仅限高级会员功能',
+      'auto_advanced_settings_description': '自动设置时间、天气和季节选项',
+      'auto_advanced_settings_enabled': '高级设置自动配置已启用',
+      'auto_advanced_settings_disabled': '高级设置自动配置已禁用',
+      'premium_styles_available_format': '高级版提供{count}个额外样式',
+
+      // Backup and restore screen
+      'backup_and_restore': '备份与恢复',
+      'auto_backup': '自动备份',
+      'local_backup_restore': '本地备份/恢复',
+      'cloud_backup_restore': '云端备份/恢复',
+      'free_user_backup_description': '免费用户可以以JSON格式备份日记标题、内容和日期。',
+      'premium_backup_description': '高级版：包含情感分析、生成图像、AI提示',
+      'select_backup_location': '选择备份文件保存位置',
+      'backup_canceled': '备份已取消',
+      'restore_warning': '当前保存的数据将全部删除\n并替换为备份文件',
+      'select_file': '选择文件',
+      'restoring': '恢复中...',
+      'no_restored_diaries': '没有恢复的日记',
+      'restore_failed_format': '恢复失败: {error}',
+      'included_content': '包含内容:',
+      'all_diary_content': '所有日记内容',
+      'emotion_analysis_result': '情感分析结果',
+      'generated_images_base64': '生成的图像 (base64)',
+      'image_style_and_settings': '图像样式和设置',
+      'uploaded_photos': '上传的照片',
+      'existing_backup_warning': '现有备份将被覆盖',
+      'premium_backup_success_format': '{count}篇日记已完全备份',
+      'backup_success_format': '{count}篇日记已备份',
+      'cancel_file_selection_hint': '在文件选择界面可以使用\n返回按钮随时取消',
+      'restore_success_format': '{count}篇日记已恢复',
+      'google_drive_backup': 'Google Drive 备份',
+      'google_drive_backup_description': '安全地将日记数据备份到 Google Drive。',
+      'start_backup': '开始备份',
+      'login_required_message': '需要登录。\n请先登录应用程序。',
+      'backing_up_to_google_drive': '正在备份到 Google Drive...',
+      'backup_complete_test_mode': '备份完成 (测试模式)',
+      'backing_up_to_cloud': '正在备份到云端...',
+      'cloud_backup_complete': '云备份已完成',
+      'cloud_backup_failed': '云备份失败',
+      'cloud_backup_error_format': '云备份错误: {error}',
+      'login_required_title': '需要登录',
+      'cloud_restore_login_message': '请先登录应用程序以使用云恢复功能。',
+      'test_restore_title': '[测试] 恢复',
+      'test_mode_restore_simulation': '在测试模式下模拟恢复。',
+      'real_environment_google_drive_restore': '在真实环境中，从 Google Drive 恢复。',
+      'start_button': '开始',
+      'no_backup_title': '无备份',
+      'no_cloud_backup_message': '云端没有保存的备份。\n请先创建备份。',
+      'ok': '确定',
+      'cloud_restore_title': '云恢复',
+      'restore_from_firebase': '从 Firebase 恢复日记数据。',
+      'all_data_will_be_replaced': '当前保存的所有数据将被删除\n并替换为云备份数据',
+      'cancel_button': '取消',
+      'start_restore_button': '开始恢复',
+      'restoring_from_cloud': '正在从云端恢复...',
+      'cloud_restore_failed': '云恢复失败',
+      'cloud_restore_error_format': '云恢复错误: {error}',
+      'test_mode_restore_simulation': '[测试模式] 云恢复模拟进行中...',
+      'restore_complete_test_mode': '恢复完成 (测试模式)',
+      'premium_only_feature': '高级会员专属功能',
+      'cloud_backup_restore_premium_only': '云备份/恢复仅限高级会员使用。',
+      'auto_cloud_backup': '自动云备份',
+      'auto_backup_every_5_minutes': '每5分钟自动备份',
+      'auto_backup_enabled': '自动备份已启用',
+      'auto_backup_disabled': '自动备份已禁用',
+      'backing_up': '备份中...',
+      // Diary detail screen
+      'error_loading_diary': '加载日记时出错',
+      'diary_detail_title': '日记详情',
+      'diary_not_found': '未找到日记',
+      'written_label': '撰写：',
+      'last_modified_label': '最后修改：',
+      'no_ai_image_available': '没有AI生成的图片',
+      'todays_emotion_label': '今天的情绪：',
+      'written_date_label': '撰写日期：',
+      'hashtag_ai_diary': '#AI绘画日记 #情绪日记',
+      'delete_diary_title': '删除日记',
+      'delete_diary_confirmation': '确定要删除这篇日记吗？\n删除的日记无法恢复。',
+      'diary_deleted_success': '日记已删除',
+      'diary_delete_error': '删除时出错',
+      'ai_generated_badge': 'AI生成',
+      'user_photo_badge': '我的照片',
     },
     'la': {
       'app_title': 'ArtDiary AI',
@@ -1452,6 +1940,21 @@ Output only the insights, no other explanations needed.''',
       'diary_updated': 'Diarium renovatum est',
       'image_generation_error': 'Error in imagine generanda: {error}',
       'save_error': 'Error in servando: {error}',
+      'failed_to_load_diary': 'Diarium onerare non potuit: {error}',
+      'analyzing_photo': 'Photographia analysi...',
+      'analyzing_emotion': 'Affectus analysi...',
+      'extracting_keywords': 'Verba clavis extrahens...',
+      'generating_prompt': 'Promptum imaginis generans...',
+      'generating_ai_image_notice': 'Imago AI generatur...\n\n(Tempus exspectationis longius esse potest cum multi usores adsunt)',
+      'diary_saved_successfully': 'Diarium feliciter servatum!',
+      'image_gallery': 'Galeria Imaginum',
+      'photo_upload': 'Photographia Upload',
+      'select_photo': 'Photographiam Eligere',
+      'my_photo': 'Mea Photographia',
+      'edit_diary_only': 'Diarium Tantum Corrigere',
+      'edit_image_and_diary': 'Imaginem + Diarium Corrigere',
+      'photo_upload_and_gallery': 'Photographia Upload et Galeria',
+      'photo_select_failed': 'Photographia electio defecit: {error}',
       // Login screen
       'login_title': 'ArtDiary AI',
       'login_description': 'Diarium Artificii Intellectus cum picturis pulchris',
@@ -1546,6 +2049,19 @@ Output only the insights, no other explanations needed.''',
       'backup_image_style': 'Informatio styli imaginis',
       'backup_start': 'Incipe Copiam',
       'backing_up': 'Copiando...',
+      'ok': 'Confirma',
+      'last_backup_time_format': 'Ultima copia: {time}',
+      'error_format': 'Error: {error}',
+      'auto_cloud_backup_feature': 'Copia Automatica in Nube',
+      'upgrade_for_auto_backup': 'Promove ad premium pro functione copiae automaticae',
+      'cloud_backup_feature': 'Copia in Nube',
+      'cloud_backup_to_google_drive': 'Copia diarium tuum in Google Drive',
+      'premium_feature_short': 'Functio premium tantum',
+      'cloud_restore_feature': 'Restitutio ex Nube',
+      'cloud_restore_from_google_drive': 'Restitue diarium tuum ex Google Drive',
+      'cloud_backup_restore_feature': 'Copia/Restitutio in Nube',
+      'upgrade_for_cloud_backup_restore': 'Promove ad premium pro functionibus copiae/restitutionis in nube',
+      'backup_complete': 'Copia perfecta',
       'backup_completed': 'Copia perfecta! {count} diaria copiata sunt.',
       'backup_failed': 'Copia defecit: {error}',
       'data_restore_title': 'Restitutio Datorum',
@@ -1554,6 +2070,21 @@ Output only the insights, no other explanations needed.''',
       'delete_all_title': 'Dele Omnia Data',
       'delete_all_warning': 'Certusne es te velle delere omnia data diarii?\nHaec actio revocari non potest.',
       'delete_all_confirm': 'Dele Omnia Data',
+      // Delete settings screen
+      'warning_notice': 'Monitum',
+      'delete_warning_message': '• Omnia diaria permanenter delebuntur\n• Data deleta recuperari non possunt\n• Ante deletionem copiam valde commendamus',
+      'clear_cache': 'Cache Purgare',
+      'clear_cache_description': 'Delete cache imaginum conservatarum ad spatium liberandum',
+      'cache_zero': '0 MB',
+      'calculation_failed': 'Calculatio Defecit',
+      'clear_cache_confirm_message': 'Visne cache imaginum delere?\n\nMagnitude cache nunc: {size}\n\nNota: Data diarii non delebuntur,\net imagines re-generabuntur cum necesse sit.',
+      'clearing_cache': 'Cache Purgans...',
+      'cache_deleted_success': 'Cache feliciter deletum est',
+      'cache_delete_error': 'Error accidit dum cache delebatur',
+      'delete_button': 'Dele',
+      'all_data_deleted': 'Omnia data deleta sunt',
+      'delete_error_format': 'Error accidit dum deletio: {error}',
+      'app_info_subtitle': 'Versio applicationis, Politica secretitudinis',
       'app_name': 'ArtDiary AI',
       'app_description': 'Diarium pictum speciale ab AI depictum',
       'privacy_policy_title': 'Politica Privacitatis',
@@ -1799,7 +2330,14 @@ Emitte tantum perspicacitates, nulla alia explanatio necessaria.''',
   String get diaryUpdated => _localizedValues[locale.languageCode]!['diary_updated']!;
   String imageGenerationError(String error) => _localizedValues[locale.languageCode]!['image_generation_error']!.replaceAll('{error}', error);
   String saveError(String error) => _localizedValues[locale.languageCode]!['save_error']!.replaceAll('{error}', error);
-  
+  String failedToLoadDiary(String error) => _localizedValues[locale.languageCode]!['failed_to_load_diary']!.replaceAll('{error}', error);
+  String get analyzingPhoto => _localizedValues[locale.languageCode]!['analyzing_photo']!;
+  String get analyzingEmotion => _localizedValues[locale.languageCode]!['analyzing_emotion']!;
+  String get extractingKeywords => _localizedValues[locale.languageCode]!['extracting_keywords']!;
+  String get generatingPrompt => _localizedValues[locale.languageCode]!['generating_prompt']!;
+  String get generatingAiImageNotice => _localizedValues[locale.languageCode]!['generating_ai_image_notice']!;
+  String get diarySavedSuccessfully => _localizedValues[locale.languageCode]!['diary_saved_successfully']!;
+
   // Login screen
   String get loginTitle => _localizedValues[locale.languageCode]!['login_title']!;
   String get loginDescription => _localizedValues[locale.languageCode]!['login_description']!;
@@ -1824,7 +2362,12 @@ Emitte tantum perspicacitates, nulla alia explanatio necessaria.''',
   String get emotionRomantic => _localizedValues[locale.languageCode]!['emotion_romantic']!;
   String get emotionFrustrated => _localizedValues[locale.languageCode]!['emotion_frustrated']!;
   String get emotionNormal => _localizedValues[locale.languageCode]!['emotion_normal']!;
-  
+  String get allEmotions => _localizedValues[locale.languageCode]!['all_emotions']!;
+  String get errorOccurredGeneral => _localizedValues[locale.languageCode]!['error_occurred_general']!;
+  String get retryButton => _localizedValues[locale.languageCode]!['retry_button']!;
+  String get searchButton => _localizedValues[locale.languageCode]!['search_button']!;
+  String get aiGeneratedImagePlaceholder => _localizedValues[locale.languageCode]!['ai_generated_image_placeholder']!;
+
   String getEmotionText(String emotion) {
     switch (emotion.toLowerCase()) {
       case 'happy': return emotionHappy;
@@ -1914,6 +2457,7 @@ Emitte tantum perspicacitates, nulla alia explanatio necessaria.''',
   String get backupImageStyle => _localizedValues[locale.languageCode]!['backup_image_style']!;
   String get backupStart => _localizedValues[locale.languageCode]!['backup_start']!;
   String get backingUp => _localizedValues[locale.languageCode]!['backing_up']!;
+  String get backupComplete => _localizedValues[locale.languageCode]!['backup_complete']!;
   String backupCompleted(String count) => _localizedValues[locale.languageCode]!['backup_completed']!.replaceAll('{count}', count);
   String backupFailed(String error) => _localizedValues[locale.languageCode]!['backup_failed']!.replaceAll('{error}', error);
   String get dataRestoreTitle => _localizedValues[locale.languageCode]!['data_restore_title']!;
@@ -2011,6 +2555,260 @@ Emitte tantum perspicacitates, nulla alia explanatio necessaria.''',
 
   String get aiFallbackInsight => _localizedValues[locale.languageCode]!['ai_fallback_insight']!;
 
+  // Settings screen getters
+  String get personalizationSubtitle => _localizedValues[locale.languageCode]!['personalization_subtitle']!;
+  String get aiSettingsSubtitle => _localizedValues[locale.languageCode]!['ai_settings_subtitle']!;
+  String get backupAndRestore => _localizedValues[locale.languageCode]!['backup_and_restore']!;
+  String get deleteData => _localizedValues[locale.languageCode]!['delete_data']!;
+  String get deleteDataDescription => _localizedValues[locale.languageCode]!['delete_data_description']!;
+  String get premiumUpgradeDescription => _localizedValues[locale.languageCode]!['premium_upgrade_description']!;
+  String get unlimitedWithPremium => _localizedValues[locale.languageCode]!['unlimited_with_premium']!;
+  String get testMode => _localizedValues[locale.languageCode]!['test_mode']!;
+  String get currentPremiumUser => _localizedValues[locale.languageCode]!['current_premium_user']!;
+  String get currentFreeUser => _localizedValues[locale.languageCode]!['current_free_user']!;
+  String get switchedToPremium => _localizedValues[locale.languageCode]!['switched_to_premium']!;
+  String get switchedToFree => _localizedValues[locale.languageCode]!['switched_to_free']!;
+  String get free => _localizedValues[locale.languageCode]!['free']!;
+  String get logoutToLoginScreen => _localizedValues[locale.languageCode]!['logout_to_login_screen']!;
+  String get logout => _localizedValues[locale.languageCode]!['logout']!;
+  String get returnToLoginConfirmation => _localizedValues[locale.languageCode]!['return_to_login_confirmation']!;
+  // Personalization settings screen
+  String get font => _localizedValues[locale.languageCode]!['font']!;
+  String get selectFontDescription => _localizedValues[locale.languageCode]!['select_font_description']!;
+  String get dateFormat => _localizedValues[locale.languageCode]!['date_format']!;
+  String get selectDateFormatDescription => _localizedValues[locale.languageCode]!['select_date_format_description']!;
+  String get timezone => _localizedValues[locale.languageCode]!['timezone']!;
+  String get selectTimezoneDescription => _localizedValues[locale.languageCode]!['select_timezone_description']!;
+  String get selectFont => _localizedValues[locale.languageCode]!['select_font']!;
+  String get premiumOnlyFont => _localizedValues[locale.languageCode]!['premium_only_font']!;
+  String get selectDateFormat => _localizedValues[locale.languageCode]!['select_date_format']!;
+  String get dateFormatYmd => _localizedValues[locale.languageCode]!['date_format_ymd']!;
+  String get dateFormatDmy => _localizedValues[locale.languageCode]!['date_format_dmy']!;
+  String get dateFormatMdy => _localizedValues[locale.languageCode]!['date_format_mdy']!;
+  String get dateFormatChanged => _localizedValues[locale.languageCode]!['date_format_changed']!;
+  String get selectTimezone => _localizedValues[locale.languageCode]!['select_timezone']!;
+  String get timezoneChangedFormat => _localizedValues[locale.languageCode]!['timezone_changed_format']!;
+  String get timezoneSeoul => _localizedValues[locale.languageCode]!['timezone_seoul']!;
+  String get timezoneTokyo => _localizedValues[locale.languageCode]!['timezone_tokyo']!;
+  String get timezoneBeijing => _localizedValues[locale.languageCode]!['timezone_beijing']!;
+  String get timezoneNewYork => _localizedValues[locale.languageCode]!['timezone_new_york']!;
+  String get timezoneLosAngeles => _localizedValues[locale.languageCode]!['timezone_los_angeles']!;
+  String get timezoneLondon => _localizedValues[locale.languageCode]!['timezone_london']!;
+  String get timezoneParis => _localizedValues[locale.languageCode]!['timezone_paris']!;
+
+  // AI settings screen
+  String get autoAdvancedSettings => _localizedValues[locale.languageCode]!['auto_advanced_settings']!;
+  String get autoAdvancedSettingsDescription => _localizedValues[locale.languageCode]!['auto_advanced_settings_description']!;
+  String get autoAdvancedSettingsEnabled => _localizedValues[locale.languageCode]!['auto_advanced_settings_enabled']!;
+  String get autoAdvancedSettingsDisabled => _localizedValues[locale.languageCode]!['auto_advanced_settings_disabled']!;
+  String get premiumStylesAvailableFormat => _localizedValues[locale.languageCode]!['premium_styles_available_format']!;
+
+  // Backup and restore screen
+  String get autoBackup => _localizedValues[locale.languageCode]!['auto_backup']!;
+  String get localBackupRestore => _localizedValues[locale.languageCode]!['local_backup_restore']!;
+  String get cloudBackupRestore => _localizedValues[locale.languageCode]!['cloud_backup_restore']!;
+  String get freeUserBackupDescription => _localizedValues[locale.languageCode]!['free_user_backup_description']!;
+  String get premiumBackupDescription => _localizedValues[locale.languageCode]!['premium_backup_description']!;
+  String get selectBackupLocation => _localizedValues[locale.languageCode]!['select_backup_location']!;
+  String get backupCanceled => _localizedValues[locale.languageCode]!['backup_canceled']!;
+  String get restoreWarning => _localizedValues[locale.languageCode]!['restore_warning']!;
+  String get selectFile => _localizedValues[locale.languageCode]!['select_file']!;
+  String get restoring => _localizedValues[locale.languageCode]!['restoring']!;
+  String get noRestoredDiaries => _localizedValues[locale.languageCode]!['no_restored_diaries']!;
+  String get restoreFailedFormat => _localizedValues[locale.languageCode]!['restore_failed_format']!;
+  String get includedContent => _localizedValues[locale.languageCode]!['included_content']!;
+  String get allDiaryContent => _localizedValues[locale.languageCode]!['all_diary_content']!;
+  String get emotionAnalysisResult => _localizedValues[locale.languageCode]!['emotion_analysis_result']!;
+  String get generatedImagesBase64 => _localizedValues[locale.languageCode]!['generated_images_base64']!;
+  String get imageStyleAndSettings => _localizedValues[locale.languageCode]!['image_style_and_settings']!;
+  String get uploadedPhotos => _localizedValues[locale.languageCode]!['uploaded_photos']!;
+  String get existingBackupWarning => _localizedValues[locale.languageCode]!['existing_backup_warning']!;
+  String get premiumBackupSuccessFormat => _localizedValues[locale.languageCode]!['premium_backup_success_format']!;
+  String get backupSuccessFormat => _localizedValues[locale.languageCode]!['backup_success_format']!;
+  String get cancelFileSelectionHint => _localizedValues[locale.languageCode]!['cancel_file_selection_hint']!;
+  String get restoreSuccessFormat => _localizedValues[locale.languageCode]!['restore_success_format']!;
+  String get googleDriveBackup => _localizedValues[locale.languageCode]!['google_drive_backup']!;
+  String get googleDriveBackupDescription => _localizedValues[locale.languageCode]!['google_drive_backup_description']!;
+  String get startBackup => _localizedValues[locale.languageCode]!['start_backup']!;
+  String get loginRequiredMessage => _localizedValues[locale.languageCode]!['login_required_message']!;
+  String get backingUpToGoogleDrive => _localizedValues[locale.languageCode]!['backing_up_to_google_drive']!;
+  String get backupCompleteTestMode => _localizedValues[locale.languageCode]!['backup_complete_test_mode']!;
+  String get backingUpToCloud => _localizedValues[locale.languageCode]!['backing_up_to_cloud']!;
+  String get cloudBackupComplete => _localizedValues[locale.languageCode]!['cloud_backup_complete']!;
+  String get cloudBackupFailed => _localizedValues[locale.languageCode]!['cloud_backup_failed']!;
+  String cloudBackupErrorFormat(String error) => _localizedValues[locale.languageCode]!['cloud_backup_error_format']!.replaceAll('{error}', error);
+  String get loginRequiredTitle => _localizedValues[locale.languageCode]!['login_required_title']!;
+  String get cloudRestoreLoginMessage => _localizedValues[locale.languageCode]!['cloud_restore_login_message']!;
+  String get testRestoreTitle => _localizedValues[locale.languageCode]!['test_restore_title']!;
+  String get testModeRestoreSimulation => _localizedValues[locale.languageCode]!['test_mode_restore_simulation']!;
+  String get realEnvironmentGoogleDriveRestore => _localizedValues[locale.languageCode]!['real_environment_google_drive_restore']!;
+  String get startButton => _localizedValues[locale.languageCode]!['start_button']!;
+  String get noBackupTitle => _localizedValues[locale.languageCode]!['no_backup_title']!;
+  String get noCloudBackupMessage => _localizedValues[locale.languageCode]!['no_cloud_backup_message']!;
+  String get premiumOnlyFeature => _localizedValues[locale.languageCode]!['premium_only_feature']!;
+  String get cloudRestoreTitle => _localizedValues[locale.languageCode]!['cloud_restore_title']!;
+  String get restoreFromFirebase => _localizedValues[locale.languageCode]!['restore_from_firebase']!;
+  String get allDataWillBeReplaced => _localizedValues[locale.languageCode]!['all_data_will_be_replaced']!;
+  String get cancelButton => _localizedValues[locale.languageCode]!['cancel_button']!;
+  String get startRestoreButton => _localizedValues[locale.languageCode]!['start_restore_button']!;
+  String get restoringFromCloud => _localizedValues[locale.languageCode]!['restoring_from_cloud']!;
+  String get cloudRestoreFailed => _localizedValues[locale.languageCode]!['cloud_restore_failed']!;
+  String cloudRestoreErrorFormat(String error) => _localizedValues[locale.languageCode]!['cloud_restore_error_format']!.replaceAll('{error}', error);
+  String get restoreCompleteTestMode => _localizedValues[locale.languageCode]!['restore_complete_test_mode']!;
+  String get cloudBackupRestorePremiumOnly => _localizedValues[locale.languageCode]!['cloud_backup_restore_premium_only']!;
+  String get autoCloudBackup => _localizedValues[locale.languageCode]!['auto_cloud_backup']!;
+  String get autoBackupEveryFiveMinutes => _localizedValues[locale.languageCode]!['auto_backup_every_5_minutes']!;
+  String get autoBackupEnabled => _localizedValues[locale.languageCode]!['auto_backup_enabled']!;
+  String get autoBackupDisabled => _localizedValues[locale.languageCode]!['auto_backup_disabled']!;
+  String lastBackupTimeFormat(String time) => _localizedValues[locale.languageCode]!['last_backup_time_format']!.replaceAll('{time}', time);
+  String errorFormat(String error) => _localizedValues[locale.languageCode]!['error_format']!.replaceAll('{error}', error);
+  String get autoCloudBackupFeature => _localizedValues[locale.languageCode]!['auto_cloud_backup_feature']!;
+  String get upgradeForAutoBackup => _localizedValues[locale.languageCode]!['upgrade_for_auto_backup']!;
+  String get cloudBackupFeature => _localizedValues[locale.languageCode]!['cloud_backup_feature']!;
+  String get cloudBackupToGoogleDrive => _localizedValues[locale.languageCode]!['cloud_backup_to_google_drive']!;
+  String get premiumFeatureShort => _localizedValues[locale.languageCode]!['premium_feature_short']!;
+  String get cloudRestoreFeature => _localizedValues[locale.languageCode]!['cloud_restore_feature']!;
+  String get cloudRestoreFromGoogleDrive => _localizedValues[locale.languageCode]!['cloud_restore_from_google_drive']!;
+  String get cloudBackupRestoreFeature => _localizedValues[locale.languageCode]!['cloud_backup_restore_feature']!;
+  String get upgradeForCloudBackupRestore => _localizedValues[locale.languageCode]!['upgrade_for_cloud_backup_restore']!;
+  // Delete settings screen getters
+  String get warningNotice => _localizedValues[locale.languageCode]!['warning_notice']!;
+  String get deleteWarningMessage => _localizedValues[locale.languageCode]!['delete_warning_message']!;
+  String get clearCache => _localizedValues[locale.languageCode]!['clear_cache']!;
+  String get clearCacheDescription => _localizedValues[locale.languageCode]!['clear_cache_description']!;
+  String get cacheZero => _localizedValues[locale.languageCode]!['cache_zero']!;
+  String get calculationFailed => _localizedValues[locale.languageCode]!['calculation_failed']!;
+  String get clearCacheConfirmMessage => _localizedValues[locale.languageCode]!['clear_cache_confirm_message']!;
+  String get clearingCache => _localizedValues[locale.languageCode]!['clearing_cache']!;
+  String get cacheDeletedSuccess => _localizedValues[locale.languageCode]!['cache_deleted_success']!;
+  String get cacheDeleteError => _localizedValues[locale.languageCode]!['cache_delete_error']!;
+  String get deleteButton => _localizedValues[locale.languageCode]!['delete_button']!;
+  String get allDataDeleted => _localizedValues[locale.languageCode]!['all_data_deleted']!;
+  String get deleteErrorFormat => _localizedValues[locale.languageCode]!['delete_error_format']!;
+  String get appInfoSubtitle => _localizedValues[locale.languageCode]!['app_info_subtitle']!;
+
+  // Diary detail screen
+  String get errorLoadingDiary => _localizedValues[locale.languageCode]!['error_loading_diary']!;
+  String get diaryDetailTitle => _localizedValues[locale.languageCode]!['diary_detail_title']!;
+  String get diaryNotFound => _localizedValues[locale.languageCode]!['diary_not_found']!;
+  String get writtenLabel => _localizedValues[locale.languageCode]!['written_label']!;
+  String get lastModifiedLabel => _localizedValues[locale.languageCode]!['last_modified_label']!;
+  String get noAiImageAvailable => _localizedValues[locale.languageCode]!['no_ai_image_available']!;
+  String get todaysEmotionLabel => _localizedValues[locale.languageCode]!['todays_emotion_label']!;
+  String get writtenDateLabel => _localizedValues[locale.languageCode]!['written_date_label']!;
+  String get hashtagAiDiary => _localizedValues[locale.languageCode]!['hashtag_ai_diary']!;
+  String get deleteDiaryTitle => _localizedValues[locale.languageCode]!['delete_diary_title']!;
+  String get deleteDiaryConfirmation => _localizedValues[locale.languageCode]!['delete_diary_confirmation']!;
+  String get diaryDeletedSuccess => _localizedValues[locale.languageCode]!['diary_deleted_success']!;
+  String get diaryDeleteError => _localizedValues[locale.languageCode]!['diary_delete_error']!;
+  String get aiGeneratedBadge => _localizedValues[locale.languageCode]!['ai_generated_badge']!;
+  String get userPhotoBadge => _localizedValues[locale.languageCode]!['user_photo_badge']!;
+
+  String get testModeMessage => _localizedValues[locale.languageCode]!['test_mode_message']!;
+  String get subscriptionCompleted => _localizedValues[locale.languageCode]!['subscription_completed']!;
+  String get subscribeTest => _localizedValues[locale.languageCode]!['subscribe_test']!;
+
+  // Date formats
+  String get dateFormatFull => _localizedValues[locale.languageCode]!['date_format_full']!;
+  String get adFreeUnlimited => _localizedValues[locale.languageCode]!['ad_free_unlimited']!;
+  String get adRemoval => _localizedValues[locale.languageCode]!['ad_removal']!;
+  String get adRemovalDesc => _localizedValues[locale.languageCode]!['ad_removal_desc']!;
+  String get advancedImageOptions => _localizedValues[locale.languageCode]!['advanced_image_options']!;
+  String get advancedImageOptionsDesc => _localizedValues[locale.languageCode]!['advanced_image_options_desc']!;
+  String get aiDrawnImage => _localizedValues[locale.languageCode]!['ai_drawn_image']!;
+  String get allPremiumFeatures => _localizedValues[locale.languageCode]!['all_premium_features']!;
+  String get alreadyPremium => _localizedValues[locale.languageCode]!['already_premium']!;
+  String get bestValue => _localizedValues[locale.languageCode]!['best_value']!;
+  String get cancelAnytime => _localizedValues[locale.languageCode]!['cancel_anytime']!;
+  String get cloudBackupAuto => _localizedValues[locale.languageCode]!['cloud_backup_auto']!;
+  String get cloudBackupAutoDesc => _localizedValues[locale.languageCode]!['cloud_backup_auto_desc']!;
+  String get confirmDeleteDiary => _localizedValues[locale.languageCode]!['confirm_delete_diary']!;
+  String get contentLabel => _localizedValues[locale.languageCode]!['content_label']!;
+  String get createAiDiaryButton => _localizedValues[locale.languageCode]!['create_ai_diary_button']!;
+  String get createNewDiary => _localizedValues[locale.languageCode]!['create_new_diary']!;
+  String get currentlySubscribed => _localizedValues[locale.languageCode]!['currently_subscribed']!;
+  String get delete => _localizedValues[locale.languageCode]!['delete']!;
+  String get deleteDiary => _localizedValues[locale.languageCode]!['delete_diary']!;
+  String get deleteFailed => _localizedValues[locale.languageCode]!['delete_failed']!;
+  String get diaryDeleted => _localizedValues[locale.languageCode]!['diary_deleted']!;
+  String get edit => _localizedValues[locale.languageCode]!['edit']!;
+  String get editDiaryOnly => _localizedValues[locale.languageCode]!['edit_diary_only']!;
+  String get editImageAndDiary => _localizedValues[locale.languageCode]!['edit_image_and_diary']!;
+  String get emotionAll => _localizedValues[locale.languageCode]!['emotion_all']!;
+  String get emotionStats => _localizedValues[locale.languageCode]!['emotion_stats']!;
+  String get errorOccurred => _localizedValues[locale.languageCode]!['error_occurred']!;
+  String get freeVersion1PhotoOnly => _localizedValues[locale.languageCode]!['free_version1_photo_only']!;
+  String get generating => _localizedValues[locale.languageCode]!['generating']!;
+  String get imageGallery => _localizedValues[locale.languageCode]!['image_gallery']!;
+  String get lifetimeAccess => _localizedValues[locale.languageCode]!['lifetime_access']!;
+  String get lifetimeSubscription => _localizedValues[locale.languageCode]!['lifetime_subscription']!;
+  String get makeDiarySpecial => _localizedValues[locale.languageCode]!['make_diary_special']!;
+  String get max3Photos => _localizedValues[locale.languageCode]!['max3_photos']!;
+  String get max3PhotosUpload => _localizedValues[locale.languageCode]!['max3_photos_upload']!;
+  String get monthly => _localizedValues[locale.languageCode]!['monthly']!;
+  String get monthlySubscription => _localizedValues[locale.languageCode]!['monthly_subscription']!;
+  String get myPhoto => _localizedValues[locale.languageCode]!['my_photo']!;
+  String get onboardingNext => _localizedValues[locale.languageCode]!['onboarding_next']!;
+  String get onboardingPage1Desc => _localizedValues[locale.languageCode]!['onboarding_page1_desc']!;
+  String get onboardingPage1Title => _localizedValues[locale.languageCode]!['onboarding_page1_title']!;
+  String get onboardingPage2Desc => _localizedValues[locale.languageCode]!['onboarding_page2_desc']!;
+  String get onboardingPage2Title => _localizedValues[locale.languageCode]!['onboarding_page2_title']!;
+  String get onboardingPage3Desc => _localizedValues[locale.languageCode]!['onboarding_page3_desc']!;
+  String get onboardingPage3Title => _localizedValues[locale.languageCode]!['onboarding_page3_title']!;
+  String get onboardingPage4Desc => _localizedValues[locale.languageCode]!['onboarding_page4_desc']!;
+  String get onboardingPage4Title => _localizedValues[locale.languageCode]!['onboarding_page4_title']!;
+  String get onboardingSkip => _localizedValues[locale.languageCode]!['onboarding_skip']!;
+  String get onboardingStart => _localizedValues[locale.languageCode]!['onboarding_start']!;
+  String get onePhoto => _localizedValues[locale.languageCode]!['one_photo']!;
+  String get oneTimePayment => _localizedValues[locale.languageCode]!['one_time_payment']!;
+  String get photoUpload => _localizedValues[locale.languageCode]!['photo_upload']!;
+  String get photoUploadMax3 => _localizedValues[locale.languageCode]!['photo_upload_max3']!;
+  String get photoUploadMax3Desc => _localizedValues[locale.languageCode]!['photo_upload_max3_desc']!;
+  String get pleaseSelectPhoto => _localizedValues[locale.languageCode]!['please_select_photo']!;
+  String get premiumArtStyles => _localizedValues[locale.languageCode]!['premium_art_styles']!;
+  String get premiumArtStylesDesc => _localizedValues[locale.languageCode]!['premium_art_styles_desc']!;
+  String get premiumFeatures => _localizedValues[locale.languageCode]!['premium_features']!;
+  String get premiumFonts => _localizedValues[locale.languageCode]!['premium_fonts']!;
+  String get premiumFontsDesc => _localizedValues[locale.languageCode]!['premium_fonts_desc']!;
+  String get regenerationComplete => _localizedValues[locale.languageCode]!['regeneration_complete']!;
+  String get retry => _localizedValues[locale.languageCode]!['retry']!;
+  String get sampleDiaryContent => _localizedValues[locale.languageCode]!['sample_diary_content']!;
+  String get sampleDiaryTitle => _localizedValues[locale.languageCode]!['sample_diary_title']!;
+  String get search => _localizedValues[locale.languageCode]!['search']!;
+  String get selectPhoto => _localizedValues[locale.languageCode]!['select_photo']!;
+  String get subscribe => _localizedValues[locale.languageCode]!['subscribe']!;
+  String get subscriptionFooter => _localizedValues[locale.languageCode]!['subscription_footer']!;
+  String get subscriptionOptions => _localizedValues[locale.languageCode]!['subscription_options']!;
+  String get timeWeatherSeasonSettings => _localizedValues[locale.languageCode]!['time_weather_season_settings']!;
+  String get timeWeatherSeasonSettingsDesc => _localizedValues[locale.languageCode]!['time_weather_season_settings_desc']!;
+  String get titleLabel => _localizedValues[locale.languageCode]!['title_label']!;
+  String get unlimitedImageGeneration => _localizedValues[locale.languageCode]!['unlimited_image_generation']!;
+  String get unlimitedImageGenerationDesc => _localizedValues[locale.languageCode]!['unlimited_image_generation_desc']!;
+  String get upgradeToPremiumUnlimited => _localizedValues[locale.languageCode]!['upgrade_to_premium_unlimited']!;
+  String get weekly => _localizedValues[locale.languageCode]!['weekly']!;
+  String get yearly => _localizedValues[locale.languageCode]!['yearly']!;
+  String get yearlySubscription => _localizedValues[locale.languageCode]!['yearly_subscription']!;
+
+  // Premium subscription & onboarding
+  String get dateFormatMonth => _localizedValues[locale.languageCode]!['date_format_month']!;
+
+  // Emotion name helper method
+  String getEmotionName(String? emotion) {
+    switch (emotion) {
+      case 'happy': return emotionHappy;
+      case 'sad': return emotionSad;
+      case 'angry': return emotionAngry;
+      case 'excited': return emotionExcited;
+      case 'peaceful': return emotionPeaceful;
+      case 'anxious': return emotionAnxious;
+      case 'grateful': return emotionGrateful;
+      case 'nostalgic': return emotionNostalgic;
+      case 'romantic': return emotionRomantic;
+      case 'frustrated': return emotionFrustrated;
+      default: return emotionNormal;
+    }
+  }
+
   String getImageStyleName(String styleKey) {
     switch (styleKey.toLowerCase()) {
       case 'auto': return styleAuto;
@@ -2032,8 +2830,24 @@ Emitte tantum perspicacitates, nulla alia explanatio necessaria.''',
 
   static Future<Locale> getSavedLocale() async {
     final prefs = await SharedPreferences.getInstance();
-    final languageCode = prefs.getString('locale') ?? 'ko';
-    return Locale(languageCode);
+    final savedLanguage = prefs.getString('locale');
+
+    // 저장된 언어가 있으면 해당 언어 사용
+    if (savedLanguage != null) {
+      return Locale(savedLanguage);
+    }
+
+    // 저장된 언어가 없으면 기기 언어 감지
+    final systemLocale = PlatformDispatcher.instance.locale;
+    final supportedLanguages = ['ko', 'ja', 'en', 'zh'];
+
+    // 기기 언어가 지원하는 언어 목록에 있으면 해당 언어 사용
+    if (supportedLanguages.contains(systemLocale.languageCode)) {
+      return systemLocale;
+    }
+
+    // 지원하지 않는 언어면 영어로 폴백
+    return const Locale('en');
   }
 }
 
