@@ -3,122 +3,58 @@ import '../l10n/app_localizations.dart';
 
 // 조명 옵션
 enum LightingOption {
-  natural('natural lighting, soft daylight, outdoor environment'),
-  dramatic('dramatic lighting, strong shadows, cinematic mood'),
-  warm('warm golden hour lighting, cozy atmosphere'),
-  cool('cool blue lighting, modern clean atmosphere'),
-  sunset('golden sunset lighting, romantic warm glow'),
-  night('night scene, street lights, atmospheric darkness');
+  natural('자연광', 'natural lighting, soft daylight, outdoor environment'),
+  dramatic('드라마틱', 'dramatic lighting, strong shadows, cinematic mood'),
+  warm('따뜻한 조명', 'warm golden hour lighting, cozy atmosphere'),
+  cool('시원한 조명', 'cool blue lighting, modern clean atmosphere'),
+  sunset('노을', 'golden sunset lighting, romantic warm glow'),
+  night('야간', 'night scene, street lights, atmospheric darkness');
 
-  const LightingOption(this.promptSuffix);
+  const LightingOption(this.displayName, this.promptSuffix);
+  final String displayName;
   final String promptSuffix;
-
-  String getDisplayName(AppLocalizations l10n) {
-    switch (this) {
-      case LightingOption.natural:
-        return l10n.lightingNatural;
-      case LightingOption.dramatic:
-        return l10n.lightingDramatic;
-      case LightingOption.warm:
-        return l10n.lightingWarm;
-      case LightingOption.cool:
-        return l10n.lightingCool;
-      case LightingOption.sunset:
-        return l10n.lightingSunset;
-      case LightingOption.night:
-        return l10n.lightingNight;
-    }
-  }
 }
 
 // 분위기 옵션
 enum MoodOption {
-  peaceful('peaceful, serene, calm atmosphere'),
-  energetic('energetic, vibrant, dynamic mood'),
-  mysterious('mysterious, enigmatic, ethereal atmosphere'),
-  nostalgic('nostalgic, sentimental, vintage mood'),
-  dreamy('dreamy, surreal, fantastical atmosphere'),
-  melancholic('melancholic, somber, introspective mood');
+  peaceful('평화로운', 'peaceful, serene, calm atmosphere'),
+  energetic('활기찬', 'energetic, vibrant, dynamic mood'),
+  mysterious('신비로운', 'mysterious, enigmatic, ethereal atmosphere'),
+  nostalgic('향수를 자아내는', 'nostalgic, sentimental, vintage mood'),
+  dreamy('몽환적인', 'dreamy, surreal, fantastical atmosphere'),
+  melancholic('우울한', 'melancholic, somber, introspective mood');
 
-  const MoodOption(this.promptSuffix);
+  const MoodOption(this.displayName, this.promptSuffix);
+  final String displayName;
   final String promptSuffix;
-
-  String getDisplayName(AppLocalizations l10n) {
-    switch (this) {
-      case MoodOption.peaceful:
-        return l10n.moodPeaceful;
-      case MoodOption.energetic:
-        return l10n.moodEnergetic;
-      case MoodOption.mysterious:
-        return l10n.moodMysterious;
-      case MoodOption.nostalgic:
-        return l10n.moodNostalgic;
-      case MoodOption.dreamy:
-        return l10n.moodDreamy;
-      case MoodOption.melancholic:
-        return l10n.moodMelancholic;
-    }
-  }
 }
 
 // 색상 톤 옵션
 enum ColorOption {
-  vibrant('vibrant colors, high saturation, bold palette'),
-  pastel('pastel colors, soft muted tones, delicate palette'),
-  monochrome('monochrome, black and white, grayscale'),
-  sepia('sepia tone, vintage brown tints, aged photograph'),
-  earthTone('earth tones, natural colors, brown and green palette'),
-  neonPop('neon colors, electric palette, cyberpunk vibes');
+  vibrant('선명한', 'vibrant colors, high saturation, bold palette'),
+  pastel('파스텔', 'pastel colors, soft muted tones, delicate palette'),
+  monochrome('흑백', 'monochrome, black and white, grayscale'),
+  sepia('세피아', 'sepia tone, vintage brown tints, aged photograph'),
+  earthTone('자연색', 'earth tones, natural colors, brown and green palette'),
+  neonPop('네온', 'neon colors, electric palette, cyberpunk vibes');
 
-  const ColorOption(this.promptSuffix);
+  const ColorOption(this.displayName, this.promptSuffix);
+  final String displayName;
   final String promptSuffix;
-
-  String getDisplayName(AppLocalizations l10n) {
-    switch (this) {
-      case ColorOption.vibrant:
-        return l10n.colorVibrant;
-      case ColorOption.pastel:
-        return l10n.colorPastel;
-      case ColorOption.monochrome:
-        return l10n.colorMonochrome;
-      case ColorOption.sepia:
-        return l10n.colorSepia;
-      case ColorOption.earthTone:
-        return l10n.colorEarthTone;
-      case ColorOption.neonPop:
-        return l10n.colorNeon;
-    }
-  }
 }
 
 // 구도 옵션
 enum CompositionOption {
-  closeUp('close-up shot, detailed focus, intimate framing'),
-  wideAngle('wide angle view, expansive scene, panoramic perspective'),
-  birdEye('birds eye view, aerial perspective, top-down angle'),
-  lowAngle('low angle shot, dramatic upward perspective'),
-  symmetrical('symmetrical composition, balanced framing'),
-  ruleOfThirds('rule of thirds composition, dynamic balance');
+  closeUp('클로즈업', 'close-up shot, detailed focus, intimate framing'),
+  wideAngle('와이드앵글', 'wide angle view, expansive scene, panoramic perspective'),
+  birdEye('조감도', 'birds eye view, aerial perspective, top-down angle'),
+  lowAngle('로우앵글', 'low angle shot, dramatic upward perspective'),
+  symmetrical('대칭', 'symmetrical composition, balanced framing'),
+  ruleOfThirds('삼분할', 'rule of thirds composition, dynamic balance');
 
-  const CompositionOption(this.promptSuffix);
+  const CompositionOption(this.displayName, this.promptSuffix);
+  final String displayName;
   final String promptSuffix;
-
-  String getDisplayName(AppLocalizations l10n) {
-    switch (this) {
-      case CompositionOption.closeUp:
-        return l10n.compositionCloseUp;
-      case CompositionOption.wideAngle:
-        return l10n.compositionWideAngle;
-      case CompositionOption.birdEye:
-        return l10n.compositionBirdEye;
-      case CompositionOption.lowAngle:
-        return l10n.compositionLowAngle;
-      case CompositionOption.symmetrical:
-        return l10n.compositionSymmetrical;
-      case CompositionOption.ruleOfThirds:
-        return l10n.compositionRuleOfThirds;
-    }
-  }
 }
 
 // 고급 이미지 옵션 설정 클래스
@@ -215,7 +151,7 @@ class AdvancedImageOptionsSelector extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(Icons.tune, size: 20, color: Colors.orange),
+            const Icon(Icons.tune, size: 20, color: Colors.orange),
             const SizedBox(width: 8),
             Text(
               l10n.advancedOptions,
@@ -348,7 +284,7 @@ class AdvancedImageOptionsSelector extends StatelessWidget {
                 ),
                 // 옵션들
                 ...options.map((option) {
-                  final displayName = _getDisplayName(l10n, option);
+                  final displayName = _getDisplayName(context, option);
                   return DropdownMenuItem<T?>(
                     value: option,
                     child: Row(
@@ -380,11 +316,72 @@ class AdvancedImageOptionsSelector extends StatelessWidget {
     );
   }
 
-  String _getDisplayName(AppLocalizations l10n, dynamic option) {
-    if (option is LightingOption) return option.getDisplayName(l10n);
-    if (option is MoodOption) return option.getDisplayName(l10n);
-    if (option is ColorOption) return option.getDisplayName(l10n);
-    if (option is CompositionOption) return option.getDisplayName(l10n);
+  String _getDisplayName(BuildContext context, dynamic option) {
+    final l10n = AppLocalizations.of(context);
+    if (option is LightingOption) {
+      switch (option) {
+        case LightingOption.natural:
+          return l10n.lightingNatural;
+        case LightingOption.dramatic:
+          return l10n.lightingDramatic;
+        case LightingOption.warm:
+          return l10n.lightingWarm;
+        case LightingOption.cool:
+          return l10n.lightingCool;
+        case LightingOption.sunset:
+          return l10n.lightingSunset;
+        case LightingOption.night:
+          return l10n.lightingNight;
+      }
+    }
+    if (option is MoodOption) {
+      switch (option) {
+        case MoodOption.peaceful:
+          return l10n.moodPeaceful;
+        case MoodOption.energetic:
+          return l10n.moodEnergetic;
+        case MoodOption.mysterious:
+          return l10n.moodMysterious;
+        case MoodOption.nostalgic:
+          return l10n.moodNostalgic;
+        case MoodOption.dreamy:
+          return l10n.moodDreamy;
+        case MoodOption.melancholic:
+          return l10n.moodMelancholic;
+      }
+    }
+    if (option is ColorOption) {
+      switch (option) {
+        case ColorOption.vibrant:
+          return l10n.colorVibrant;
+        case ColorOption.pastel:
+          return l10n.colorPastel;
+        case ColorOption.monochrome:
+          return l10n.colorMonochrome;
+        case ColorOption.sepia:
+          return l10n.colorSepia;
+        case ColorOption.earthTone:
+          return l10n.colorEarthTone;
+        case ColorOption.neonPop:
+          return l10n.colorNeon;
+      }
+    }
+    if (option is CompositionOption) {
+      switch (option) {
+        case CompositionOption.closeUp:
+          return l10n.compositionCloseUp;
+        case CompositionOption.wideAngle:
+          return l10n.compositionWideAngle;
+        case CompositionOption.birdEye:
+          return l10n.compositionBirdEye;
+        case CompositionOption.lowAngle:
+          return l10n.compositionLowAngle;
+        case CompositionOption.symmetrical:
+          return l10n.compositionSymmetrical;
+        case CompositionOption.ruleOfThirds:
+          return l10n.compositionRuleOfThirds;
+      }
+    }
     return option.toString();
   }
 

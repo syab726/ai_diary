@@ -33,10 +33,6 @@ class _AppInfoScreenState extends ConsumerState<AppInfoScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: Text(
           AppLocalizations.of(context).appInfo,
           style: const TextStyle(

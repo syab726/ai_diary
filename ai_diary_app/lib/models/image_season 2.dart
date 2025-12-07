@@ -1,38 +1,22 @@
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 
-// 날씨 옵션
-enum ImageWeather {
-  sunny,
-  cloudy,
-  rainy,
-  snowy;
-
-  // AI 프롬프트용 영어 displayName (ai_service.dart에서 사용)
-  String get displayName {
-    switch (this) {
-      case ImageWeather.sunny:
-        return 'sunny';
-      case ImageWeather.cloudy:
-        return 'cloudy';
-      case ImageWeather.rainy:
-        return 'rainy';
-      case ImageWeather.snowy:
-        return 'snowy';
-    }
-  }
+enum ImageSeason {
+  spring,
+  summer,
+  autumn,
+  winter;
 }
 
-// 날씨 선택기 위젯
-class ImageWeatherSelector extends StatelessWidget {
-  final ImageWeather selectedWeather;
-  final ValueChanged<ImageWeather> onWeatherChanged;
+class ImageSeasonSelector extends StatelessWidget {
+  final ImageSeason selectedSeason;
+  final ValueChanged<ImageSeason> onSeasonChanged;
   final bool enabled;
 
-  const ImageWeatherSelector({
+  const ImageSeasonSelector({
     super.key,
-    required this.selectedWeather,
-    required this.onWeatherChanged,
+    required this.selectedSeason,
+    required this.onSeasonChanged,
     this.enabled = true,
   });
 
@@ -45,13 +29,13 @@ class ImageWeatherSelector extends StatelessWidget {
         Row(
           children: [
             Icon(
-              Icons.cloud,
+              Icons.nature,
               size: 18,
               color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
             ),
             const SizedBox(width: 8),
             Text(
-              l10n.optionWeather,
+              l10n.optionSeason,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -72,22 +56,22 @@ class ImageWeatherSelector extends StatelessWidget {
             color: enabled ? Colors.white : Colors.grey.withOpacity(0.1),
           ),
           child: DropdownButtonHideUnderline(
-            child: DropdownButton<ImageWeather>(
-              value: selectedWeather,
+            child: DropdownButton<ImageSeason>(
+              value: selectedSeason,
               isExpanded: true,
               icon: Icon(
                 Icons.arrow_drop_down,
                 color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
               ),
-              items: ImageWeather.values.map((weather) {
-                return DropdownMenuItem<ImageWeather>(
-                  value: weather,
+              items: ImageSeason.values.map((season) {
+                return DropdownMenuItem<ImageSeason>(
+                  value: season,
                   child: Row(
                     children: [
                       Icon(
-                        _getWeatherIcon(weather),
+                        _getSeasonIcon(season),
                         size: 20,
-                        color: enabled ? _getWeatherColor(weather) : Colors.grey.shade400,
+                        color: enabled ? _getSeasonColor(season) : Colors.grey.shade400,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -96,7 +80,7 @@ class ImageWeatherSelector extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              _getWeatherDisplayName(l10n, weather),
+                              _getSeasonDisplayName(l10n, season),
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
@@ -104,7 +88,7 @@ class ImageWeatherSelector extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              _getWeatherDescription(l10n, weather),
+                              _getSeasonDescription(l10n, season),
                               style: TextStyle(
                                 fontSize: 11,
                                 color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
@@ -117,9 +101,9 @@ class ImageWeatherSelector extends StatelessWidget {
                   ),
                 );
               }).toList(),
-              onChanged: enabled ? (weather) {
-                if (weather != null) {
-                  onWeatherChanged(weather);
+              onChanged: enabled ? (season) {
+                if (season != null) {
+                  onSeasonChanged(season);
                 }
               } : null,
             ),
@@ -129,55 +113,55 @@ class ImageWeatherSelector extends StatelessWidget {
     );
   }
 
-  String _getWeatherDisplayName(AppLocalizations l10n, ImageWeather weather) {
-    switch (weather) {
-      case ImageWeather.sunny:
-        return l10n.weatherSunny;
-      case ImageWeather.cloudy:
-        return l10n.weatherCloudy;
-      case ImageWeather.rainy:
-        return l10n.weatherRainy;
-      case ImageWeather.snowy:
-        return l10n.weatherSnowy;
+  String _getSeasonDisplayName(AppLocalizations l10n, ImageSeason season) {
+    switch (season) {
+      case ImageSeason.spring:
+        return l10n.seasonSpring;
+      case ImageSeason.summer:
+        return l10n.seasonSummer;
+      case ImageSeason.autumn:
+        return l10n.seasonAutumn;
+      case ImageSeason.winter:
+        return l10n.seasonWinter;
     }
   }
 
-  String _getWeatherDescription(AppLocalizations l10n, ImageWeather weather) {
-    switch (weather) {
-      case ImageWeather.sunny:
-        return l10n.weatherSunnyDesc;
-      case ImageWeather.cloudy:
-        return l10n.weatherCloudyDesc;
-      case ImageWeather.rainy:
-        return l10n.weatherRainyDesc;
-      case ImageWeather.snowy:
-        return l10n.weatherSnowyDesc;
+  String _getSeasonDescription(AppLocalizations l10n, ImageSeason season) {
+    switch (season) {
+      case ImageSeason.spring:
+        return l10n.seasonSpringDesc;
+      case ImageSeason.summer:
+        return l10n.seasonSummerDesc;
+      case ImageSeason.autumn:
+        return l10n.seasonAutumnDesc;
+      case ImageSeason.winter:
+        return l10n.seasonWinterDesc;
     }
   }
 
-  IconData _getWeatherIcon(ImageWeather weather) {
-    switch (weather) {
-      case ImageWeather.sunny:
+  IconData _getSeasonIcon(ImageSeason season) {
+    switch (season) {
+      case ImageSeason.spring:
+        return Icons.local_florist;
+      case ImageSeason.summer:
         return Icons.wb_sunny;
-      case ImageWeather.cloudy:
-        return Icons.cloud;
-      case ImageWeather.rainy:
-        return Icons.umbrella;
-      case ImageWeather.snowy:
+      case ImageSeason.autumn:
+        return Icons.park;
+      case ImageSeason.winter:
         return Icons.ac_unit;
     }
   }
 
-  Color _getWeatherColor(ImageWeather weather) {
-    switch (weather) {
-      case ImageWeather.sunny:
+  Color _getSeasonColor(ImageSeason season) {
+    switch (season) {
+      case ImageSeason.spring:
+        return Colors.green;
+      case ImageSeason.summer:
         return Colors.orange;
-      case ImageWeather.cloudy:
-        return Colors.grey.shade600;
-      case ImageWeather.rainy:
+      case ImageSeason.autumn:
+        return Colors.brown;
+      case ImageSeason.winter:
         return Colors.blue;
-      case ImageWeather.snowy:
-        return Colors.lightBlue;
     }
   }
 }

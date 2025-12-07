@@ -275,7 +275,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
         children: [
           _buildWeekSelector(),
           const SizedBox(height: 24),
-          _buildWeeklyInsight(weeklyDiaries, startOfSelectedWeek, endOfSelectedWeek),
+          _buildWeeklyInsight(context, weeklyDiaries, startOfSelectedWeek, endOfSelectedWeek),
           const SizedBox(height: 24),
           _buildWeeklyDetailedStats(weeklyDiaries),
         ],
@@ -300,7 +300,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
         children: [
           _buildMonthSelector(),
           const SizedBox(height: 24),
-          _buildMonthlyInsight(monthlyDiaries, startOfMonth, endOfMonth),
+          _buildMonthlyInsight(context, monthlyDiaries, startOfMonth, endOfMonth),
           const SizedBox(height: 24),
           _buildMonthlyDetailedStats(monthlyDiaries),
         ],
@@ -378,7 +378,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
                         color: Color(0xFF6B73FF), size: 20),
                       const SizedBox(width: 8),
                       Text(
-                        _getWeekDisplayText(),
+                        _getWeekDisplayText(context),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -493,7 +493,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
                         color: Color(0xFF667EEA), size: 20),
                       const SizedBox(width: 8),
                       Text(
-                        _getMonthDisplayText(),
+                        _getMonthDisplayText(context),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -538,11 +538,12 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
     );
   }
 
-  Widget _buildWeeklyInsight(List<DiaryEntry> diaries, DateTime startDate, DateTime endDate) {
+  Widget _buildWeeklyInsight(BuildContext context, List<DiaryEntry> diaries, DateTime startDate, DateTime endDate) {
+    final l10n = AppLocalizations.of(context);
     final periodText = '${DateFormat('M/d').format(startDate)} ~ ${DateFormat('M/d').format(endDate)}';
 
     if (diaries.isEmpty) {
-      return _buildEmptyInsight('$periodText\n이 기간에 작성된 일기가 없습니다.');
+      return _buildEmptyInsight('$periodText\n${l10n.noDiaryInPeriod}');
     }
 
     final emotions = diaries.map((d) => d.emotion).where((e) => e != null).cast<String>().toList();
@@ -557,27 +558,27 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
     return Column(
       children: [
         _buildInsightCard(
-          title: '주간 감정 인사이트 ($periodText)',
+          title: l10n.weeklyInsightTitleFormat(periodText),
           insights: [
             InsightItem(
               icon: Icons.favorite_outlined,
-              title: '주요 감정',
+              title: l10n.mainEmotion,
               value: mostFrequentEmotion.key,
-              subtitle: '${mostFrequentEmotion.value}번 기록됨',
+              subtitle: l10n.recordedTimes(mostFrequentEmotion.value),
               color: const Color(0xFF6B73FF),
             ),
             InsightItem(
               icon: Icons.edit_note_outlined,
-              title: '일기 작성 빈도',
-              value: '${diaries.length}편',
-              subtitle: '하루 평균 ${avgEntriesPerDay.toStringAsFixed(1)}편',
+              title: l10n.diaryWritingFrequency,
+              value: l10n.diaryCountFormat(diaries.length),
+              subtitle: l10n.dailyAverageFormat(avgEntriesPerDay.toStringAsFixed(1)),
               color: const Color(0xFF9B59B6),
             ),
             InsightItem(
               icon: Icons.palette_outlined,
-              title: '감정 다양성',
-              value: '${emotionCounts.length}가지',
-              subtitle: '다양한 감정을 경험하셨네요',
+              title: l10n.emotionDiversity,
+              value: l10n.emotionTypesFormat(emotionCounts.length),
+              subtitle: l10n.weeklyDiverseEmotions,
               color: const Color(0xFF00D4AA),
             ),
           ],
@@ -588,11 +589,12 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
     );
   }
 
-  Widget _buildMonthlyInsight(List<DiaryEntry> diaries, DateTime startDate, DateTime endDate) {
-    final periodText = DateFormat('yyyy년 M월').format(startDate);
+  Widget _buildMonthlyInsight(BuildContext context, List<DiaryEntry> diaries, DateTime startDate, DateTime endDate) {
+    final l10n = AppLocalizations.of(context);
+    final periodText = l10n.yearMonthFormat(startDate.year, startDate.month);
 
     if (diaries.isEmpty) {
-      return _buildEmptyInsight('$periodText\n이 기간에 작성된 일기가 없습니다.');
+      return _buildEmptyInsight('$periodText\n${l10n.noDiaryInPeriod}');
     }
 
     final emotions = diaries.map((d) => d.emotion).where((e) => e != null).cast<String>().toList();
@@ -608,27 +610,27 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
     return Column(
       children: [
         _buildInsightCard(
-          title: '월간 감정 인사이트 ($periodText)',
+          title: l10n.monthlyInsightTitleFormat(periodText),
           insights: [
             InsightItem(
               icon: Icons.favorite_outlined,
-              title: '주요 감정',
+              title: l10n.mainEmotion,
               value: mostFrequentEmotion.key,
-              subtitle: '${mostFrequentEmotion.value}번 기록됨',
+              subtitle: l10n.recordedTimes(mostFrequentEmotion.value),
               color: const Color(0xFF6B73FF),
             ),
             InsightItem(
               icon: Icons.edit_note_outlined,
-              title: '일기 작성 빈도',
-              value: '${diaries.length}편',
-              subtitle: '하루 평균 ${avgEntriesPerDay.toStringAsFixed(1)}편',
+              title: l10n.diaryWritingFrequency,
+              value: l10n.diaryCountFormat(diaries.length),
+              subtitle: l10n.dailyAverageFormat(avgEntriesPerDay.toStringAsFixed(1)),
               color: const Color(0xFF9B59B6),
             ),
             InsightItem(
               icon: Icons.palette_outlined,
-              title: '감정 다양성',
-              value: '${emotionCounts.length}가지',
-              subtitle: '풍부한 감정을 표현하셨어요',
+              title: l10n.emotionDiversity,
+              value: l10n.emotionTypesFormat(emotionCounts.length),
+              subtitle: l10n.monthlyRichEmotions,
               color: const Color(0xFF00D4AA),
             ),
           ],
@@ -769,29 +771,27 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
     );
   }
 
-  String _getWeekDisplayText() {
+  String _getWeekDisplayText(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final now = DateTime.now();
     final currentWeekStart = _getWeekStart(now);
     final selectedWeekStart = currentWeekStart.add(Duration(days: _selectedWeek * 7));
     final selectedWeekEnd = selectedWeekStart.add(const Duration(days: 6));
 
     if (_selectedWeek == 0) {
-      return '이번 주';
+      return l10n.thisWeek;
     } else if (_selectedWeek == -1) {
-      return '지난 주';
+      return l10n.lastWeek;
     } else {
-      // 날짜 범위 형태로 표시 (10월5일~10월11일)
       final startMonth = selectedWeekStart.month;
       final startDay = selectedWeekStart.day;
       final endMonth = selectedWeekEnd.month;
       final endDay = selectedWeekEnd.day;
 
       if (startMonth == endMonth) {
-        // 같은 달인 경우
-        return '$startMonth월$startDay일~$endDay일';
+        return l10n.dateRangeFormat(startMonth, startDay, endDay);
       } else {
-        // 다른 달인 경우
-        return '$startMonth월$startDay일~$endMonth월$endDay일';
+        return l10n.dateRangeCrossMonthFormat(startMonth, startDay, endMonth, endDay);
       }
     }
   }
@@ -801,16 +801,17 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
     return date.subtract(Duration(days: weekday - 1));
   }
 
-  String _getMonthDisplayText() {
+  String _getMonthDisplayText(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final now = DateTime.now();
     final selectedDate = DateTime(now.year, now.month + _selectedMonth);
 
     if (_selectedMonth == 0) {
-      return '이번 달';
+      return l10n.thisMonth;
     } else if (_selectedMonth == -1) {
-      return '지난 달';
+      return l10n.lastMonth;
     } else {
-      return '${selectedDate.year}년 ${selectedDate.month}월';
+      return l10n.yearMonthFormat(selectedDate.year, selectedDate.month);
     }
   }
 
@@ -1221,7 +1222,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
         children: [
           _buildYearSelector(),
           const SizedBox(height: 24),
-          _buildYearlyInsight(yearlyDiaries, startOfYear, endOfYear),
+          _buildYearlyInsight(context, yearlyDiaries, startOfYear, endOfYear),
           const SizedBox(height: 24),
           _buildYearlyDetailedStats(yearlyDiaries),
         ],
@@ -1232,6 +1233,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
 
   // AI 인사이트 카드 생성 위젯
   Widget _buildAIInsightCard(String type, List<DiaryEntry> diaries) {
+    final l10n = AppLocalizations.of(context);
     final insightText = _insights[type];
     final isGenerating = _isGenerating[type] ?? false;
     final lastGenerated = _lastGenerated[type];
@@ -1240,16 +1242,16 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
     String title;
     switch (type) {
       case 'weekly':
-        title = '주간 AI 감정 분석';
+        title = l10n.weeklyAiEmotionAnalysis;
         break;
       case 'monthly':
-        title = '월간 AI 감정 분석';
+        title = l10n.monthlyAiEmotionAnalysis;
         break;
       case 'yearly':
-        title = '연간 AI 감정 분석';
+        title = l10n.yearlyAiEmotionAnalysis;
         break;
       default:
-        title = 'AI 감정 분석';
+        title = l10n.weeklyAiEmotionAnalysis;
     }
 
     return Card(
@@ -1290,16 +1292,16 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
             ),
             const SizedBox(height: 16),
             if (isGenerating)
-              const Center(
+              Center(
                 child: Padding(
-                  padding: EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 12),
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 12),
                       Text(
-                        'AI가 감정을 분석하고 있습니다...',
-                        style: TextStyle(
+                        l10n.aiAnalyzingEmotions,
+                        style: const TextStyle(
                           color: Colors.grey,
                           fontSize: 14,
                         ),
@@ -1330,7 +1332,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
                   if (lastGenerated != null) ...[
                     const SizedBox(height: 12),
                     Text(
-                      '분석 시각: ${DateFormat('yyyy년 MM월 dd일 HH:mm').format(lastGenerated)}',
+                      l10n.analysisTimeFormat(DateFormat('yyyy-MM-dd HH:mm').format(lastGenerated)),
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey.shade600,
@@ -1345,8 +1347,8 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
                   padding: const EdgeInsets.all(20),
                   child: Text(
                     diaries.isEmpty
-                        ? '일기를 작성하면 AI 인사이트가 자동으로 생성됩니다'
-                        : 'AI 인사이트가 자동으로 생성 중입니다...',
+                        ? l10n.writeDiaryForAiInsight
+                        : l10n.aiInsightGenerating,
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey.shade600,
@@ -1368,6 +1370,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
   }
 
   Widget _buildWeeklyDetailedStats(List<DiaryEntry> diaries) {
+    final l10n = AppLocalizations.of(context);
     if (diaries.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -1417,9 +1420,9 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
                 ),
               ),
               const SizedBox(width: 12),
-              const Text(
-                '감정 분포',
-                style: TextStyle(
+              Text(
+                l10n.emotionDistribution,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF2D3748),
@@ -1448,7 +1451,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
                         ),
                       ),
                       Text(
-                        '${entry.value}회 ($percentage%)',
+                        l10n.timesWithPercentageFormat(entry.value, percentage),
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey.shade600,
@@ -1476,6 +1479,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
   }
 
   Widget _buildMonthlyDetailedStats(List<DiaryEntry> diaries) {
+    final l10n = AppLocalizations.of(context);
     if (diaries.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -1525,9 +1529,9 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
                 ),
               ),
               const SizedBox(width: 12),
-              const Text(
-                '감정 분포',
-                style: TextStyle(
+              Text(
+                l10n.emotionDistribution,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF2D3748),
@@ -1556,7 +1560,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
                         ),
                       ),
                       Text(
-                        '${entry.value}회 ($percentage%)',
+                        l10n.timesWithPercentageFormat(entry.value, percentage),
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey.shade600,
@@ -1699,11 +1703,12 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
     );
   }
 
-  Widget _buildYearlyInsight(List<DiaryEntry> diaries, DateTime startDate, DateTime endDate) {
-    final periodText = '${startDate.year}년';
+  Widget _buildYearlyInsight(BuildContext context, List<DiaryEntry> diaries, DateTime startDate, DateTime endDate) {
+    final l10n = AppLocalizations.of(context);
+    final periodText = '${startDate.year}';
 
     if (diaries.isEmpty) {
-      return _buildEmptyInsight('$periodText\n이 기간에 작성된 일기가 없습니다.');
+      return _buildEmptyInsight('$periodText\n${l10n.noDiaryInPeriod}');
     }
 
     final emotions = diaries.map((d) => d.emotion).where((e) => e != null).cast<String>().toList();
@@ -1718,27 +1723,27 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
     return Column(
       children: [
         _buildInsightCard(
-          title: '연간 감정 인사이트 ($periodText)',
+          title: l10n.yearlyInsightTitleFormat(periodText),
           insights: [
             InsightItem(
               icon: Icons.favorite_outlined,
-              title: '주요 감정',
+              title: l10n.mainEmotion,
               value: mostFrequentEmotion.key,
-              subtitle: '${mostFrequentEmotion.value}번 기록됨',
+              subtitle: l10n.recordedTimes(mostFrequentEmotion.value),
               color: const Color(0xFF764BA2),
             ),
             InsightItem(
               icon: Icons.edit_note_outlined,
-              title: '일기 작성 빈도',
-              value: '${diaries.length}편',
-              subtitle: '월 평균 ${avgEntriesPerMonth.toStringAsFixed(1)}편',
+              title: l10n.diaryWritingFrequency,
+              value: l10n.diaryCountFormat(diaries.length),
+              subtitle: l10n.monthlyAverageFormat(avgEntriesPerMonth.toStringAsFixed(1)),
               color: const Color(0xFF667EEA),
             ),
             InsightItem(
               icon: Icons.palette_outlined,
-              title: '감정 다양성',
-              value: '${emotionCounts.length}가지',
-              subtitle: '한 해 동안 다양한 감정을 경험하셨어요',
+              title: l10n.emotionDiversity,
+              value: l10n.emotionTypesFormat(emotionCounts.length),
+              subtitle: l10n.yearlyVariousEmotions,
               color: const Color(0xFF00D4AA),
             ),
           ],
@@ -1750,6 +1755,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
   }
 
   Widget _buildYearlyDetailedStats(List<DiaryEntry> diaries) {
+    final l10n = AppLocalizations.of(context);
     if (diaries.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -1799,9 +1805,9 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
                 ),
               ),
               const SizedBox(width: 12),
-              const Text(
-                '연간 감정 분포',
-                style: TextStyle(
+              Text(
+                l10n.yearlyEmotionDistribution,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF2D3748),
@@ -1830,7 +1836,7 @@ class _EmotionStatsScreenState extends ConsumerState<EmotionStatsScreen> with Si
                         ),
                       ),
                       Text(
-                        '${entry.value}회 ($percentage%)',
+                        l10n.timesWithPercentageFormat(entry.value, percentage),
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey.shade600,

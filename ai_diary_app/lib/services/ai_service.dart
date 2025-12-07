@@ -51,7 +51,7 @@ class AIService {
     }
   }
   static late GenerativeModel _textModel;
-  static String _currentImageModel = 'gemini-2.5-flash-image';
+  static String _currentImageModel = 'gemini-2.0-flash-exp';
   static Timer? _modelCheckTimer; // 주기적 모델 체크용 타이머
 
   // 사용 가능한 이미지 생성 모델 자동 감지
@@ -104,9 +104,14 @@ class AIService {
         }
       }
 
-      // 첫 번째 이미지 모델 사용 (가장 최신 모델)
+      // gemini-2.0-flash-exp 우선 선택, 없으면 첫 번째 모델 사용
       if (imageModels.isNotEmpty) {
-        final selectedModel = (imageModels.first['name'] as String).replaceAll('models/', '');
+        // gemini-2.0-flash-exp 모델 우선 탐색
+        final preferredModel = imageModels.firstWhere(
+          (model) => (model['name'] as String).contains('gemini-2.0-flash-exp'),
+          orElse: () => imageModels.first,
+        );
+        final selectedModel = (preferredModel['name'] as String).replaceAll('models/', '');
         if (kDebugMode) debugPrint('✓ 선택된 이미지 모델: $selectedModel');
         return selectedModel;
       }
@@ -222,10 +227,11 @@ class AIService {
   static Future<List<String>> extractKeywords(String diaryContent) async {
     try {
       final response = await _textModel.generateContent([
-        Content.text('''다음 일기 내용에서 주요 키워드 5개를 추출해주세요.
-쉼표로 구분하여 답변해주세요.
+        Content.text('''Extract 5 main keywords from the following diary content.
+Answer with comma-separated English keywords only.
+Do not include any Korean words in your response.
 
-일기 내용: $diaryContent''')
+Diary content: $diaryContent''')
       ]);
 
       String keywords = response.text?.trim() ?? '';
@@ -291,6 +297,12 @@ class AIService {
 
   static Future<String> generateImagePrompt(BuildContext context, String diaryContent, String emotion, List<String> keywords, String style, [AdvancedImageOptions? advancedOptions, PerspectiveOptions? perspectiveOptions, ImageTime? imageTime, ImageWeather? imageWeather, String? photoAnalysis]) async {
     try {
+      if (kDebugMode) debugPrint('=== generateImagePrompt 시작 ===');
+      if (kDebugMode) debugPrint('일기 내용: $diaryContent');
+      if (kDebugMode) debugPrint('감정: $emotion');
+      if (kDebugMode) debugPrint('키워드: $keywords');
+      if (kDebugMode) debugPrint('스타일: $style');
+
       final l10n = AppLocalizations.of(context);
 
       // 고급 옵션을 프롬프트 접미사로 변환
@@ -343,33 +355,51 @@ class AIService {
 
       String advancedCombined = advancedParts.isEmpty ? '' : '\n' + advancedParts.join('\n');
 
+      final promptRequest = l10n.aiImagePromptBase(
+        style: style,
+        content: diaryContent,
+        emotion: emotion,
+        keywords: keywords.join(', '),
+        advanced: advancedCombined,
+      );
+
+      if (kDebugMode) debugPrint('=== AI에게 보내는 프롬프트 요청 ===');
+      if (kDebugMode) debugPrint(promptRequest);
+
       final response = await _textModel.generateContent([
-        Content.text(l10n.aiImagePromptBase(
-          style: style,
-          content: diaryContent,
-          emotion: emotion,
-          keywords: keywords.join(', '),
-          advanced: advancedCombined,
-        ))
+        Content.text(promptRequest)
       ]);
 
-      return response.text?.trim() ?? 'A peaceful and emotional illustration';
+      final generatedPrompt = response.text?.trim();
+      if (kDebugMode) debugPrint('=== AI 응답 ===');
+      if (kDebugMode) debugPrint('response.text: ${response.text}');
+      if (kDebugMode) debugPrint('생성된 프롬프트: $generatedPrompt');
+
+      return generatedPrompt ?? 'A peaceful and emotional illustration';
     } catch (e) {
+      if (kDebugMode) debugPrint('이미지 프롬프트 생성 오류: $e');
       log('이미지 프롬프트 생성 오류: $e');
       return 'A peaceful and emotional illustration representing daily life';
     }
   }
 
-  static Future<String?> generateImage(String prompt, [ImageTime? imageTime, ImageWeather? imageWeather]) async {
+  static Future<String?> generateImage(String prompt, [ImageTime? imageTime, ImageWeather? imageWeather, String? style]) async {
     final startTime = DateTime.now(); // 시간 측정 시작
     try {
       if (kDebugMode) debugPrint('=== Gemini Imagen API를 통한 이미지 생성 시작 ===');
       if (kDebugMode) debugPrint('프롬프트: $prompt');
+      if (kDebugMode) debugPrint('적용할 스타일: ${style ?? '기본값'}');
       if (kDebugMode) debugPrint('적용할 시간: ${imageTime != null ? imageTime.displayName : '기본값'}');
       if (kDebugMode) debugPrint('적용할 날씨: ${imageWeather != null ? imageWeather.displayName : '기본값'}');
 
       try {
         if (kDebugMode) debugPrint('Gemini 2.5 Flash Image Preview 이미지 생성 시도...');
+
+        // 스타일 프롬프트를 맨 앞에 삽입 (가장 중요)
+        String stylePrompt = '';
+        if (style != null && style.isNotEmpty) {
+          stylePrompt = 'STYLE: $style. ';
+        }
 
         // 시간과 날씨에 따른 프롬프트 강화
         String timePrompt = '';
@@ -382,7 +412,7 @@ class AIService {
           weatherPrompt = 'Weather: ${imageWeather.displayName}. ';
         }
 
-        final enhancedPrompt = '$timePrompt$weatherPrompt$prompt. Ensure the image reflects the specified time and weather conditions.';
+        final enhancedPrompt = '$stylePrompt$timePrompt$weatherPrompt$prompt. Ensure the image strictly follows the specified STYLE.';
 
         if (kDebugMode) debugPrint('최종 강화된 프롬프트: $enhancedPrompt');
 
@@ -402,11 +432,7 @@ class AIService {
               }
             ],
             'generationConfig': {
-              'temperature': 0.9,
-              'topK': 1,
-              'topP': 1,
-              'maxOutputTokens': 8192,
-              'response_modalities': ['IMAGE'],
+              'responseModalities': ['TEXT', 'IMAGE'],
             }
           }),
         );
@@ -586,9 +612,9 @@ JSON 형태로 답변해주세요:
       );
       if (kDebugMode) debugPrint('이미지 프롬프트 결과: $imagePrompt');
 
-      // 이미지 생성
+      // 이미지 생성 (스타일을 직접 전달하여 스타일 준수 보장)
       if (kDebugMode) debugPrint('이미지 생성 시작...');
-      final imageUrl = await generateImage(imagePrompt, imageTime, imageWeather);
+      final imageUrl = await generateImage(imagePrompt, imageTime, imageWeather, style);
       if (kDebugMode) debugPrint('이미지 생성 완료. URL: $imageUrl');
 
       final result = {

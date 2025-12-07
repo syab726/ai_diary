@@ -1,24 +1,28 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 
 // 시점 옵션 열거형
 enum PerspectiveType {
-  firstPerson('1인칭 시점', '내가 직접 경험하는 관점'),
-  thirdPerson('3인칭 시점', '나를 객관적으로 보는 관점');
-
-  const PerspectiveType(this.displayName, this.description);
-  final String displayName;
-  final String description;
+  firstPerson,
+  thirdPerson;
 }
 
 // 성별 옵션 열거형
 enum GenderType {
-  male('남성', '👨'),
-  female('여성', '👩'),
-  unspecified('지정하지 않음', '👤');
+  male,
+  female,
+  unspecified;
 
-  const GenderType(this.displayName, this.icon);
-  final String displayName;
-  final String icon;
+  String get icon {
+    switch (this) {
+      case GenderType.male:
+        return '👨';
+      case GenderType.female:
+        return '👩';
+      case GenderType.unspecified:
+        return '👤';
+    }
+  }
 }
 
 // 시점 및 성별 옵션 클래스
@@ -96,6 +100,7 @@ class PerspectiveOptionsSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -109,7 +114,7 @@ class PerspectiveOptionsSelector extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              '시점',
+              l10n.optionPerspective,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -154,7 +159,7 @@ class PerspectiveOptionsSelector extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              perspective.displayName,
+                              _getPerspectiveDisplayName(l10n, perspective),
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
@@ -162,7 +167,7 @@ class PerspectiveOptionsSelector extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              perspective.description,
+                              _getPerspectiveDescription(l10n, perspective),
                               style: TextStyle(
                                 fontSize: 11,
                                 color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
@@ -196,7 +201,7 @@ class PerspectiveOptionsSelector extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                '캐릭터 성별',
+                l10n.optionCharacterGender,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -235,7 +240,7 @@ class PerspectiveOptionsSelector extends StatelessWidget {
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          gender.displayName,
+                          _getGenderDisplayName(l10n, gender),
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -257,6 +262,35 @@ class PerspectiveOptionsSelector extends StatelessWidget {
         ],
       ],
     );
+  }
+
+  String _getPerspectiveDisplayName(AppLocalizations l10n, PerspectiveType perspective) {
+    switch (perspective) {
+      case PerspectiveType.firstPerson:
+        return l10n.perspectiveFirstPerson;
+      case PerspectiveType.thirdPerson:
+        return l10n.perspectiveThirdPerson;
+    }
+  }
+
+  String _getPerspectiveDescription(AppLocalizations l10n, PerspectiveType perspective) {
+    switch (perspective) {
+      case PerspectiveType.firstPerson:
+        return l10n.perspectiveFirstPersonDesc;
+      case PerspectiveType.thirdPerson:
+        return l10n.perspectiveThirdPersonDesc;
+    }
+  }
+
+  String _getGenderDisplayName(AppLocalizations l10n, GenderType gender) {
+    switch (gender) {
+      case GenderType.male:
+        return l10n.genderMale;
+      case GenderType.female:
+        return l10n.genderFemale;
+      case GenderType.unspecified:
+        return l10n.genderUnspecified;
+    }
   }
 
 

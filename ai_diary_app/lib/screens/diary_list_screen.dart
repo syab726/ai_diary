@@ -416,7 +416,6 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
                           diary.imageData!,
                           fit: BoxFit.cover,
                           cacheWidth: 400,
-                          cacheHeight: 250,
                         )
                       : (diary.generatedImageUrl != null
                           ? _buildImageWidget(diary.generatedImageUrl!)
@@ -463,7 +462,6 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
           file,
           fit: BoxFit.cover,
           cacheWidth: 400,
-          cacheHeight: 250,
           errorBuilder: (context, error, stackTrace) {
             if (kDebugMode) print('로컬 이미지 로드 오류: $error');
             return _buildImagePlaceholder();
@@ -483,7 +481,6 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
           bytes,
           fit: BoxFit.cover,
           cacheWidth: 400,
-          cacheHeight: 250,
           errorBuilder: (context, error, stackTrace) {
             if (kDebugMode) print('base64 이미지 로드 오류: $error');
             return _buildImagePlaceholder();
@@ -500,7 +497,6 @@ class _DiaryListScreenState extends ConsumerState<DiaryListScreen> {
         imageUrl: imageUrl,
         fit: BoxFit.cover,
         memCacheWidth: 400,
-        memCacheHeight: 250,
         placeholder: (context, url) => Container(
           color: const Color(0xFFF9FAFB),
           child: const Center(child: CircularProgressIndicator()),

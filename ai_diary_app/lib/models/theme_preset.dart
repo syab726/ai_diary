@@ -3,6 +3,7 @@ import 'image_style.dart';
 import 'image_options.dart';
 import 'image_time.dart';
 import 'image_weather.dart';
+import '../l10n/app_localizations.dart';
 
 // 테마 프리셋 모델
 class ThemePreset {
@@ -228,6 +229,7 @@ class ThemePresetSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final freePresets = ThemePresets.freePresets;
     final premiumPresets = ThemePresets.premiumPresets;
 
@@ -243,7 +245,7 @@ class ThemePresetSelector extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              '테마 프리셋',
+              l10n.optionThemePreset,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -256,20 +258,20 @@ class ThemePresetSelector extends StatelessWidget {
 
         // 모든 프리셋 (프리미엄 사용자는 구분 없이 표시)
         if (isPremium) ...[
-          ...ThemePresets.presets.map((preset) => _buildPresetCard(preset, true)),
+          ...ThemePresets.presets.map((preset) => _buildPresetCard(context, preset, true)),
         ] else ...[
           // 무료 사용자는 기존대로 구분 표시
           if (freePresets.isNotEmpty) ...[
-            _buildSectionTitle('무료 프리셋'),
+            _buildSectionTitle(l10n.freePresets),
             const SizedBox(height: 8),
-            ...freePresets.map((preset) => _buildPresetCard(preset, true)),
+            ...freePresets.map((preset) => _buildPresetCard(context, preset, true)),
             const SizedBox(height: 16),
           ],
 
           if (premiumPresets.isNotEmpty) ...[
-            _buildSectionTitle('프리미엄 프리셋'),
+            _buildSectionTitle(l10n.premiumPresets),
             const SizedBox(height: 8),
-            ...premiumPresets.map((preset) => _buildPresetCard(preset, false)),
+            ...premiumPresets.map((preset) => _buildPresetCard(context, preset, false)),
           ],
         ],
       ],
@@ -287,7 +289,54 @@ class ThemePresetSelector extends StatelessWidget {
     );
   }
 
-  Widget _buildPresetCard(ThemePreset preset, bool enabled) {
+  String _getPresetName(AppLocalizations l10n, String presetId) {
+    switch (presetId) {
+      case 'natural':
+        return l10n.presetNatural;
+      case 'dreamy':
+        return l10n.presetDreamy;
+      case 'vintage_nostalgia':
+        return l10n.presetVintageNostalgia;
+      case 'anime_fantasy':
+        return l10n.presetAnimeFantasy;
+      case 'impressionist_garden':
+        return l10n.presetImpressionistGarden;
+      case 'pixel_retro':
+        return l10n.presetPixelRetro;
+      case 'paper_craft':
+        return l10n.presetPaperCraft;
+      case 'child_innocent':
+        return l10n.presetChildInnocent;
+      default:
+        return presetId;
+    }
+  }
+
+  String _getPresetDescription(AppLocalizations l10n, String presetId) {
+    switch (presetId) {
+      case 'natural':
+        return l10n.presetNaturalDesc;
+      case 'dreamy':
+        return l10n.presetDreamyDesc;
+      case 'vintage_nostalgia':
+        return l10n.presetVintageNostalgiaDesc;
+      case 'anime_fantasy':
+        return l10n.presetAnimeFantasyDesc;
+      case 'impressionist_garden':
+        return l10n.presetImpressionistGardenDesc;
+      case 'pixel_retro':
+        return l10n.presetPixelRetroDesc;
+      case 'paper_craft':
+        return l10n.presetPaperCraftDesc;
+      case 'child_innocent':
+        return l10n.presetChildInnocentDesc;
+      default:
+        return '';
+    }
+  }
+
+  Widget _buildPresetCard(BuildContext context, ThemePreset preset, bool enabled) {
+    final l10n = AppLocalizations.of(context);
     final isSelected = preset.id == selectedPresetId;
     final isLocked = preset.isPremium && !isPremium;
 
@@ -336,7 +385,7 @@ class ThemePresetSelector extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            preset.name,
+                            _getPresetName(l10n, preset.id),
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -361,7 +410,7 @@ class ThemePresetSelector extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      preset.description,
+                      _getPresetDescription(l10n, preset.id),
                       style: TextStyle(
                         fontSize: 12,
                         color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,

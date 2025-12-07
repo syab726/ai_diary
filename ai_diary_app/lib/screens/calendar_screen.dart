@@ -66,6 +66,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     final diariesAsync = ref.watch(diaryEntriesProvider);
+    final l10n = AppLocalizations.of(context);
 
     // 일기 데이터가 로드되었을 때 URL 파라미터 처리
     diariesAsync.whenData((diaries) {
@@ -345,7 +346,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  DateFormat('M월 d일 EEEE', 'ko').format(_selectedDay!),
+                  DateFormat(l10n.dateFormatMonthDayWeekday, l10n.locale.languageCode).format(_selectedDay!),
                   style: const TextStyle(
                     color: Color(0xFF2D3748),
                     fontSize: 18,
@@ -354,13 +355,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 ),
               ),
             ),
-            
+
             diariesAsync.when(
               loading: () => const SliverToBoxAdapter(
                 child: Center(child: CircularProgressIndicator()),
               ),
-              error: (error, stack) => const SliverToBoxAdapter(
-                child: Center(child: Text('일기를 불러올 수 없습니다')),
+              error: (error, stack) => SliverToBoxAdapter(
+                child: Center(child: Text(l10n.cannotLoadDiary)),
               ),
               data: (diaries) {
                 final selectedDayDiaries = _getEventsForDay(diaries, _selectedDay!);

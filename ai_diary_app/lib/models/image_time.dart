@@ -1,18 +1,32 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 
 // 시간대/조명 옵션
 enum ImageTime {
-  morning('아침 햇살', '밝고 따뜻한 아침 햇살'),
-  noon('한낮', '밝고 환한 낮의 햇빛'),
-  golden('황금시간', '따뜻한 황금빛 조명'),
-  sunset('저녁노을', '아름다운 석양과 노을'),
-  night('밤의 분위기', '신비로운 밤의 조명'),
-  indoor('실내조명', '따뜻한 실내 조명');
+  morning,
+  noon,
+  golden,
+  sunset,
+  night,
+  indoor;
 
-  const ImageTime(this.displayName, this.description);
-
-  final String displayName;
-  final String description;
+  // AI 프롬프트용 영어 displayName (ai_service.dart에서 사용)
+  String get displayName {
+    switch (this) {
+      case ImageTime.morning:
+        return 'morning';
+      case ImageTime.noon:
+        return 'noon';
+      case ImageTime.golden:
+        return 'golden hour';
+      case ImageTime.sunset:
+        return 'sunset';
+      case ImageTime.night:
+        return 'night';
+      case ImageTime.indoor:
+        return 'indoor';
+    }
+  }
 }
 
 // 시간대/조명 선택기 위젯
@@ -30,6 +44,7 @@ class ImageTimeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -42,7 +57,7 @@ class ImageTimeSelector extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              '시간대/조명',
+              l10n.optionTimeLighting,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -87,7 +102,7 @@ class ImageTimeSelector extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              time.displayName,
+                              _getTimeDisplayName(l10n, time),
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
@@ -95,7 +110,7 @@ class ImageTimeSelector extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              time.description,
+                              _getTimeDescription(l10n, time),
                               style: TextStyle(
                                 fontSize: 11,
                                 color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
@@ -118,6 +133,40 @@ class ImageTimeSelector extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String _getTimeDisplayName(AppLocalizations l10n, ImageTime time) {
+    switch (time) {
+      case ImageTime.morning:
+        return l10n.timeMorning;
+      case ImageTime.noon:
+        return l10n.timeNoon;
+      case ImageTime.golden:
+        return l10n.timeGolden;
+      case ImageTime.sunset:
+        return l10n.timeSunset;
+      case ImageTime.night:
+        return l10n.timeNight;
+      case ImageTime.indoor:
+        return l10n.timeIndoor;
+    }
+  }
+
+  String _getTimeDescription(AppLocalizations l10n, ImageTime time) {
+    switch (time) {
+      case ImageTime.morning:
+        return l10n.timeMorningDesc;
+      case ImageTime.noon:
+        return l10n.timeNoonDesc;
+      case ImageTime.golden:
+        return l10n.timeGoldenDesc;
+      case ImageTime.sunset:
+        return l10n.timeSunsetDesc;
+      case ImageTime.night:
+        return l10n.timeNightDesc;
+      case ImageTime.indoor:
+        return l10n.timeIndoorDesc;
+    }
   }
 
   IconData _getTimeIcon(ImageTime time) {

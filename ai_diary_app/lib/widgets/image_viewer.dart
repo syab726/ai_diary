@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:gal/gal.dart';
 import 'dart:io';
 import 'dart:convert';
+import '../l10n/app_localizations.dart';
 
 class ImageViewer extends StatefulWidget {
   final String imageUrl;
@@ -177,9 +178,10 @@ class _ImageViewerState extends State<ImageViewer> {
         await Gal.putImageBytes(imageBytes);
 
         if (mounted) {
+          final l10n = AppLocalizations.of(context);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('이미지가 갤러리에 저장되었습니다'),
+            SnackBar(
+              content: Text(l10n.imageSavedToGallery),
               backgroundColor: Colors.green,
             ),
           );

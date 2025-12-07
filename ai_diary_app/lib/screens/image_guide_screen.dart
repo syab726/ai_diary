@@ -36,22 +36,22 @@ class ImageGuideScreen extends ConsumerWidget {
           // 기본 가이드
           _buildGuideCard(
             context,
-            title: '효과적인 프롬프트 작성법',
+            title: AppLocalizations.of(context).imageGuideEffectivePrompt,
             icon: Icons.edit,
             content: [
               _buildTipItem(
-                '구체적으로 묘사하기',
-                '예: "행복한 고양이" 보다 "햇살 속에서 웃고 있는 털이 부드러운 주황색 고양이"',
+                AppLocalizations.of(context).imageGuideDescribeDetail,
+                AppLocalizations.of(context).imageGuideDescribeDetailExample,
                 Colors.blue,
               ),
               _buildTipItem(
-                '감정과 분위기 표현',
-                '예: "따뜻한", "평화로운", "신비로운", "로맨틱한" 등의 형용사 활용',
+                AppLocalizations.of(context).imageGuideEmotionMood,
+                AppLocalizations.of(context).imageGuideEmotionMoodExample,
                 Colors.green,
               ),
               _buildTipItem(
-                '배경과 환경 설명',
-                '예: "벚꽃이 피는 공원에서", "일몰이 아름다운 바다 앞에서"',
+                AppLocalizations.of(context).imageGuideBackgroundEnv,
+                AppLocalizations.of(context).imageGuideBackgroundEnvExample,
                 Colors.orange,
               ),
             ],
@@ -62,61 +62,61 @@ class ImageGuideScreen extends ConsumerWidget {
           // 스타일별 가이드
           _buildGuideCard(
             context,
-            title: '이미지 스타일별 활용법',
+            title: AppLocalizations.of(context).imageGuideStyleUsage,
             icon: Icons.palette,
             content: [
               // 무료 사용자용 스타일 (실사, 수채화)
               _buildStyleExample(
                 context,
                 ImageStyle.realistic,
-                '실사 스타일',
-                '실제 사진과 같은 사실적인 이미지\n생생한 기억을 재현하고 싶을 때',
-                '예: "실제 사진처럼 생생한 일몰 풍경"',
+                AppLocalizations.of(context).imageGuideRealisticTitle,
+                AppLocalizations.of(context).imageGuideRealisticDesc,
+                AppLocalizations.of(context).imageGuideRealisticExample,
               ),
               _buildStyleExample(
                 context,
                 ImageStyle.watercolor,
-                '수채화 스타일',
-                '부드럽고 따뜻한 느낌의 수채화\n감성적인 일기를 표현할 때',
-                '예: "수채화 스타일로 그린 따뜻한 카페 풍경"',
+                AppLocalizations.of(context).imageGuideWatercolorTitle,
+                AppLocalizations.of(context).imageGuideWatercolorDesc,
+                AppLocalizations.of(context).imageGuideWatercolorExample,
               ),
-              
+
               // 프리미엄 사용자만 볼 수 있는 스타일들
               if (subscription.isPremium) ...[
                 _buildStyleExample(
                   context,
                   ImageStyle.illustration,
-                  '일러스트레이션',
-                  '현대적이고 세련된 일러스트 스타일\n트렌디한 느낌을 원할 때',
-                  '예: "모던한 일러스트 스타일의 도시 풍경"',
+                  AppLocalizations.of(context).imageGuideIllustrationTitle,
+                  AppLocalizations.of(context).imageGuideIllustrationDesc,
+                  AppLocalizations.of(context).imageGuideIllustrationExample,
                 ),
                 _buildStyleExample(
                   context,
                   ImageStyle.anime,
-                  '애니메이션',
-                  '귀엽고 친근한 애니메이션 스타일\n재미있는 일상을 표현할 때',
-                  '예: "귀여운 애니메이션 스타일의 강아지가 뛰어노는 모습"',
+                  AppLocalizations.of(context).imageGuideAnimeTitle,
+                  AppLocalizations.of(context).imageGuideAnimeDesc,
+                  AppLocalizations.of(context).imageGuideAnimeExample,
                 ),
                 _buildStyleExample(
                   context,
                   ImageStyle.sketch,
-                  '스케치',
-                  '단순하고 깔끔한 스케치 스타일\n집중하고 싶은 요소가 있을 때',
-                  '예: "심플한 선으로 표현한 나무 한 그루"',
+                  AppLocalizations.of(context).imageGuideSketchTitle,
+                  AppLocalizations.of(context).imageGuideSketchDesc,
+                  AppLocalizations.of(context).imageGuideSketchExample,
                 ),
                 _buildStyleExample(
                   context,
                   ImageStyle.impressionist,
-                  '인상주의',
-                  '모네 스타일의 인상주의 회화\n예술적이고 클래식한 느낌',
-                  '예: "인상주의 화가의 붓터치로 표현한 연못"',
+                  AppLocalizations.of(context).imageGuideImpressionistTitle,
+                  AppLocalizations.of(context).imageGuideImpressionistDesc,
+                  AppLocalizations.of(context).imageGuideImpressionistExample,
                 ),
                 _buildStyleExample(
                   context,
                   ImageStyle.vintage,
-                  '빈티지',
-                  '옛날 사진 같은 레트로 느낌\n노스탤지어를 불러일으킬 때',
-                  '예: "세피아 톤의 빈티지한 거리 풍경"',
+                  AppLocalizations.of(context).imageGuideVintageTitle,
+                  AppLocalizations.of(context).imageGuideVintageDesc,
+                  AppLocalizations.of(context).imageGuideVintageExample,
                 ),
               ] else ...[
                 // 무료 사용자에게 프리미엄 스타일 안내
@@ -136,7 +136,7 @@ class ImageGuideScreen extends ConsumerWidget {
                           const Icon(Icons.star, color: Colors.amber, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                            '프리미엄 스타일',
+                            AppLocalizations.of(context).imageGuidePremiumStyles,
                             style: GoogleFonts.notoSans(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -147,7 +147,7 @@ class ImageGuideScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '프리미엄으로 업그레이드하시면 일러스트, 애니메이션, 스케치, 인상주의, 빈티지 스타일을 추가로 사용할 수 있습니다.',
+                        AppLocalizations.of(context).imageGuidePremiumStylesDesc,
                         style: GoogleFonts.notoSans(
                           fontSize: 14,
                           color: Colors.amber.shade700,
@@ -166,25 +166,25 @@ class ImageGuideScreen extends ConsumerWidget {
           // 고급 팁
           _buildGuideCard(
             context,
-            title: '고급 활용 팁',
+            title: AppLocalizations.of(context).imageGuideAdvancedTips,
             icon: Icons.tips_and_updates,
             content: [
               _buildAdvancedTip(
-                '키워드 조합하기',
-                '여러 키워드를 조합하여 더 구체적인 이미지를 생성하세요.',
-                '감정 + 장소 + 시간 + 스타일\n예: "평화로운 + 호수가 + 저녁 + 수채화"',
+                AppLocalizations.of(context).imageGuideCombineKeywords,
+                AppLocalizations.of(context).imageGuideCombineKeywordsDesc,
+                AppLocalizations.of(context).imageGuideCombineKeywordsExample,
                 Icons.merge_type,
               ),
               _buildAdvancedTip(
-                '분위기 단어 활용',
-                '이미지의 전체적인 톤을 결정하는 단어들을 사용하세요.',
-                '• 밝고 경쾌한: bright, cheerful, vibrant\n• 차분하고 평화로운: serene, peaceful, calm\n• 몽환적인: dreamy, ethereal, mystical',
+                AppLocalizations.of(context).imageGuideMoodWords,
+                AppLocalizations.of(context).imageGuideMoodWordsDesc,
+                AppLocalizations.of(context).imageGuideMoodWordsExample,
                 Icons.mood,
               ),
               _buildAdvancedTip(
-                '시간과 날씨 표현',
-                '특정 시간대나 날씨를 명시하면 더 생생한 이미지가 만들어집니다.',
-                '• 시간: 새벽, 아침, 정오, 황혼, 밤\n• 날씨: 맑은 날, 비 오는 날, 눈 내리는 날',
+                AppLocalizations.of(context).imageGuideTimeWeather,
+                AppLocalizations.of(context).imageGuideTimeWeatherDesc,
+                AppLocalizations.of(context).imageGuideTimeWeatherExample,
                 Icons.wb_sunny,
               ),
             ],
@@ -206,7 +206,7 @@ class ImageGuideScreen extends ConsumerWidget {
                       Icon(Icons.compare, color: const Color(0xFF6B73FF), size: 24),
                       const SizedBox(width: 12),
                       Text(
-                        '고급 옵션 효과 비교',
+                        AppLocalizations.of(context).imageGuideAdvancedOptionsCompare,
                         style: GoogleFonts.notoSans(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -217,7 +217,7 @@ class ImageGuideScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    '프리미엄 고급 옵션을 사용하면 이미지의 품질과 표현력이 크게 향상됩니다.\n각 옵션별로 어떤 차이가 있는지 직접 비교해보세요!',
+                    AppLocalizations.of(context).imageGuideAdvancedOptionsDesc,
                     style: GoogleFonts.notoSans(
                       fontSize: 14,
                       color: const Color(0xFF4A5568),
@@ -248,7 +248,7 @@ class ImageGuideScreen extends ConsumerWidget {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              '이 고급 옵션들은 프리미엄 사용자만 사용할 수 있습니다',
+                              AppLocalizations.of(context).imageGuidePremiumOnlyOptions,
                               style: GoogleFonts.notoSans(
                                 fontSize: 12,
                                 color: const Color(0xFF6B73FF),
@@ -264,51 +264,51 @@ class ImageGuideScreen extends ConsumerWidget {
                   // 배경 스타일 비교
                   _buildImageComparison(
                     context,
-                    '배경 스타일',
+                    AppLocalizations.of(context).imageGuideBackgroundStyle,
                     '배경sample_1.png',
                     '배경sample_2.png',
-                    '기본 배경',
-                    '고급 배경 옵션',
-                    '단순한 배경에서 환상적이고 세밀한 배경으로 변화합니다.',
+                    AppLocalizations.of(context).imageGuideBasicBackground,
+                    AppLocalizations.of(context).imageGuideAdvancedBackground,
+                    AppLocalizations.of(context).imageGuideBackgroundChangeDesc,
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // 색감 조정 비교
                   _buildImageComparison(
                     context,
-                    '색감 조정',
+                    AppLocalizations.of(context).imageGuideColorAdjustment,
                     '색감sample_1.png',
                     '색감sample_2.png',
-                    '기본 색감',
-                    '고급 색감 옵션',
-                    '자연스럽고 생동감 있는 색상으로 변화합니다.',
+                    AppLocalizations.of(context).imageGuideBasicColor,
+                    AppLocalizations.of(context).imageGuideAdvancedColor,
+                    AppLocalizations.of(context).imageGuideColorChangeDesc,
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // 앵글 비교
                   _buildImageComparison(
                     context,
-                    '시점과 구도',
+                    AppLocalizations.of(context).imageGuideAngleComposition,
                     '앵글sample_1.png',
                     '앵글sample_2.png',
-                    '기본 앵글',
-                    '고급 앵글 옵션',
-                    '더 창의적이고 역동적인 시점으로 변화합니다.',
+                    AppLocalizations.of(context).imageGuideBasicAngle,
+                    AppLocalizations.of(context).imageGuideAdvancedAngle,
+                    AppLocalizations.of(context).imageGuideAngleChangeDesc,
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // 조명 효과 비교
                   _buildImageComparison(
                     context,
-                    '조명 효과',
+                    AppLocalizations.of(context).imageGuideLightingEffect,
                     '조명sample_1.png',
                     '조명sample_2.png',
-                    '기본 조명',
-                    '고급 조명 옵션',
-                    '드라마틱한 조명 효과가 적용됩니다.',
+                    AppLocalizations.of(context).imageGuideBasicLighting,
+                    AppLocalizations.of(context).imageGuideAdvancedLighting,
+                    AppLocalizations.of(context).imageGuideLightingChangeDesc,
                   ),
                   
                   // 무료 사용자에게 업그레이드 안내
@@ -342,7 +342,7 @@ class ImageGuideScreen extends ConsumerWidget {
                             Icon(Icons.star, color: Colors.white, size: 28),
                             const SizedBox(height: 8),
                             Text(
-                              '프리미엄으로 업그레이드',
+                              AppLocalizations.of(context).imageGuideUpgradePremium,
                               style: GoogleFonts.notoSans(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -351,7 +351,7 @@ class ImageGuideScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '설정 > 테스트 모드에서 전환 가능',
+                              AppLocalizations.of(context).imageGuideUpgradeInSettings,
                               style: GoogleFonts.notoSans(
                                 fontSize: 12,
                                 color: Colors.white.withOpacity(0.9),
@@ -365,7 +365,7 @@ class ImageGuideScreen extends ConsumerWidget {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
-                                '탭해서 설정으로 이동',
+                                AppLocalizations.of(context).imageGuideTapToSettings,
                                 style: GoogleFonts.notoSans(
                                   fontSize: 11,
                                   color: Colors.white,
@@ -674,7 +674,7 @@ class ImageGuideScreen extends ConsumerWidget {
                 Icon(Icons.warning_amber, color: Colors.orange.shade700, size: 24),
                 const SizedBox(width: 12),
                 Text(
-                  '주의사항',
+                  AppLocalizations.of(context).imageGuideCaution,
                   style: GoogleFonts.notoSans(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -685,7 +685,7 @@ class ImageGuideScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              '• 저작권이 있는 특정 캐릭터나 브랜드 로고는 생성되지 않을 수 있습니다.\n\n• 부적절한 내용이나 폭력적인 내용은 생성되지 않습니다.',
+              AppLocalizations.of(context).imageGuideCautionContent,
               style: GoogleFonts.notoSans(
                 fontSize: 14,
                 color: Colors.orange.shade700,
@@ -761,12 +761,16 @@ class ImageGuideScreen extends ConsumerWidget {
                             color: Color(0xFF718096),
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            beforeLabel,
-                            style: GoogleFonts.notoSans(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFF718096),
+                          Flexible(
+                            child: Text(
+                              beforeLabel,
+                              style: GoogleFonts.notoSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF718096),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
                         ],
@@ -881,12 +885,16 @@ class ImageGuideScreen extends ConsumerWidget {
                             color: Color(0xFF6B73FF),
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            afterLabel,
-                            style: GoogleFonts.notoSans(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF6B73FF),
+                          Flexible(
+                            child: Text(
+                              afterLabel,
+                              style: GoogleFonts.notoSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF6B73FF),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
                         ],
@@ -976,17 +984,17 @@ class ImageGuideScreen extends ConsumerWidget {
                           width: 300,
                           height: 200,
                           color: Colors.grey[300],
-                          child: const Column(
+                          child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.image_not_supported,
                                 size: 50,
                                 color: Colors.grey,
                               ),
                               Text(
-                                '이미지를 불러올 수 없습니다',
-                                style: TextStyle(color: Colors.grey),
+                                AppLocalizations.of(context).imageGuideCannotLoadImage,
+                                style: const TextStyle(color: Colors.grey),
                               ),
                             ],
                           ),

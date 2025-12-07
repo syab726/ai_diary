@@ -17,10 +17,6 @@ class PersonalizationSettingsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: Text(
           AppLocalizations.of(context).personalization,
           style: const TextStyle(
@@ -133,7 +129,6 @@ class PersonalizationSettingsScreen extends ConsumerWidget {
                   ? const Icon(Icons.check, color: Colors.blue)
                   : null,
               onTap: () {
-                ref.read(currentRouteProvider.notifier).state = '/settings';
                 ref.read(localeProvider.notifier).setLocale(const Locale('ko'));
                 Navigator.of(dialogContext).pop();
               },
@@ -144,7 +139,6 @@ class PersonalizationSettingsScreen extends ConsumerWidget {
                   ? const Icon(Icons.check, color: Colors.blue)
                   : null,
               onTap: () {
-                ref.read(currentRouteProvider.notifier).state = '/settings';
                 ref.read(localeProvider.notifier).setLocale(const Locale('ja'));
                 Navigator.of(dialogContext).pop();
               },
@@ -155,7 +149,6 @@ class PersonalizationSettingsScreen extends ConsumerWidget {
                   ? const Icon(Icons.check, color: Colors.blue)
                   : null,
               onTap: () {
-                ref.read(currentRouteProvider.notifier).state = '/settings';
                 ref.read(localeProvider.notifier).setLocale(const Locale('en'));
                 Navigator.of(dialogContext).pop();
               },
@@ -166,7 +159,6 @@ class PersonalizationSettingsScreen extends ConsumerWidget {
                   ? const Icon(Icons.check, color: Colors.blue)
                   : null,
               onTap: () {
-                ref.read(currentRouteProvider.notifier).state = '/settings';
                 ref.read(localeProvider.notifier).setLocale(const Locale('zh'));
                 Navigator.of(dialogContext).pop();
               },
@@ -200,7 +192,6 @@ class PersonalizationSettingsScreen extends ConsumerWidget {
               groupValue: currentFontSize,
               onChanged: (value) {
                 if (value != null) {
-                  ref.read(currentRouteProvider.notifier).state = '/settings';
                   ref.read(fontSizeProvider.notifier).setFontSize(value);
                   Navigator.pop(context);
                 }
@@ -212,7 +203,6 @@ class PersonalizationSettingsScreen extends ConsumerWidget {
               groupValue: currentFontSize,
               onChanged: (value) {
                 if (value != null) {
-                  ref.read(currentRouteProvider.notifier).state = '/settings';
                   ref.read(fontSizeProvider.notifier).setFontSize(value);
                   Navigator.pop(context);
                 }
@@ -224,7 +214,6 @@ class PersonalizationSettingsScreen extends ConsumerWidget {
               groupValue: currentFontSize,
               onChanged: (value) {
                 if (value != null) {
-                  ref.read(currentRouteProvider.notifier).state = '/settings';
                   ref.read(fontSizeProvider.notifier).setFontSize(value);
                   Navigator.pop(context);
                 }
@@ -236,7 +225,6 @@ class PersonalizationSettingsScreen extends ConsumerWidget {
               groupValue: currentFontSize,
               onChanged: (value) {
                 if (value != null) {
-                  ref.read(currentRouteProvider.notifier).state = '/settings';
                   ref.read(fontSizeProvider.notifier).setFontSize(value);
                   Navigator.pop(context);
                 }

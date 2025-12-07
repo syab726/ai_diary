@@ -18,10 +18,6 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
         title: Text(
           AppLocalizations.of(context).settings,
           style: const TextStyle(

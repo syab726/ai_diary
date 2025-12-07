@@ -15,6 +15,21 @@ class AppLocalizations {
   static const LocalizationsDelegate<AppLocalizations> delegate =
       AppLocalizationsDelegate();
 
+  // 헬퍼 메서드: 현재 언어에 키가 없으면 영어로 폴백, 영어에도 없으면 한국어로 폴백
+  String _get(String key) {
+    final currentLang = locale.languageCode;
+    // 1. 현재 언어에서 찾기
+    if (_localizedValues[currentLang]?.containsKey(key) == true) {
+      return _localizedValues[currentLang]![key]!;
+    }
+    // 2. 영어로 폴백
+    if (_localizedValues['en']?.containsKey(key) == true) {
+      return _localizedValues['en']![key]!;
+    }
+    // 3. 한국어로 폴백 (기본)
+    return _localizedValues['ko']![key] ?? key;
+  }
+
   static final Map<String, Map<String, String>> _localizedValues = {
     'ko': {
       'app_title': 'ArtDiary AI',
@@ -353,14 +368,26 @@ class AppLocalizations {
 - 주요 피사체나 오브젝트
 2-3문장으로 간결하게 요약해주세요.''',
       'ai_image_prompt_base': '''다음 일기 내용을 바탕으로 이미지 생성 프롬프트를 만들어주세요.
-스타일: {style}
-감정적이고 아름다운 이미지가 되도록 작성해주세요.
+
+**가장 중요**: 일기에 언급된 구체적인 장소와 상황을 반드시 이미지에 포함해야 합니다.
+예를 들어:
+- 일기에 "카페"가 언급되면 -> 카페 내부, 커피, 창가 등을 묘사
+- 일기에 "공원"이 언급되면 -> 공원의 나무, 벤치, 산책로 등을 묘사
+- 일기에 "집"이 언급되면 -> 집 안의 방, 소파, 침대 등을 묘사
+
+스타일 지시: {style}
+
 일기 내용: {content}
 주요 감정: {emotion}
 키워드: {keywords}
 {advanced}
-프롬프트는 영어로 작성하고, 일기의 감정과 내용을 잘 표현하는 따뜻하고 감성적인 이미지가 되도록 해주세요.
-구체적인 시각적 요소, 색감, 분위기를 포함해서 작성해주세요.''',
+
+프롬프트 작성 지침:
+1. 프롬프트는 반드시 영어로 작성하세요.
+2. 스타일 지시에 명시된 내용을 프롬프트의 맨 앞에 포함하세요.
+3. 스타일이 "photorealistic" 또는 "photograph"인 경우, 절대 illustration, painting, drawing 단어를 사용하지 마세요.
+4. **핵심**: 일기에서 언급한 구체적인 장소(카페, 집, 공원 등)와 활동(커피 마시기, 독서, 산책 등)을 프롬프트에 반드시 포함하세요.
+5. 절대 일기 내용과 상관없는 일반적인 풍경(언덕, 들판, 해질녘 등)을 사용하지 마세요.''',
       'ai_advanced_option_prefix': '고급 옵션: {options}',
       'ai_auto_settings_prompt': '''다음 일기 내용을 분석해서 이미지 생성에 적합한 설정들을 추천해주세요.
 JSON 형태로 답변해주세요:
@@ -429,6 +456,16 @@ JSON 형태로 답변해주세요:
       // AI settings screen
       'auto_advanced_settings': '고급설정 자동설정',
       'premium_only_feature': '프리미엄 전용 기능',
+      'premium_only_feature_desc': '이 스타일은 프리미엄 사용자만 사용할 수 있습니다.',
+      'premium_benefit_fonts': '- 10가지 프리미엄 글꼴',
+      'premium_benefit_styles': '- 6가지 추가 아트 스타일',
+      'premium_benefit_unlimited': '- 무제한 이미지 생성',
+      'premium_benefit_regenerate': '- 무제한 이미지 재생성',
+      'premium_benefit_advanced': '- 고급 이미지 옵션',
+      'premium_benefit_ads': '- 광고 없는 경험',
+      'test_mode_premium_hint': '설정 > 테스트 모드에서 프리미엄으로 전환할 수 있습니다',
+      'premium_feature_message': '{feature}은(는) 프리미엄 사용자만 사용할 수 있습니다.',
+      'premium_feature_message_default': '이 기능은 프리미엄 사용자만 사용할 수 있습니다.',
       'auto_advanced_settings_description': '시간, 날씨, 계절 옵션을 자동으로 설정합니다',
       'auto_advanced_settings_enabled': '고급설정 자동설정이 활성화되었습니다',
       'auto_advanced_settings_disabled': '고급설정 자동설정이 비활성화되었습니다',
@@ -523,6 +560,7 @@ JSON 형태로 답변해주세요:
       // Progress messages
       'photo_mood_analyzing': '사진 분위기 분석 중...',
       'photo_analyzing': '사진 분석 중...',
+      'image_saved_to_gallery': '이미지가 갤러리에 저장되었습니다',
 
       // Diary create/edit
       'create_new_diary': '새 일기 작성',
@@ -575,6 +613,8 @@ JSON 형태로 답변해주세요:
       'premium_fonts_desc': '10가지 아름다운 한글 글꼴\n개구쟁이체, 독도체, 나눔손글씨 펜 등',
       'premium_art_styles': '프리미엄 아트 스타일',
       'premium_art_styles_desc': '6가지 추가 스타일\n일러스트, 스케치, 애니메이션, 인상파, 빈티지',
+      'additional_options': '추가 옵션',
+      'premium_styles_upgrade_message': '프리미엄으로 업그레이드하면 다양한 스타일과 글꼴을 사용할 수 있어요!',
       'advanced_image_options': '고급 이미지 옵션',
       'advanced_image_options_desc': '조명, 분위기, 색상, 구도 등\n세밀한 이미지 생성 설정',
       'time_weather_season_settings': '시간대/날씨/계절 설정',
@@ -606,25 +646,337 @@ JSON 형태로 답변해주세요:
       // Date formats
       'date_format_full': 'yyyy년 M월 d일 EEEE',
       'date_format_month': 'yyyy년 M월',
+      'date_format_month_day_weekday': 'M월 d일 EEEE',
+
+      // Image Guide Screen
+      'image_guide_effective_prompt': '효과적인 프롬프트 작성법',
+      'image_guide_describe_detail': '구체적으로 묘사하기',
+      'image_guide_describe_detail_example': '예: "행복한 고양이" 보다 "햇살 속에서 웃고 있는 털이 부드러운 주황색 고양이"',
+      'image_guide_emotion_mood': '감정과 분위기 표현',
+      'image_guide_emotion_mood_example': '예: "따뜻한", "평화로운", "신비로운", "로맨틱한" 등의 형용사 활용',
+      'image_guide_background_env': '배경과 환경 설명',
+      'image_guide_background_env_example': '예: "벚꽃이 피는 공원에서", "일몰이 아름다운 바다 앞에서"',
+      'image_guide_style_usage': '이미지 스타일별 활용법',
+      'image_guide_realistic_title': '실사 스타일',
+      'image_guide_realistic_desc': '실제 사진과 같은 사실적인 이미지\n생생한 기억을 재현하고 싶을 때',
+      'image_guide_realistic_example': '예: "실제 사진처럼 생생한 일몰 풍경"',
+      'image_guide_watercolor_title': '수채화 스타일',
+      'image_guide_watercolor_desc': '부드럽고 따뜻한 느낌의 수채화\n감성적인 일기를 표현할 때',
+      'image_guide_watercolor_example': '예: "수채화 스타일로 그린 따뜻한 카페 풍경"',
+      'image_guide_illustration_title': '일러스트레이션',
+      'image_guide_illustration_desc': '현대적이고 세련된 일러스트 스타일\n트렌디한 느낌을 원할 때',
+      'image_guide_illustration_example': '예: "모던한 일러스트 스타일의 도시 풍경"',
+      'image_guide_anime_title': '애니메이션',
+      'image_guide_anime_desc': '귀엽고 친근한 애니메이션 스타일\n재미있는 일상을 표현할 때',
+      'image_guide_anime_example': '예: "귀여운 애니메이션 스타일의 강아지가 뛰어노는 모습"',
+      'image_guide_sketch_title': '스케치',
+      'image_guide_sketch_desc': '단순하고 깔끔한 스케치 스타일\n집중하고 싶은 요소가 있을 때',
+      'image_guide_sketch_example': '예: "심플한 선으로 표현한 나무 한 그루"',
+      'image_guide_impressionist_title': '인상주의',
+      'image_guide_impressionist_desc': '모네 스타일의 인상주의 회화\n예술적이고 클래식한 느낌',
+      'image_guide_impressionist_example': '예: "인상주의 화가의 붓터치로 표현한 연못"',
+      'image_guide_vintage_title': '빈티지',
+      'image_guide_vintage_desc': '옛날 사진 같은 레트로 느낌\n노스탤지어를 불러일으킬 때',
+      'image_guide_vintage_example': '예: "세피아 톤의 빈티지한 거리 풍경"',
+      'image_guide_premium_styles': '프리미엄 스타일',
+      'image_guide_premium_styles_desc': '프리미엄으로 업그레이드하시면 일러스트, 애니메이션, 스케치, 인상주의, 빈티지 스타일을 추가로 사용할 수 있습니다.',
+      'image_guide_advanced_tips': '고급 활용 팁',
+      'image_guide_combine_keywords': '키워드 조합하기',
+      'image_guide_combine_keywords_desc': '여러 키워드를 조합하여 더 구체적인 이미지를 생성하세요.',
+      'image_guide_combine_keywords_example': '감정 + 장소 + 시간 + 스타일\n예: "평화로운 + 호수가 + 저녁 + 수채화"',
+      'image_guide_mood_words': '분위기 단어 활용',
+      'image_guide_mood_words_desc': '이미지의 전체적인 톤을 결정하는 단어들을 사용하세요.',
+      'image_guide_mood_words_example': '• 밝고 경쾌한: bright, cheerful, vibrant\n• 차분하고 평화로운: serene, peaceful, calm\n• 몽환적인: dreamy, ethereal, mystical',
+      'image_guide_time_weather': '시간과 날씨 표현',
+      'image_guide_time_weather_desc': '특정 시간대나 날씨를 명시하면 더 생생한 이미지가 만들어집니다.',
+      'image_guide_time_weather_example': '• 시간: 새벽, 아침, 정오, 황혼, 밤\n• 날씨: 맑은 날, 비 오는 날, 눈 내리는 날',
+      'image_guide_advanced_options_compare': '고급 옵션 효과 비교',
+      'image_guide_advanced_options_desc': '프리미엄 고급 옵션을 사용하면 이미지의 품질과 표현력이 크게 향상됩니다.\n각 옵션별로 어떤 차이가 있는지 직접 비교해보세요!',
+      'image_guide_premium_only_options': '이 고급 옵션들은 프리미엄 사용자만 사용할 수 있습니다',
+      'image_guide_background_style': '배경 스타일',
+      'image_guide_basic_background': 'Basic',
+      'image_guide_advanced_background': 'Advanced',
+      'image_guide_background_change_desc': '단순한 배경에서 환상적이고 세밀한 배경으로 변화합니다.',
+      'image_guide_color_adjustment': '색감 조정',
+      'image_guide_basic_color': 'Basic',
+      'image_guide_advanced_color': 'Advanced',
+      'image_guide_color_change_desc': '자연스럽고 생동감 있는 색상으로 변화합니다.',
+      'image_guide_angle_composition': '시점과 구도',
+      'image_guide_basic_angle': 'Basic',
+      'image_guide_advanced_angle': 'Advanced',
+      'image_guide_angle_change_desc': '더 창의적이고 역동적인 시점으로 변화합니다.',
+      'image_guide_lighting_effect': '조명 효과',
+      'image_guide_basic_lighting': 'Basic',
+      'image_guide_advanced_lighting': 'Advanced',
+      'image_guide_lighting_change_desc': '드라마틱한 조명 효과가 적용됩니다.',
+      'image_guide_upgrade_premium': '프리미엄으로 업그레이드',
+      'image_guide_upgrade_in_settings': '설정 > 테스트 모드에서 전환 가능',
+      'image_guide_tap_to_settings': '탭해서 설정으로 이동',
+      'image_guide_caution': '주의사항',
+      'image_guide_caution_content': '• 저작권이 있는 특정 캐릭터나 브랜드 로고는 생성되지 않을 수 있습니다.\n\n• 부적절한 내용이나 폭력적인 내용은 생성되지 않습니다.',
+      'image_guide_cannot_load_image': '이미지를 불러올 수 없습니다',
+
+      // Diary Create Screen - Settings Sections
+      'basic_settings': '기본 설정',
+      'image_settings': '이미지 설정',
+      'advanced_features': '부가 기능',
+      'advanced_options': '고급 옵션',
+      'no_selection': '선택 안함',
+
+      // Image Options - Lighting
+      'option_lighting': '조명',
+      'lighting_natural': '자연광',
+      'lighting_dramatic': '드라마틱',
+      'lighting_warm': '따뜻한 조명',
+      'lighting_cool': '시원한 조명',
+      'lighting_sunset': '노을',
+      'lighting_night': '야간',
+
+      // Image Options - Mood
+      'option_mood': '분위기',
+      'mood_peaceful': '평화로운',
+      'mood_energetic': '활기찬',
+      'mood_mysterious': '신비로운',
+      'mood_nostalgic': '향수를 자아내는',
+      'mood_dreamy': '몽환적인',
+      'mood_melancholic': '우울한',
+
+      // Image Options - Color
+      'option_color': '색상',
+      'color_vibrant': '선명한',
+      'color_pastel': '파스텔',
+      'color_monochrome': '흑백',
+      'color_sepia': '세피아',
+      'color_earth_tone': '자연색',
+      'color_neon': '네온',
+
+      // Image Options - Composition
+      'option_composition': '구도',
+      'composition_close_up': '클로즈업',
+      'composition_wide_angle': '와이드앵글',
+      'composition_bird_eye': '조감도',
+      'composition_low_angle': '로우앵글',
+      'composition_symmetrical': '대칭',
+      'composition_rule_of_thirds': '삼분할',
+
+      // Image Time Options
+      'option_time_lighting': '시간대/조명',
+      'time_morning': '아침 햇살',
+      'time_morning_desc': '밝고 따뜻한 아침 햇살',
+      'time_noon': '한낮',
+      'time_noon_desc': '밝고 환한 낮의 햇빛',
+      'time_golden': '황금시간',
+      'time_golden_desc': '따뜻한 황금빛 조명',
+      'time_sunset': '저녁노을',
+      'time_sunset_desc': '아름다운 석양과 노을',
+      'time_night': '밤의 분위기',
+      'time_night_desc': '신비로운 밤의 조명',
+      'time_indoor': '실내조명',
+      'time_indoor_desc': '따뜻한 실내 조명',
+
+      // Image Weather Options
+      'option_weather': '날씨',
+      'weather_sunny': '맑은 날',
+      'weather_sunny_desc': '화창하고 밝은 날씨',
+      'weather_cloudy': '흐린 날',
+      'weather_cloudy_desc': '구름 낀 부드러운 날씨',
+      'weather_rainy': '비 오는 날',
+      'weather_rainy_desc': '촉촉한 비의 분위기',
+      'weather_snowy': '눈 내리는 날',
+      'weather_snowy_desc': '하얀 눈의 포근함',
+
+      // Image Season Options
+      'option_season': '계절',
+      'season_spring': '봄',
+      'season_spring_desc': '신록과 꽃이 피어나는 봄',
+      'season_summer': '여름',
+      'season_summer_desc': '푸르고 생기 넘치는 여름',
+      'season_autumn': '가을',
+      'season_autumn_desc': '단풍과 따뜻한 색감의 가을',
+      'season_winter': '겨울',
+      'season_winter_desc': '하얀 설경과 차가운 겨울',
+
+      // Perspective Options
+      'option_perspective': '시점',
+      'perspective_first_person': '1인칭 시점',
+      'perspective_first_person_desc': '내가 직접 경험하는 관점',
+      'perspective_third_person': '3인칭 시점',
+      'perspective_third_person_desc': '나를 객관적으로 보는 관점',
+      'option_character_gender': '캐릭터 성별',
+      'gender_male': '남성',
+      'gender_female': '여성',
+      'gender_unspecified': '지정하지 않음',
+
+      // Theme Presets
+      'option_theme_preset': '테마 프리셋',
+      'free_presets': '무료 프리셋',
+      'premium_presets': '프리미엄 프리셋',
+      'preset_natural': '자연스러운',
+      'preset_natural_desc': '실사 스타일로 자연스러운 일상을 담아내세요',
+      'preset_dreamy': '몽환적인',
+      'preset_dreamy_desc': '수채화 스타일로 꿈 같은 분위기를 연출하세요',
+      'preset_vintage_nostalgia': '빈티지 향수',
+      'preset_vintage_nostalgia_desc': '세피아 톤과 빈티지 스타일로 추억을 되살려보세요',
+      'preset_anime_fantasy': '애니메이션 판타지',
+      'preset_anime_fantasy_desc': '애니메이션 스타일로 판타지 세계를 그려보세요',
+      'preset_impressionist_garden': '인상파 정원',
+      'preset_impressionist_garden_desc': '인상주의 스타일로 평화로운 정원을 표현하세요',
+      'preset_pixel_retro': '픽셀 레트로',
+      'preset_pixel_retro_desc': '8비트 픽셀아트로 레트로 게임 느낌을 만들어보세요',
+      'preset_paper_craft': '종이공예 콜라주',
+      'preset_paper_craft_desc': '수작업 종이공예 스타일로 따뜻한 감성을 표현하세요',
+      'preset_child_innocent': '순수한 아이',
+      'preset_child_innocent_desc': '아이 그림 스타일로 순수하고 밝은 감성을 담아보세요',
+
+      // Auto Settings
+      'auto_advanced_options': '고급옵션 자동설정',
+      'auto_advanced_options_desc': '아래 네 가지 옵션을 일기 내용에 맞게 자동 설정합니다',
+      'auto_config_applied': '고급옵션이 자동으로 설정되었습니다 (조명, 분위기, 색상, 구도)',
+      'please_write_diary_first': '일기 내용을 먼저 작성해주세요',
+
+      // Premium Dialog
+      'premium_only': '프리미엄 전용 기능',
+      'ai_image_regeneration': 'AI 이미지 재생성',
+      'premium_only_message': '프리미엄에서만 제공되는 기능입니다',
+      'premium_benefits_title': '프리미엄 구독 시 혜택:',
+      'unlimited_regeneration_benefit': '무제한 이미지 재생성',
+      'unlimited_regeneration_desc': '원하는 그림이 나올 때까지 무제한 재생성',
+      'ad_free_benefit': '광고 없는 쾌적한 환경',
+      'ad_free_desc': '모든 광고 제거로 집중된 일기 작성',
+      'premium_styles_benefit': '다양한 아트 스타일',
+      'premium_styles_desc': '6가지 프리미엄 스타일로 매일 다른 느낌',
+      'advanced_control_benefit': '고급 이미지 제어',
+      'advanced_control_desc': '조명, 분위기, 색상, 구도 세밀 조정',
+      'later': '나중에',
+      'learn_about_premium': '프리미엄 알아보기',
+
+      // Edit Mode
+      'image_edit_premium_only': '이미지 수정은 프리미엄에서만 제공',
+      'upgrade_for_styles': '다양한 그림 스타일과 옵션을 사용하려면\n프리미엄으로 업그레이드하세요',
+
+      // Hybrid Ad Model
+      'congratulations': '축하합니다!',
+      'watch_ad_continue': '광고를 보고 계속 사용하세요',
+      'five_diaries_written': '5개의 일기를 작성하셨네요!\n이제 광고를 보고 무료로 계속 사용하세요',
+      'watch_ad_to_create': '광고를 보고 일기를 작성하세요',
+      'watch_30_sec_ad': '30초 광고 시청',
+      'create_1_diary': '일기 1개 생성',
+      'unlimited_with_ads': '광고 시청으로 무제한 생성',
+      'watch_ad': '광고 보기',
+      'ad_watch_failed': '광고 시청 실패',
+      'ad_load_failed_message': '광고를 불러올 수 없거나 시청이 중단되었습니다.\n\n네트워크 연결을 확인하고 다시 시도해주세요.',
+      'ad_watch_complete': '광고 시청 완료!',
+      'starting_diary_creation': '일기 생성을 시작합니다...',
+      // Statistics Screen
+      'this_week': '이번 주',
+      'last_week': '지난 주',
+      'this_month': '이번 달',
+      'last_month': '지난 달',
+      'date_range_format': '{startMonth}월 {startDay}일~{endDay}일',
+      'date_range_cross_month_format': '{startMonth}월 {startDay}일~{endMonth}월 {endDay}일',
+      'year_month_format': '{year}년 {month}월',
+      'no_diary_in_period': '이 기간에 작성된 일기가 없습니다',
+      'weekly_emotion_insight': '주간 감정 인사이트',
+      'monthly_emotion_insight': '월간 감정 인사이트',
+      'yearly_emotion_insight': '연간 감정 인사이트',
+      'main_emotion': '주요 감정',
+      'recorded_times': '{count}번 기록됨',
+      'diary_writing_frequency': '일기 작성 빈도',
+      'diary_count_format': '{count}편',
+      'emotion_diversity': '감정 다양성',
+      'emotion_types_format': '{count}가지',
+      'weekly_ai_emotion_analysis': '주간 AI 감정 분석',
+      'monthly_ai_emotion_analysis': '월간 AI 감정 분석',
+      'yearly_ai_emotion_analysis': '연간 AI 감정 분석',
+      'ai_analyzing_emotions': 'AI가 감정을 분석하고 있습니다...',
+      'analysis_time_format': '분석 시각: {time}',
+      'write_diary_for_ai_insight': '일기를 작성하면 AI 인사이트가 자동으로 생성됩니다',
+      'ai_insight_generating': 'AI 인사이트가 자동으로 생성 중입니다...',
+      'emotion_distribution': '감정 분포',
+      'yearly_emotion_distribution': '연간 감정 분포',
+      'times_count_format': '{count}회',
+      'times_with_percentage_format': '{count}회 ({percentage}%)',
+      'daily_average_format': '하루 평균 {count}편',
+      'weekly_diverse_emotions': '다양한 감정을 경험하셨네요',
+      'monthly_rich_emotions': '풍부한 감정을 표현하셨어요',
+      'yearly_various_emotions': '다채로운 감정의 한 해였네요',
+      'weekly_insight_title_format': '주간 감정 인사이트 ({period})',
+      'monthly_insight_title_format': '월간 감정 인사이트 ({period})',
+      'yearly_insight_title_format': '연간 감정 인사이트 ({period})',
+      'monthly_average_format': '월 평균 {count}편',
     },
     'ja': {
-      // Search
-      // Navigation & UI
-      // Settings dialog content
-
-      // Delete settings screen
-      // Subscription management
-      // Image styles
-      
-      // Advanced options
-
-      // AI Prompts
-      // Settings screen
-      // Personalization settings screen
-      // AI settings screen
-
-      // Backup and restore screen
-      // Diary detail screen
+      // Image Guide Screen
+      'image_guide_effective_prompt': '効果的なプロンプトの書き方',
+      'image_guide_describe_detail': '具体的に描写する',
+      'image_guide_describe_detail_example': '例：「幸せな猫」より「日差しの中で微笑んでいるふわふわのオレンジ色の猫」',
+      'image_guide_emotion_mood': '感情と雰囲気を表現',
+      'image_guide_emotion_mood_example': '例：「温かい」「穏やかな」「神秘的な」「ロマンチックな」などの形容詞を活用',
+      'image_guide_background_env': '背景と環境を説明',
+      'image_guide_background_env_example': '例：「桜が咲く公園で」「夕日が美しい海辺で」',
+      'image_guide_style_usage': '画像スタイル別活用法',
+      'image_guide_realistic_title': 'リアルスタイル',
+      'image_guide_realistic_desc': '実際の写真のようなリアルな画像\n生き生きとした記憶を再現したいとき',
+      'image_guide_realistic_example': '例：「実際の写真のような生き生きとした夕焼け風景」',
+      'image_guide_watercolor_title': '水彩画スタイル',
+      'image_guide_watercolor_desc': '柔らかく温かみのある水彩画\n感性的な日記を表現するとき',
+      'image_guide_watercolor_example': '例：「水彩画スタイルで描いた温かいカフェ風景」',
+      'image_guide_illustration_title': 'イラストレーション',
+      'image_guide_illustration_desc': 'モダンで洗練されたイラストスタイル\nトレンディな雰囲気が欲しいとき',
+      'image_guide_illustration_example': '例：「モダンなイラストスタイルの都市風景」',
+      'image_guide_anime_title': 'アニメーション',
+      'image_guide_anime_desc': 'かわいくて親しみやすいアニメスタイル\n楽しい日常を表現するとき',
+      'image_guide_anime_example': '例：「かわいいアニメスタイルの犬が走り回る様子」',
+      'image_guide_sketch_title': 'スケッチ',
+      'image_guide_sketch_desc': 'シンプルですっきりしたスケッチスタイル\n強調したい要素があるとき',
+      'image_guide_sketch_example': '例：「シンプルな線で表現した一本の木」',
+      'image_guide_impressionist_title': '印象派',
+      'image_guide_impressionist_desc': 'モネスタイルの印象派絵画\n芸術的でクラシックな雰囲気',
+      'image_guide_impressionist_example': '例：「印象派の筆触で表現した池」',
+      'image_guide_vintage_title': 'ヴィンテージ',
+      'image_guide_vintage_desc': '昔の写真のようなレトロな雰囲気\nノスタルジーを呼び起こすとき',
+      'image_guide_vintage_example': '例：「セピア調のヴィンテージな街並み」',
+      'image_guide_premium_styles': 'プレミアムスタイル',
+      'image_guide_premium_styles_desc': 'プレミアムにアップグレードすると、イラスト、アニメーション、スケッチ、印象派、ヴィンテージスタイルが追加で使用できます。',
+      'image_guide_advanced_tips': '上級活用ヒント',
+      'image_guide_combine_keywords': 'キーワードを組み合わせる',
+      'image_guide_combine_keywords_desc': '複数のキーワードを組み合わせてより具体的な画像を生成しましょう。',
+      'image_guide_combine_keywords_example': '感情 + 場所 + 時間 + スタイル\n例：「穏やかな + 湖畔 + 夕方 + 水彩画」',
+      'image_guide_mood_words': '雰囲気の言葉を活用',
+      'image_guide_mood_words_desc': '画像の全体的なトーンを決める言葉を使いましょう。',
+      'image_guide_mood_words_example': '• 明るく軽快：bright, cheerful, vibrant\n• 穏やかで平和：serene, peaceful, calm\n• 夢幻的：dreamy, ethereal, mystical',
+      'image_guide_time_weather': '時間と天気の表現',
+      'image_guide_time_weather_desc': '特定の時間帯や天気を明示するとより生き生きとした画像が作られます。',
+      'image_guide_time_weather_example': '• 時間：夜明け、朝、正午、夕暮れ、夜\n• 天気：晴れ、雨、雪',
+      'image_guide_advanced_options_compare': '高度なオプション効果比較',
+      'image_guide_advanced_options_desc': 'プレミアム高度オプションを使用すると画像の品質と表現力が大幅に向上します。\n各オプションの違いを直接比較してみてください！',
+      'image_guide_premium_only_options': 'これらの高度オプションはプレミアムユーザーのみ使用できます',
+      'image_guide_background_style': '背景スタイル',
+      'image_guide_basic_background': 'Basic',
+      'image_guide_advanced_background': 'Advanced',
+      'image_guide_background_change_desc': 'シンプルな背景から幻想的で細かい背景に変化します。',
+      'image_guide_color_adjustment': '色調調整',
+      'image_guide_basic_color': 'Basic',
+      'image_guide_advanced_color': 'Advanced',
+      'image_guide_color_change_desc': '自然で生き生きとした色彩に変化します。',
+      'image_guide_angle_composition': '視点と構図',
+      'image_guide_basic_angle': 'Basic',
+      'image_guide_advanced_angle': 'Advanced',
+      'image_guide_angle_change_desc': 'より創造的でダイナミックな視点に変化します。',
+      'image_guide_lighting_effect': '照明効果',
+      'image_guide_basic_lighting': 'Basic',
+      'image_guide_advanced_lighting': 'Advanced',
+      'image_guide_lighting_change_desc': 'ドラマチックな照明効果が適用されます。',
+      'image_guide_upgrade_premium': 'プレミアムにアップグレード',
+      'image_guide_upgrade_in_settings': '設定 > テストモードで切り替え可能',
+      'image_guide_tap_to_settings': 'タップして設定へ移動',
+      'image_guide_caution': '注意事項',
+      'image_guide_caution_content': '• 著作権のある特定のキャラクターやブランドロゴは生成されない場合があります。\n\n• 不適切な内容や暴力的な内容は生成されません。',
+      'image_guide_cannot_load_image': '画像を読み込めません',
+      // Date formats
+      'date_format_full': 'yyyy年M月d日 EEEE',
+      'date_format_month': 'yyyy年M月',
+      'date_format_month_day_weekday': 'M月d日 EEEE',
     },
     'en': {
       'app_title': 'ArtDiary AI',
@@ -983,16 +1335,26 @@ Diary content: {content}''',
 
 Please summarize in 2-3 sentences.''',
       'ai_image_prompt_base': '''Please create an image generation prompt based on the following diary entry.
-Style: {style}
-Create an emotional and beautiful image.
+
+**MOST IMPORTANT**: The image MUST include specific locations and situations mentioned in the diary.
+For example:
+- If the diary mentions "cafe" -> describe cafe interior, coffee, window seat, etc.
+- If the diary mentions "park" -> describe trees, bench, walking path, etc.
+- If the diary mentions "home" -> describe room interior, sofa, bed, etc.
+
+Style instructions: {style}
 
 Diary content: {content}
 Main emotion: {emotion}
 Keywords: {keywords}
 {advanced}
 
-Write the prompt in English, creating a warm and emotional image that expresses the diary's emotion and content well.
-Include specific visual elements, colors, and atmosphere.''',
+Prompt writing guidelines:
+1. Write the prompt in English.
+2. Include the style instructions at the very beginning of the prompt.
+3. If the style contains "photorealistic" or "photograph", NEVER use the words illustration, painting, or drawing.
+4. **CRITICAL**: You MUST include the specific location (cafe, home, park, etc.) and activities (drinking coffee, reading, walking, etc.) mentioned in the diary.
+5. NEVER use generic scenery (hills, fields, sunset landscapes) that has nothing to do with the diary content.''',
       'ai_advanced_option_prefix': 'Advanced options: {options}',
       'ai_auto_settings_prompt': '''Please analyze the following diary entry and recommend suitable settings for image generation.
 Respond in JSON format:
@@ -1066,6 +1428,16 @@ Output only the insights, no other explanations needed.''',
       // AI settings screen
       'auto_advanced_settings': 'Auto Advanced Settings',
       'premium_only_feature': 'Premium Only Feature',
+      'premium_only_feature_desc': 'This style is only available for premium users.',
+      'premium_benefit_fonts': '- 10 premium fonts',
+      'premium_benefit_styles': '- 6 additional art styles',
+      'premium_benefit_unlimited': '- Unlimited image generation',
+      'premium_benefit_regenerate': '- Unlimited image regeneration',
+      'premium_benefit_advanced': '- Advanced image options',
+      'premium_benefit_ads': '- Ad-free experience',
+      'test_mode_premium_hint': 'You can switch to premium in Settings > Test Mode',
+      'premium_feature_message': '{feature} is only available for premium users.',
+      'premium_feature_message_default': 'This feature is only available for premium users.',
       'auto_advanced_settings_description': 'Automatically sets time, weather, and season options',
       'auto_advanced_settings_enabled': 'Auto Advanced Settings enabled',
       'auto_advanced_settings_disabled': 'Auto Advanced Settings disabled',
@@ -1159,6 +1531,7 @@ Output only the insights, no other explanations needed.''',
       // Progress messages
       'photo_mood_analyzing': 'Analyzing photo mood...',
       'photo_analyzing': 'Analyzing photo...',
+      'image_saved_to_gallery': 'Image saved to gallery',
 
       // Diary create/edit
       'create_new_diary': 'Create New Diary',
@@ -1212,6 +1585,8 @@ Output only the insights, no other explanations needed.''',
       'premium_fonts_desc': '10 beautiful Korean fonts\nGaegujaengi, Dokdo, Nanum Pen, etc.',
       'premium_art_styles': 'Premium Art Styles',
       'premium_art_styles_desc': '6 additional styles\nIllustration, Sketch, Animation, Impressionist, Vintage',
+      'additional_options': 'Additional Options',
+      'premium_styles_upgrade_message': 'Upgrade to Premium to access a variety of styles and fonts!',
       'advanced_image_options': 'Advanced Image Options',
       'advanced_image_options_desc': 'Lighting, mood, color, composition, etc.\nDetailed image generation settings',
       'time_weather_season_settings': 'Time/Weather/Season Settings',
@@ -1243,6 +1618,7 @@ Output only the insights, no other explanations needed.''',
       // Date formats
       'date_format_full': 'MMMM d, yyyy EEEE',
       'date_format_month': 'MMMM yyyy',
+      'date_format_month_day_weekday': 'MMMM d, EEEE',
       'confirm_delete_diary': 'Are you sure you want to delete this diary?',
       'delete_diary': 'Delete Diary',
       'diary_deleted': 'Diary has been deleted',
@@ -1265,6 +1641,263 @@ Output only the insights, no other explanations needed.''',
       'photo_upload_max3_desc': 'Upload up to 3 photos per diary',
       'sample_diary_content': 'Today was a really good day',
       'sample_diary_title': 'Sample Diary',
+
+      // Image Guide Screen
+      'image_guide_effective_prompt': 'Effective Prompt Writing',
+      'image_guide_describe_detail': 'Be Specific',
+      'image_guide_describe_detail_example': 'e.g., Instead of "happy cat", try "fluffy orange cat smiling in the sunlight"',
+      'image_guide_emotion_mood': 'Express Emotions and Mood',
+      'image_guide_emotion_mood_example': 'e.g., Use adjectives like "warm", "peaceful", "mystical", "romantic"',
+      'image_guide_background_env': 'Describe Background and Environment',
+      'image_guide_background_env_example': 'e.g., "in a park with cherry blossoms", "by the sea at sunset"',
+      'image_guide_style_usage': 'Image Style Guide',
+      'image_guide_realistic_title': 'Realistic Style',
+      'image_guide_realistic_desc': 'Photo-realistic images\nPerfect for recreating vivid memories',
+      'image_guide_realistic_example': 'e.g., "A vivid sunset landscape like a real photo"',
+      'image_guide_watercolor_title': 'Watercolor Style',
+      'image_guide_watercolor_desc': 'Soft and warm watercolor feel\nGreat for emotional diary entries',
+      'image_guide_watercolor_example': 'e.g., "A warm cafe scene in watercolor style"',
+      'image_guide_illustration_title': 'Illustration',
+      'image_guide_illustration_desc': 'Modern and stylish illustration\nFor a trendy aesthetic',
+      'image_guide_illustration_example': 'e.g., "A cityscape in modern illustration style"',
+      'image_guide_anime_title': 'Animation',
+      'image_guide_anime_desc': 'Cute and friendly animation style\nFor fun daily moments',
+      'image_guide_anime_example': 'e.g., "A cute puppy playing in anime style"',
+      'image_guide_sketch_title': 'Sketch',
+      'image_guide_sketch_desc': 'Simple and clean sketch style\nWhen you want to focus on key elements',
+      'image_guide_sketch_example': 'e.g., "A single tree drawn with simple lines"',
+      'image_guide_impressionist_title': 'Impressionist',
+      'image_guide_impressionist_desc': 'Monet-style impressionist painting\nArtistic and classic feel',
+      'image_guide_impressionist_example': 'e.g., "A pond painted with impressionist brushstrokes"',
+      'image_guide_vintage_title': 'Vintage',
+      'image_guide_vintage_desc': 'Retro old-photo feel\nFor nostalgic moments',
+      'image_guide_vintage_example': 'e.g., "A vintage sepia-toned street scene"',
+      'image_guide_premium_styles': 'Premium Styles',
+      'image_guide_premium_styles_desc': 'Upgrade to Premium to unlock Illustration, Animation, Sketch, Impressionist, and Vintage styles.',
+      'image_guide_advanced_tips': 'Advanced Tips',
+      'image_guide_combine_keywords': 'Combine Keywords',
+      'image_guide_combine_keywords_desc': 'Combine multiple keywords for more specific images.',
+      'image_guide_combine_keywords_example': 'Emotion + Place + Time + Style\ne.g., "peaceful + lakeside + evening + watercolor"',
+      'image_guide_mood_words': 'Use Mood Words',
+      'image_guide_mood_words_desc': 'Use words that set the overall tone of the image.',
+      'image_guide_mood_words_example': '• Bright and cheerful: bright, cheerful, vibrant\n• Calm and peaceful: serene, peaceful, calm\n• Dreamy: dreamy, ethereal, mystical',
+      'image_guide_time_weather': 'Time and Weather',
+      'image_guide_time_weather_desc': 'Specifying time or weather creates more vivid images.',
+      'image_guide_time_weather_example': '• Time: dawn, morning, noon, dusk, night\n• Weather: sunny, rainy, snowy',
+      'image_guide_advanced_options_compare': 'Advanced Options Comparison',
+      'image_guide_advanced_options_desc': 'Premium advanced options significantly improve image quality and expressiveness.\nCompare the differences for each option!',
+      'image_guide_premium_only_options': 'These advanced options are only available for premium users',
+      'image_guide_background_style': 'Background Style',
+      'image_guide_basic_background': 'Basic',
+      'image_guide_advanced_background': 'Advanced',
+      'image_guide_background_change_desc': 'Transform from simple to fantastic, detailed backgrounds.',
+      'image_guide_color_adjustment': 'Color Adjustment',
+      'image_guide_basic_color': 'Basic',
+      'image_guide_advanced_color': 'Advanced',
+      'image_guide_color_change_desc': 'Natural and vivid color enhancements.',
+      'image_guide_angle_composition': 'Angle and Composition',
+      'image_guide_basic_angle': 'Basic',
+      'image_guide_advanced_angle': 'Advanced',
+      'image_guide_angle_change_desc': 'More creative and dynamic perspectives.',
+      'image_guide_lighting_effect': 'Lighting Effect',
+      'image_guide_basic_lighting': 'Basic',
+      'image_guide_advanced_lighting': 'Advanced',
+      'image_guide_lighting_change_desc': 'Dramatic lighting effects applied.',
+      'image_guide_upgrade_premium': 'Upgrade to Premium',
+      'image_guide_upgrade_in_settings': 'Go to Settings > Test Mode to switch',
+      'image_guide_tap_to_settings': 'Tap to go to Settings',
+      'image_guide_caution': 'Caution',
+      'image_guide_caution_content': '• Copyrighted characters or brand logos may not be generated.\n\n• Inappropriate or violent content will not be generated.',
+      'image_guide_cannot_load_image': 'Cannot load image',
+
+      // Diary Create Screen - Settings Sections
+      'basic_settings': 'Basic Settings',
+      'image_settings': 'Image Settings',
+      'advanced_features': 'Advanced Features',
+      'advanced_options': 'Advanced Options',
+      'no_selection': 'None',
+
+      // Image Options - Lighting
+      'option_lighting': 'Lighting',
+      'lighting_natural': 'Natural',
+      'lighting_dramatic': 'Dramatic',
+      'lighting_warm': 'Warm',
+      'lighting_cool': 'Cool',
+      'lighting_sunset': 'Sunset',
+      'lighting_night': 'Night',
+
+      // Image Options - Mood
+      'option_mood': 'Mood',
+      'mood_peaceful': 'Peaceful',
+      'mood_energetic': 'Energetic',
+      'mood_mysterious': 'Mysterious',
+      'mood_nostalgic': 'Nostalgic',
+      'mood_dreamy': 'Dreamy',
+      'mood_melancholic': 'Melancholic',
+
+      // Image Options - Color
+      'option_color': 'Color',
+      'color_vibrant': 'Vibrant',
+      'color_pastel': 'Pastel',
+      'color_monochrome': 'Monochrome',
+      'color_sepia': 'Sepia',
+      'color_earth_tone': 'Earth Tone',
+      'color_neon': 'Neon',
+
+      // Image Options - Composition
+      'option_composition': 'Composition',
+      'composition_close_up': 'Close-up',
+      'composition_wide_angle': 'Wide Angle',
+      'composition_bird_eye': 'Bird\'s Eye',
+      'composition_low_angle': 'Low Angle',
+      'composition_symmetrical': 'Symmetrical',
+      'composition_rule_of_thirds': 'Rule of Thirds',
+
+      // Image Time Options
+      'option_time_lighting': 'Time/Lighting',
+      'time_morning': 'Morning',
+      'time_morning_desc': 'Bright and warm morning light',
+      'time_noon': 'Noon',
+      'time_noon_desc': 'Bright daylight',
+      'time_golden': 'Golden Hour',
+      'time_golden_desc': 'Warm golden lighting',
+      'time_sunset': 'Sunset',
+      'time_sunset_desc': 'Beautiful sunset glow',
+      'time_night': 'Night',
+      'time_night_desc': 'Mysterious night atmosphere',
+      'time_indoor': 'Indoor',
+      'time_indoor_desc': 'Warm indoor lighting',
+
+      // Image Weather Options
+      'option_weather': 'Weather',
+      'weather_sunny': 'Sunny',
+      'weather_sunny_desc': 'Bright and clear weather',
+      'weather_cloudy': 'Cloudy',
+      'weather_cloudy_desc': 'Soft overcast sky',
+      'weather_rainy': 'Rainy',
+      'weather_rainy_desc': 'Rainy atmosphere',
+      'weather_snowy': 'Snowy',
+      'weather_snowy_desc': 'White snowy scene',
+
+      // Image Season Options
+      'option_season': 'Season',
+      'season_spring': 'Spring',
+      'season_spring_desc': 'Blooming flowers and fresh greenery',
+      'season_summer': 'Summer',
+      'season_summer_desc': 'Lush green and vibrant',
+      'season_autumn': 'Autumn',
+      'season_autumn_desc': 'Warm autumn colors and foliage',
+      'season_winter': 'Winter',
+      'season_winter_desc': 'White snow and cold winter',
+
+      // Perspective Options
+      'option_perspective': 'Perspective',
+      'perspective_first_person': 'First Person',
+      'perspective_first_person_desc': 'Experience from my own viewpoint',
+      'perspective_third_person': 'Third Person',
+      'perspective_third_person_desc': 'Objective view of myself',
+      'option_character_gender': 'Character Gender',
+      'gender_male': 'Male',
+      'gender_female': 'Female',
+      'gender_unspecified': 'Unspecified',
+
+      // Theme Presets
+      'option_theme_preset': 'Theme Preset',
+      'free_presets': 'Free Presets',
+      'premium_presets': 'Premium Presets',
+      'preset_natural': 'Natural',
+      'preset_natural_desc': 'Capture everyday life with a realistic style',
+      'preset_dreamy': 'Dreamy',
+      'preset_dreamy_desc': 'Create a dreamlike atmosphere with watercolor style',
+      'preset_vintage_nostalgia': 'Vintage Nostalgia',
+      'preset_vintage_nostalgia_desc': 'Revive memories with sepia tones and vintage style',
+      'preset_anime_fantasy': 'Anime Fantasy',
+      'preset_anime_fantasy_desc': 'Draw a fantasy world in anime style',
+      'preset_impressionist_garden': 'Impressionist Garden',
+      'preset_impressionist_garden_desc': 'Express peaceful gardens in impressionist style',
+      'preset_pixel_retro': 'Pixel Retro',
+      'preset_pixel_retro_desc': 'Create retro game vibes with 8-bit pixel art',
+      'preset_paper_craft': 'Paper Craft Collage',
+      'preset_paper_craft_desc': 'Express warm feelings with handmade paper craft style',
+      'preset_child_innocent': 'Innocent Child',
+      'preset_child_innocent_desc': 'Capture pure and bright emotions in child\'s drawing style',
+
+      // Auto Settings
+      'auto_advanced_options': 'Auto Advanced Options',
+      'auto_advanced_options_desc': 'Automatically set the four options based on diary content',
+      'auto_config_applied': 'Advanced options have been automatically set (Lighting, Mood, Color, Composition)',
+      'please_write_diary_first': 'Please write diary content first',
+
+      // Premium Dialog
+      'premium_only': 'Premium Only Feature',
+      'ai_image_regeneration': 'AI Image Regeneration',
+      'premium_only_message': 'This feature is only available for premium users',
+      'premium_benefits_title': 'Premium subscription benefits:',
+      'unlimited_regeneration_benefit': 'Unlimited Image Regeneration',
+      'unlimited_regeneration_desc': 'Regenerate until you get the perfect image',
+      'ad_free_benefit': 'Ad-free Experience',
+      'ad_free_desc': 'Focus on diary writing without ads',
+      'premium_styles_benefit': 'Diverse Art Styles',
+      'premium_styles_desc': '6 premium styles for different vibes every day',
+      'advanced_control_benefit': 'Advanced Image Control',
+      'advanced_control_desc': 'Fine-tune lighting, mood, color, and composition',
+      'later': 'Later',
+      'learn_about_premium': 'Learn About Premium',
+
+      // Edit Mode
+      'image_edit_premium_only': 'Image editing is premium only',
+      'upgrade_for_styles': 'Upgrade to premium for\nvarious art styles and options',
+
+      // Hybrid Ad Model
+      'congratulations': 'Congratulations!',
+      'watch_ad_continue': 'Watch an ad to continue',
+      'five_diaries_written': 'You\'ve written 5 diaries!\nWatch an ad to continue for free',
+      'watch_ad_to_create': 'Watch an ad to create diary',
+      'watch_30_sec_ad': 'Watch 30s Ad',
+      'create_1_diary': 'Create 1 Diary',
+      'unlimited_with_ads': 'Unlimited with ads',
+      'watch_ad': 'Watch Ad',
+      'ad_watch_failed': 'Ad Watch Failed',
+      'ad_load_failed_message': 'Could not load ad or viewing was interrupted.\n\nPlease check your network connection and try again.',
+      'ad_watch_complete': 'Ad Watch Complete!',
+      'starting_diary_creation': 'Starting diary creation...',
+      // Statistics Screen
+      'this_week': 'This Week',
+      'last_week': 'Last Week',
+      'this_month': 'This Month',
+      'last_month': 'Last Month',
+      'date_range_format': '{startMonth}/{startDay}~{endDay}',
+      'date_range_cross_month_format': '{startMonth}/{startDay}~{endMonth}/{endDay}',
+      'year_month_format': '{month}/{year}',
+      'no_diary_in_period': 'No diaries written during this period',
+      'weekly_emotion_insight': 'Weekly Emotion Insight',
+      'monthly_emotion_insight': 'Monthly Emotion Insight',
+      'yearly_emotion_insight': 'Yearly Emotion Insight',
+      'main_emotion': 'Main Emotion',
+      'recorded_times': 'Recorded {count} times',
+      'diary_writing_frequency': 'Writing Frequency',
+      'diary_count_format': '{count} entries',
+      'emotion_diversity': 'Emotion Diversity',
+      'emotion_types_format': '{count} types',
+      'weekly_ai_emotion_analysis': 'Weekly AI Emotion Analysis',
+      'monthly_ai_emotion_analysis': 'Monthly AI Emotion Analysis',
+      'yearly_ai_emotion_analysis': 'Yearly AI Emotion Analysis',
+      'ai_analyzing_emotions': 'AI is analyzing emotions...',
+      'analysis_time_format': 'Analysis time: {time}',
+      'write_diary_for_ai_insight': 'Write a diary to auto-generate AI insights',
+      'ai_insight_generating': 'AI insights are being generated...',
+      'emotion_distribution': 'Emotion Distribution',
+      'yearly_emotion_distribution': 'Yearly Emotion Distribution',
+      'times_count_format': '{count} times',
+      'times_with_percentage_format': '{count} times ({percentage}%)',
+      'daily_average_format': 'Daily average {count} entries',
+      'weekly_diverse_emotions': 'You experienced diverse emotions',
+      'monthly_rich_emotions': 'You expressed rich emotions',
+      'yearly_various_emotions': 'A year of colorful emotions',
+      'weekly_insight_title_format': 'Weekly Emotion Insight ({period})',
+      'monthly_insight_title_format': 'Monthly Emotion Insight ({period})',
+      'yearly_insight_title_format': 'Yearly Emotion Insight ({period})',
+      'monthly_average_format': 'Monthly average {count} entries',
     },
     'zh': {
       'app_title': 'ArtDiary AI',
@@ -1694,6 +2327,9 @@ Output only the insights, no other explanations needed.''',
       'date_format_dmy': '日/月/年 (25/12/2024)',
       'date_format_mdy': '月/日/年 (12/25/2024)',
       'date_format_changed': '日期格式已更改',
+      'date_format_full': 'yyyy年M月d日 EEEE',
+      'date_format_month': 'yyyy年M月',
+      'date_format_month_day_weekday': 'M月d日 EEEE',
       'select_timezone': '选择时区',
       'timezone_changed_format': '时区已更改为{name}',
       'timezone_seoul': '首尔 (KST)',
@@ -1706,6 +2342,8 @@ Output only the insights, no other explanations needed.''',
       // AI settings screen
       'auto_advanced_settings': '高级设置自动配置',
       'premium_only_feature': '仅限高级会员功能',
+      'premium_feature_message': '{feature}仅限高级会员使用。',
+      'premium_feature_message_default': '此功能仅限高级会员使用。',
       'auto_advanced_settings_description': '自动设置时间、天气和季节选项',
       'auto_advanced_settings_enabled': '高级设置自动配置已启用',
       'auto_advanced_settings_disabled': '高级设置自动配置已禁用',
@@ -1782,6 +2420,74 @@ Output only the insights, no other explanations needed.''',
       'diary_delete_error': '删除时出错',
       'ai_generated_badge': 'AI生成',
       'user_photo_badge': '我的照片',
+
+      // Image Guide Screen
+      'image_guide_effective_prompt': '有效的提示词编写技巧',
+      'image_guide_describe_detail': '具体描述',
+      'image_guide_describe_detail_example': '例如：不要写"快乐的猫"，而是写"阳光下微笑的毛茸茸的橙色猫咪"',
+      'image_guide_emotion_mood': '表达情感和氛围',
+      'image_guide_emotion_mood_example': '例如：使用"温暖的"、"平和的"、"神秘的"、"浪漫的"等形容词',
+      'image_guide_background_env': '描述背景和环境',
+      'image_guide_background_env_example': '例如："在樱花盛开的公园"、"在日落时分的海边"',
+      'image_guide_style_usage': '图像风格使用指南',
+      'image_guide_realistic_title': '写实风格',
+      'image_guide_realistic_desc': '如照片般逼真的图像\n适合重现生动的记忆',
+      'image_guide_realistic_example': '例如："如真实照片般生动的日落风景"',
+      'image_guide_watercolor_title': '水彩风格',
+      'image_guide_watercolor_desc': '柔和温暖的水彩感觉\n适合表达感性的日记',
+      'image_guide_watercolor_example': '例如："水彩风格的温馨咖啡馆场景"',
+      'image_guide_illustration_title': '插画',
+      'image_guide_illustration_desc': '现代时尚的插画风格\n适合追求潮流感',
+      'image_guide_illustration_example': '例如："现代插画风格的城市景观"',
+      'image_guide_anime_title': '动画',
+      'image_guide_anime_desc': '可爱友好的动画风格\n适合有趣的日常时刻',
+      'image_guide_anime_example': '例如："可爱的动画风格小狗在玩耍"',
+      'image_guide_sketch_title': '素描',
+      'image_guide_sketch_desc': '简洁干净的素描风格\n适合突出关键元素',
+      'image_guide_sketch_example': '例如："用简单线条画的一棵树"',
+      'image_guide_impressionist_title': '印象派',
+      'image_guide_impressionist_desc': '莫奈风格的印象派绘画\n艺术感和古典感',
+      'image_guide_impressionist_example': '例如："用印象派笔触画的池塘"',
+      'image_guide_vintage_title': '复古',
+      'image_guide_vintage_desc': '老照片般的复古感觉\n适合怀旧时刻',
+      'image_guide_vintage_example': '例如："复古棕褐色调的街景"',
+      'image_guide_premium_styles': '高级风格',
+      'image_guide_premium_styles_desc': '升级到高级版可解锁插画、动画、素描、印象派和复古风格。',
+      'image_guide_advanced_tips': '高级技巧',
+      'image_guide_combine_keywords': '组合关键词',
+      'image_guide_combine_keywords_desc': '组合多个关键词以生成更具体的图像。',
+      'image_guide_combine_keywords_example': '情感 + 地点 + 时间 + 风格\n例如："平和的 + 湖边 + 傍晚 + 水彩"',
+      'image_guide_mood_words': '使用氛围词',
+      'image_guide_mood_words_desc': '使用决定图像整体基调的词语。',
+      'image_guide_mood_words_example': '• 明亮欢快：bright, cheerful, vibrant\n• 平静祥和：serene, peaceful, calm\n• 梦幻：dreamy, ethereal, mystical',
+      'image_guide_time_weather': '时间和天气',
+      'image_guide_time_weather_desc': '指定时间或天气可以创建更生动的图像。',
+      'image_guide_time_weather_example': '• 时间：黎明、早晨、正午、黄昏、夜晚\n• 天气：晴天、雨天、雪天',
+      'image_guide_advanced_options_compare': '高级选项效果比较',
+      'image_guide_advanced_options_desc': '高级选项可显著提高图像质量和表现力。\n比较每个选项的差异！',
+      'image_guide_premium_only_options': '这些高级选项仅供高级用户使用',
+      'image_guide_background_style': '背景风格',
+      'image_guide_basic_background': 'Basic',
+      'image_guide_advanced_background': 'Advanced',
+      'image_guide_background_change_desc': '从简单背景变为奇幻细致的背景。',
+      'image_guide_color_adjustment': '色彩调整',
+      'image_guide_basic_color': 'Basic',
+      'image_guide_advanced_color': 'Advanced',
+      'image_guide_color_change_desc': '自然生动的色彩增强。',
+      'image_guide_angle_composition': '角度和构图',
+      'image_guide_basic_angle': 'Basic',
+      'image_guide_advanced_angle': 'Advanced',
+      'image_guide_angle_change_desc': '更具创意和动感的视角。',
+      'image_guide_lighting_effect': '光照效果',
+      'image_guide_basic_lighting': 'Basic',
+      'image_guide_advanced_lighting': 'Advanced',
+      'image_guide_lighting_change_desc': '应用戏剧性的光照效果。',
+      'image_guide_upgrade_premium': '升级到高级版',
+      'image_guide_upgrade_in_settings': '前往设置 > 测试模式切换',
+      'image_guide_tap_to_settings': '点击前往设置',
+      'image_guide_caution': '注意事项',
+      'image_guide_caution_content': '• 受版权保护的角色或品牌标志可能无法生成。\n\n• 不当或暴力内容将不会生成。',
+      'image_guide_cannot_load_image': '无法加载图片',
     },
     'la': {
       'app_title': 'ArtDiary AI',
@@ -2168,112 +2874,168 @@ Emitte tantum perspicacitates, nulla alia explanatio necessaria.''',
     },
   };
 
-  String get appTitle => _localizedValues[locale.languageCode]!['app_title']!;
-  String get settings => _localizedValues[locale.languageCode]!['settings']!;
-  String get personalization => _localizedValues[locale.languageCode]!['personalization']!;
-  String get theme => _localizedValues[locale.languageCode]!['theme']!;
-  String get themeSubtitle => _localizedValues[locale.languageCode]!['theme_subtitle']!;
-  String get language => _localizedValues[locale.languageCode]!['language']!;
-  String get languageSubtitle => _localizedValues[locale.languageCode]!['language_subtitle']!;
-  String get fontSize => _localizedValues[locale.languageCode]!['font_size']!;
-  String get fontSizeSubtitle => _localizedValues[locale.languageCode]!['font_size_subtitle']!;
-  String get notifications => _localizedValues[locale.languageCode]!['notifications']!;
-  String get notificationsSubtitle => _localizedValues[locale.languageCode]!['notifications_subtitle']!;
-  String get aiSettings => _localizedValues[locale.languageCode]!['ai_settings']!;
-  String get defaultImageStyle => _localizedValues[locale.languageCode]!['default_image_style']!;
-  String get defaultImageStyleSubtitle => _localizedValues[locale.languageCode]!['default_image_style_subtitle']!;
-  String get aiAnalysisStrength => _localizedValues[locale.languageCode]!['ai_analysis_strength']!;
-  String get aiAnalysisStrengthSubtitle => _localizedValues[locale.languageCode]!['ai_analysis_strength_subtitle']!;
-  String get aiImageGuide => _localizedValues[locale.languageCode]!['ai_image_guide']!;
-  String get aiImageGuideSubtitle => _localizedValues[locale.languageCode]!['ai_image_guide_subtitle']!;
-  String get dataPrivacy => _localizedValues[locale.languageCode]!['data_privacy']!;
-  String get dataBackup => _localizedValues[locale.languageCode]!['data_backup']!;
-  String get dataBackupSubtitle => _localizedValues[locale.languageCode]!['data_backup_subtitle']!;
-  String get dataRestore => _localizedValues[locale.languageCode]!['data_restore']!;
-  String get dataRestoreSubtitle => _localizedValues[locale.languageCode]!['data_restore_subtitle']!;
-  String get deleteAllData => _localizedValues[locale.languageCode]!['delete_all_data']!;
-  String get deleteAllDataSubtitle => _localizedValues[locale.languageCode]!['delete_all_data_subtitle']!;
-  String get premium => _localizedValues[locale.languageCode]!['premium']!;
-  String get premiumUpgrade => _localizedValues[locale.languageCode]!['premium_upgrade']!;
-  String get premiumUpgradeSubtitle => _localizedValues[locale.languageCode]!['premium_upgrade_subtitle']!;
-  String get appInfo => _localizedValues[locale.languageCode]!['app_info']!;
-  String get appVersion => _localizedValues[locale.languageCode]!['app_version']!;
-  String get privacyPolicy => _localizedValues[locale.languageCode]!['privacy_policy']!;
-  String get termsOfService => _localizedValues[locale.languageCode]!['terms_of_service']!;
-  String get cancel => _localizedValues[locale.languageCode]!['cancel']!;
-  String get confirm => _localizedValues[locale.languageCode]!['confirm']!;
-  String get close => _localizedValues[locale.languageCode]!['close']!;
-  String get save => _localizedValues[locale.languageCode]!['save']!;
-  String get back => _localizedValues[locale.languageCode]!['back']!;
+  String get appTitle => _get('app_title');
+  String get settings => _get('settings');
+  String get personalization => _get('personalization');
+  String get theme => _get('theme');
+  String get themeSubtitle => _get('theme_subtitle');
+  String get language => _get('language');
+  String get languageSubtitle => _get('language_subtitle');
+  String get fontSize => _get('font_size');
+  String get fontSizeSubtitle => _get('font_size_subtitle');
+  String get notifications => _get('notifications');
+  String get notificationsSubtitle => _get('notifications_subtitle');
+  String get aiSettings => _get('ai_settings');
+  String get defaultImageStyle => _get('default_image_style');
+  String get defaultImageStyleSubtitle => _get('default_image_style_subtitle');
+  String get aiAnalysisStrength => _get('ai_analysis_strength');
+  String get aiAnalysisStrengthSubtitle => _get('ai_analysis_strength_subtitle');
+  String get aiImageGuide => _get('ai_image_guide');
+  String get aiImageGuideSubtitle => _get('ai_image_guide_subtitle');
+  String get dataPrivacy => _get('data_privacy');
+  String get dataBackup => _get('data_backup');
+  String get dataBackupSubtitle => _get('data_backup_subtitle');
+  String get dataRestore => _get('data_restore');
+  String get dataRestoreSubtitle => _get('data_restore_subtitle');
+  String get deleteAllData => _get('delete_all_data');
+  String get deleteAllDataSubtitle => _get('delete_all_data_subtitle');
+  String get premium => _get('premium');
+  String get premiumUpgrade => _get('premium_upgrade');
+  String get premiumUpgradeSubtitle => _get('premium_upgrade_subtitle');
+  String get appInfo => _get('app_info');
+  String get appVersion => _get('app_version');
+  String get privacyPolicy => _get('privacy_policy');
+  String get termsOfService => _get('terms_of_service');
+  String get cancel => _get('cancel');
+  String get confirm => _get('confirm');
+  String get close => _get('close');
+  String get save => _get('save');
+  String get back => _get('back');
   
   // Calendar screen
-  String get refresh => _localizedValues[locale.languageCode]!['refresh']!;
-  String get today => _localizedValues[locale.languageCode]!['today']!;
-  String get noDiaryOnDate => _localizedValues[locale.languageCode]!['no_diary_on_date']!;
-  String get writeDiary => _localizedValues[locale.languageCode]!['write_diary']!;
-  String get cannotLoadCalendar => _localizedValues[locale.languageCode]!['cannot_load_calendar']!;
-  String get cannotLoadDiary => _localizedValues[locale.languageCode]!['cannot_load_diary']!;
-  String get tagsCount => _localizedValues[locale.languageCode]!['tags_count']!;
+  String get refresh => _get('refresh');
+  String get today => _get('today');
+  String get noDiaryOnDate => _get('no_diary_on_date');
+  String get writeDiary => _get('write_diary');
+  String get cannotLoadCalendar => _get('cannot_load_calendar');
+  String get cannotLoadDiary => _get('cannot_load_diary');
+  String get tagsCount => _get('tags_count');
   
   // Diary create screen
-  String get newDiary => _localizedValues[locale.languageCode]!['new_diary']!;
-  String get editDiary => _localizedValues[locale.languageCode]!['edit_diary']!;
-  String get title => _localizedValues[locale.languageCode]!['title']!;
-  String get titleHint => _localizedValues[locale.languageCode]!['title_hint']!;
-  String get diaryContent => _localizedValues[locale.languageCode]!['diary_content']!;
-  String get diaryContentHint => _localizedValues[locale.languageCode]!['diary_content_hint']!;
-  String get pleaseEnterTitle => _localizedValues[locale.languageCode]!['please_enter_title']!;
-  String get pleaseEnterContent => _localizedValues[locale.languageCode]!['please_enter_content']!;
-  String get contentTooShort => _localizedValues[locale.languageCode]!['content_too_short']!;
-  String get imageStyle => _localizedValues[locale.languageCode]!['image_style']!;
-  String get aiDrawingComplete => _localizedValues[locale.languageCode]!['ai_drawing_complete']!;
-  String get aiDrawing => _localizedValues[locale.languageCode]!['ai_drawing']!;
-  String get generateImage => _localizedValues[locale.languageCode]!['generate_image']!;
-  String generatingImage(String style) => _localizedValues[locale.languageCode]!['generating_image']!.replaceAll('{style}', style);
-  String get pleaseWait => _localizedValues[locale.languageCode]!['please_wait']!;
-  String get saving => _localizedValues[locale.languageCode]!['saving']!;
-  String get savedSuccessfully => _localizedValues[locale.languageCode]!['saved_successfully']!;
-  String get diarySaved => _localizedValues[locale.languageCode]!['diary_saved']!;
-  String get diaryUpdated => _localizedValues[locale.languageCode]!['diary_updated']!;
-  String imageGenerationError(String error) => _localizedValues[locale.languageCode]!['image_generation_error']!.replaceAll('{error}', error);
-  String saveError(String error) => _localizedValues[locale.languageCode]!['save_error']!.replaceAll('{error}', error);
-  String failedToLoadDiary(String error) => _localizedValues[locale.languageCode]!['failed_to_load_diary']!.replaceAll('{error}', error);
-  String get analyzingPhoto => _localizedValues[locale.languageCode]!['analyzing_photo']!;
-  String get analyzingEmotion => _localizedValues[locale.languageCode]!['analyzing_emotion']!;
-  String get extractingKeywords => _localizedValues[locale.languageCode]!['extracting_keywords']!;
-  String get generatingPrompt => _localizedValues[locale.languageCode]!['generating_prompt']!;
-  String get generatingAiImageNotice => _localizedValues[locale.languageCode]!['generating_ai_image_notice']!;
-  String get diarySavedSuccessfully => _localizedValues[locale.languageCode]!['diary_saved_successfully']!;
+  String get newDiary => _get('new_diary');
+  String get editDiary => _get('edit_diary');
+  String get title => _get('title');
+  String get titleHint => _get('title_hint');
+  String get diaryContent => _get('diary_content');
+  String get diaryContentHint => _get('diary_content_hint');
+  String get pleaseEnterTitle => _get('please_enter_title');
+  String get pleaseEnterContent => _get('please_enter_content');
+  String get contentTooShort => _get('content_too_short');
+  String get imageStyle => _get('image_style');
+  String get aiDrawingComplete => _get('ai_drawing_complete');
+  String get aiDrawing => _get('ai_drawing');
+  String get generateImage => _get('generate_image');
+  String generatingImage(String style) => _get('generating_image').replaceAll('{style}', style);
+  String get pleaseWait => _get('please_wait');
+  String get saving => _get('saving');
+  String get savedSuccessfully => _get('saved_successfully');
+  String get diarySaved => _get('diary_saved');
+  String get diaryUpdated => _get('diary_updated');
+  String imageGenerationError(String error) => _get('image_generation_error').replaceAll('{error}', error);
+  String saveError(String error) => _get('save_error').replaceAll('{error}', error);
+  String failedToLoadDiary(String error) => _get('failed_to_load_diary').replaceAll('{error}', error);
+  String get analyzingPhoto => _get('analyzing_photo');
+  String get analyzingEmotion => _get('analyzing_emotion');
+  String get extractingKeywords => _get('extracting_keywords');
+  String get generatingPrompt => _get('generating_prompt');
+  String get generatingAiImageNotice => _get('generating_ai_image_notice');
+  String get diarySavedSuccessfully => _get('diary_saved_successfully');
+  String get photoMoodAnalyzing => _get('photo_mood_analyzing');
+  String get photoAnalyzing => _get('photo_analyzing');
+  String get imageSavedToGallery => _get('image_saved_to_gallery');
+
+  // Statistics Screen
+  String get thisWeek => _get('this_week');
+  String get lastWeek => _get('last_week');
+  String get thisMonth => _get('this_month');
+  String get lastMonth => _get('last_month');
+  String dateRangeFormat(int startMonth, int startDay, int endDay) =>
+      _get('date_range_format')
+          .replaceAll('{startMonth}', startMonth.toString())
+          .replaceAll('{startDay}', startDay.toString())
+          .replaceAll('{endDay}', endDay.toString());
+  String dateRangeCrossMonthFormat(int startMonth, int startDay, int endMonth, int endDay) =>
+      _get('date_range_cross_month_format')
+          .replaceAll('{startMonth}', startMonth.toString())
+          .replaceAll('{startDay}', startDay.toString())
+          .replaceAll('{endMonth}', endMonth.toString())
+          .replaceAll('{endDay}', endDay.toString());
+  String yearMonthFormat(int year, int month) =>
+      _get('year_month_format')
+          .replaceAll('{year}', year.toString())
+          .replaceAll('{month}', month.toString());
+  String get noDiaryInPeriod => _get('no_diary_in_period');
+  String get weeklyEmotionInsight => _get('weekly_emotion_insight');
+  String get monthlyEmotionInsight => _get('monthly_emotion_insight');
+  String get yearlyEmotionInsight => _get('yearly_emotion_insight');
+  String get mainEmotion => _get('main_emotion');
+  String recordedTimes(int count) => _get('recorded_times').replaceAll('{count}', count.toString());
+  String get diaryWritingFrequency => _get('diary_writing_frequency');
+  String diaryCountFormat(int count) => _get('diary_count_format').replaceAll('{count}', count.toString());
+  String get emotionDiversity => _get('emotion_diversity');
+  String emotionTypesFormat(int count) => _get('emotion_types_format').replaceAll('{count}', count.toString());
+  String get weeklyAiEmotionAnalysis => _get('weekly_ai_emotion_analysis');
+  String get monthlyAiEmotionAnalysis => _get('monthly_ai_emotion_analysis');
+  String get yearlyAiEmotionAnalysis => _get('yearly_ai_emotion_analysis');
+  String get aiAnalyzingEmotions => _get('ai_analyzing_emotions');
+  String analysisTimeFormat(String time) => _get('analysis_time_format').replaceAll('{time}', time);
+  String get writeDiaryForAiInsight => _get('write_diary_for_ai_insight');
+  String get aiInsightGenerating => _get('ai_insight_generating');
+  String get emotionDistribution => _get('emotion_distribution');
+  String get yearlyEmotionDistribution => _get('yearly_emotion_distribution');
+  String timesCountFormat(int count) => _get('times_count_format').replaceAll('{count}', count.toString());
+  String timesWithPercentageFormat(int count, int percentage) =>
+      _get('times_with_percentage_format')
+          .replaceAll('{count}', count.toString())
+          .replaceAll('{percentage}', percentage.toString());
+  String dailyAverageFormat(String count) => _get('daily_average_format').replaceAll('{count}', count);
+  String get weeklyDiverseEmotions => _get('weekly_diverse_emotions');
+  String get monthlyRichEmotions => _get('monthly_rich_emotions');
+  String get yearlyVariousEmotions => _get('yearly_various_emotions');
+  String weeklyInsightTitleFormat(String period) => _get('weekly_insight_title_format').replaceAll('{period}', period);
+  String monthlyInsightTitleFormat(String period) => _get('monthly_insight_title_format').replaceAll('{period}', period);
+  String yearlyInsightTitleFormat(String period) => _get('yearly_insight_title_format').replaceAll('{period}', period);
+  String monthlyAverageFormat(String count) => _get('monthly_average_format').replaceAll('{count}', count);
 
   // Login screen
-  String get loginTitle => _localizedValues[locale.languageCode]!['login_title']!;
-  String get loginDescription => _localizedValues[locale.languageCode]!['login_description']!;
-  String get loginTagline => _localizedValues[locale.languageCode]!['login_tagline']!;
-  String get startWithGoogle => _localizedValues[locale.languageCode]!['start_with_google']!;
-  String get continueAsGuest => _localizedValues[locale.languageCode]!['continue_as_guest']!;
-  String welcomeUser(String name) => _localizedValues[locale.languageCode]!['welcome_user']!.replaceAll('{name}', name);
-  String get user => _localizedValues[locale.languageCode]!['user']!;
-  String googleLoginFailed(String error) => _localizedValues[locale.languageCode]!['google_login_failed']!.replaceAll('{error}', error);
-  String get guestLoginMessage => _localizedValues[locale.languageCode]!['guest_login_message']!;
-  String loginFailed(String error) => _localizedValues[locale.languageCode]!['login_failed']!.replaceAll('{error}', error);
+  String get loginTitle => _get('login_title');
+  String get loginDescription => _get('login_description');
+  String get loginTagline => _get('login_tagline');
+  String get startWithGoogle => _get('start_with_google');
+  String get continueAsGuest => _get('continue_as_guest');
+  String welcomeUser(String name) => _get('welcome_user').replaceAll('{name}', name);
+  String get user => _get('user');
+  String googleLoginFailed(String error) => _get('google_login_failed').replaceAll('{error}', error);
+  String get guestLoginMessage => _get('guest_login_message');
+  String loginFailed(String error) => _get('login_failed').replaceAll('{error}', error);
   
   // Emotions
-  String get emotionHappy => _localizedValues[locale.languageCode]!['emotion_happy']!;
-  String get emotionSad => _localizedValues[locale.languageCode]!['emotion_sad']!;
-  String get emotionAngry => _localizedValues[locale.languageCode]!['emotion_angry']!;
-  String get emotionExcited => _localizedValues[locale.languageCode]!['emotion_excited']!;
-  String get emotionPeaceful => _localizedValues[locale.languageCode]!['emotion_peaceful']!;
-  String get emotionAnxious => _localizedValues[locale.languageCode]!['emotion_anxious']!;
-  String get emotionGrateful => _localizedValues[locale.languageCode]!['emotion_grateful']!;
-  String get emotionNostalgic => _localizedValues[locale.languageCode]!['emotion_nostalgic']!;
-  String get emotionRomantic => _localizedValues[locale.languageCode]!['emotion_romantic']!;
-  String get emotionFrustrated => _localizedValues[locale.languageCode]!['emotion_frustrated']!;
-  String get emotionNormal => _localizedValues[locale.languageCode]!['emotion_normal']!;
-  String get allEmotions => _localizedValues[locale.languageCode]!['all_emotions']!;
-  String get errorOccurredGeneral => _localizedValues[locale.languageCode]!['error_occurred_general']!;
-  String get retryButton => _localizedValues[locale.languageCode]!['retry_button']!;
-  String get searchButton => _localizedValues[locale.languageCode]!['search_button']!;
-  String get aiGeneratedImagePlaceholder => _localizedValues[locale.languageCode]!['ai_generated_image_placeholder']!;
+  String get emotionHappy => _get('emotion_happy');
+  String get emotionSad => _get('emotion_sad');
+  String get emotionAngry => _get('emotion_angry');
+  String get emotionExcited => _get('emotion_excited');
+  String get emotionPeaceful => _get('emotion_peaceful');
+  String get emotionAnxious => _get('emotion_anxious');
+  String get emotionGrateful => _get('emotion_grateful');
+  String get emotionNostalgic => _get('emotion_nostalgic');
+  String get emotionRomantic => _get('emotion_romantic');
+  String get emotionFrustrated => _get('emotion_frustrated');
+  String get emotionNormal => _get('emotion_normal');
+  String get allEmotions => _get('all_emotions');
+  String get errorOccurredGeneral => _get('error_occurred_general');
+  String get retryButton => _get('retry_button');
+  String get searchButton => _get('search_button');
+  String get aiGeneratedImagePlaceholder => _get('ai_generated_image_placeholder');
 
   String getEmotionText(String emotion) {
     switch (emotion.toLowerCase()) {
@@ -2292,126 +3054,126 @@ Emitte tantum perspicacitates, nulla alia explanatio necessaria.''',
   }
   
   // Premium features
-  String get premiumFeature => _localizedValues[locale.languageCode]!['premium_feature']!;
-  String get upgradeToPremium => _localizedValues[locale.languageCode]!['upgrade_to_premium']!;
-  String get freeUserLimit => _localizedValues[locale.languageCode]!['free_user_limit']!;
-  String get imageModificationLimit => _localizedValues[locale.languageCode]!['image_modification_limit']!;
-  String get regenerateImage => _localizedValues[locale.languageCode]!['regenerate_image']!;
-  String get keepExistingImage => _localizedValues[locale.languageCode]!['keep_existing_image']!;
-  String get imageModificationDialogTitle => _localizedValues[locale.languageCode]!['image_modification_dialog_title']!;
-  String get imageModificationDialogContent => _localizedValues[locale.languageCode]!['image_modification_dialog_content']!;
-  String remainingGenerations(String count) => _localizedValues[locale.languageCode]!['remaining_generations']!.replaceAll('{count}', count);
-  String remainingModifications(String count) => _localizedValues[locale.languageCode]!['remaining_modifications']!.replaceAll('{count}', count);
-  String get unlimited => _localizedValues[locale.languageCode]!['unlimited']!;
+  String get premiumFeature => _get('premium_feature');
+  String get upgradeToPremium => _get('upgrade_to_premium');
+  String get freeUserLimit => _get('free_user_limit');
+  String get imageModificationLimit => _get('image_modification_limit');
+  String get regenerateImage => _get('regenerate_image');
+  String get keepExistingImage => _get('keep_existing_image');
+  String get imageModificationDialogTitle => _get('image_modification_dialog_title');
+  String get imageModificationDialogContent => _get('image_modification_dialog_content');
+  String remainingGenerations(String count) => _get('remaining_generations').replaceAll('{count}', count);
+  String remainingModifications(String count) => _get('remaining_modifications').replaceAll('{count}', count);
+  String get unlimited => _get('unlimited');
   
   // Search
-  String get searchHint => _localizedValues[locale.languageCode]!['search_hint']!;
-  String get searchLabel => _localizedValues[locale.languageCode]!['search_label']!;
-  String get noEntries => _localizedValues[locale.languageCode]!['no_entries']!;
-  String get createFirstEntry => _localizedValues[locale.languageCode]!['create_first_entry']!;
-  String get emptySearch => _localizedValues[locale.languageCode]!['empty_search']!;
-  String get tryDifferentKeyword => _localizedValues[locale.languageCode]!['try_different_keyword']!;
+  String get searchHint => _get('search_hint');
+  String get searchLabel => _get('search_label');
+  String get noEntries => _get('no_entries');
+  String get createFirstEntry => _get('create_first_entry');
+  String get emptySearch => _get('empty_search');
+  String get tryDifferentKeyword => _get('try_different_keyword');
   
   // Navigation & UI
-  String get diaryList => _localizedValues[locale.languageCode]!['diary_list']!;
-  String get calendar => _localizedValues[locale.languageCode]!['calendar']!;
-  String get diarySearch => _localizedValues[locale.languageCode]!['diary_search']!;
-  String get startWithAiDiary => _localizedValues[locale.languageCode]!['start_with_ai_diary']!;
-  String? get calendarLoadError => _localizedValues[locale.languageCode]?['calendar_load_error'];
+  String get diaryList => _get('diary_list');
+  String get calendar => _get('calendar');
+  String get diarySearch => _get('diary_search');
+  String get startWithAiDiary => _get('start_with_ai_diary');
+  String get calendarLoadError => _get('calendar_load_error');
   
   // Settings dialog getters
-  String get themeSelection => _localizedValues[locale.languageCode]!['theme_selection']!;
-  String get lightTheme => _localizedValues[locale.languageCode]!['light_theme']!;
-  String get darkTheme => _localizedValues[locale.languageCode]!['dark_theme']!;
-  String get systemTheme => _localizedValues[locale.languageCode]!['system_theme']!;
-  String get fontSizeSetting => _localizedValues[locale.languageCode]!['font_size_setting']!;
-  String get fontSizeDescription => _localizedValues[locale.languageCode]!['font_size_description']!;
-  String get fontSmall => _localizedValues[locale.languageCode]!['font_small']!;
-  String get fontMedium => _localizedValues[locale.languageCode]!['font_medium']!;
-  String get fontLarge => _localizedValues[locale.languageCode]!['font_large']!;
-  String get fontXLarge => _localizedValues[locale.languageCode]!['font_xlarge']!;
-  String fontSizeChanged(String size) => _localizedValues[locale.languageCode]!['font_size_changed']!.replaceAll('{size}', size);
-  String get notificationSettings => _localizedValues[locale.languageCode]!['notification_settings']!;
-  String get notificationDescription => _localizedValues[locale.languageCode]!['notification_description']!;
-  String get dailyReminder => _localizedValues[locale.languageCode]!['daily_reminder']!;
-  String get dailyReminderTime => _localizedValues[locale.languageCode]!['daily_reminder_time']!;
-  String get weeklySummary => _localizedValues[locale.languageCode]!['weekly_summary']!;
-  String get weeklySummaryTime => _localizedValues[locale.languageCode]!['weekly_summary_time']!;
-  String get notificationEnabled => _localizedValues[locale.languageCode]!['notification_enabled']!;
-  String get notificationDisabled => _localizedValues[locale.languageCode]!['notification_disabled']!;
-  String get weeklyNotificationEnabled => _localizedValues[locale.languageCode]!['weekly_notification_enabled']!;
-  String get weeklyNotificationDisabled => _localizedValues[locale.languageCode]!['weekly_notification_disabled']!;
-  String get premiumUpgradeTitle => _localizedValues[locale.languageCode]!['premium_upgrade_title']!;
-  String get premiumBenefits => _localizedValues[locale.languageCode]!['premium_benefits']!;
-  String get unlimitedAiImages => _localizedValues[locale.languageCode]!['unlimited_ai_images']!;
-  String get advancedImageStyles => _localizedValues[locale.languageCode]!['advanced_image_styles']!;
-  String get noAds => _localizedValues[locale.languageCode]!['no_ads']!;
-  String get cloudBackup => _localizedValues[locale.languageCode]!['cloud_backup']!;
-  String get advancedSecurity => _localizedValues[locale.languageCode]!['advanced_security']!;
-  String get later => _localizedValues[locale.languageCode]!['later']!;
-  String get monthlyPrice => _localizedValues[locale.languageCode]!['monthly_price']!;
-  String get premiumComingSoon => _localizedValues[locale.languageCode]!['premium_coming_soon']!;
-  String get defaultImageStyleSetting => _localizedValues[locale.languageCode]!['default_image_style_setting']!;
-  String get imageStyleDescription => _localizedValues[locale.languageCode]!['image_style_description']!;
-  String defaultStyleSet(String style) => _localizedValues[locale.languageCode]!['default_style_set']!.replaceAll('{style}', style);
-  String get dataBackupTitle => _localizedValues[locale.languageCode]!['data_backup_title']!;
-  String get backupDescription => _localizedValues[locale.languageCode]!['backup_description']!;
-  String get backupIncludes => _localizedValues[locale.languageCode]!['backup_includes']!;
-  String get backupDiaryContent => _localizedValues[locale.languageCode]!['backup_diary_content']!;
-  String get backupDateTime => _localizedValues[locale.languageCode]!['backup_date_time']!;
-  String get backupEmotionAnalysis => _localizedValues[locale.languageCode]!['backup_emotion_analysis']!;
-  String get backupGeneratedImages => _localizedValues[locale.languageCode]!['backup_generated_images']!;
-  String get backupImageStyle => _localizedValues[locale.languageCode]!['backup_image_style']!;
-  String get backupStart => _localizedValues[locale.languageCode]!['backup_start']!;
-  String get backingUp => _localizedValues[locale.languageCode]!['backing_up']!;
-  String get backupComplete => _localizedValues[locale.languageCode]!['backup_complete']!;
-  String backupCompleted(String count) => _localizedValues[locale.languageCode]!['backup_completed']!.replaceAll('{count}', count);
-  String backupFailed(String error) => _localizedValues[locale.languageCode]!['backup_failed']!.replaceAll('{error}', error);
-  String get dataRestoreTitle => _localizedValues[locale.languageCode]!['data_restore_title']!;
-  String get restoreDescription => _localizedValues[locale.languageCode]!['restore_description']!;
-  String get restoreStart => _localizedValues[locale.languageCode]!['restore_start']!;
-  String get deleteAllTitle => _localizedValues[locale.languageCode]!['delete_all_title']!;
-  String get deleteAllWarning => _localizedValues[locale.languageCode]!['delete_all_warning']!;
-  String get deleteAllConfirm => _localizedValues[locale.languageCode]!['delete_all_confirm']!;
-  String get appName => _localizedValues[locale.languageCode]!['app_name']!;
-  String get appDescription => _localizedValues[locale.languageCode]!['app_description']!;
-  String get privacyPolicyTitle => _localizedValues[locale.languageCode]!['privacy_policy_title']!;
-  String get privacyPolicyContent => _localizedValues[locale.languageCode]!['privacy_policy_content']!;
-  String get termsTitle => _localizedValues[locale.languageCode]!['terms_title']!;
-  String get termsContent => _localizedValues[locale.languageCode]!['terms_content']!;
-  String get privacyPolicySubtitle => _localizedValues[locale.languageCode]!['privacy_policy_subtitle']!;
-  String get termsSubtitle => _localizedValues[locale.languageCode]!['terms_subtitle']!;
-  String get ok => _localizedValues[locale.languageCode]!['ok']!;
+  String get themeSelection => _get('theme_selection');
+  String get lightTheme => _get('light_theme');
+  String get darkTheme => _get('dark_theme');
+  String get systemTheme => _get('system_theme');
+  String get fontSizeSetting => _get('font_size_setting');
+  String get fontSizeDescription => _get('font_size_description');
+  String get fontSmall => _get('font_small');
+  String get fontMedium => _get('font_medium');
+  String get fontLarge => _get('font_large');
+  String get fontXLarge => _get('font_xlarge');
+  String fontSizeChanged(String size) => _get('font_size_changed').replaceAll('{size}', size);
+  String get notificationSettings => _get('notification_settings');
+  String get notificationDescription => _get('notification_description');
+  String get dailyReminder => _get('daily_reminder');
+  String get dailyReminderTime => _get('daily_reminder_time');
+  String get weeklySummary => _get('weekly_summary');
+  String get weeklySummaryTime => _get('weekly_summary_time');
+  String get notificationEnabled => _get('notification_enabled');
+  String get notificationDisabled => _get('notification_disabled');
+  String get weeklyNotificationEnabled => _get('weekly_notification_enabled');
+  String get weeklyNotificationDisabled => _get('weekly_notification_disabled');
+  String get premiumUpgradeTitle => _get('premium_upgrade_title');
+  String get premiumBenefits => _get('premium_benefits');
+  String get unlimitedAiImages => _get('unlimited_ai_images');
+  String get advancedImageStyles => _get('advanced_image_styles');
+  String get noAds => _get('no_ads');
+  String get cloudBackup => _get('cloud_backup');
+  String get advancedSecurity => _get('advanced_security');
+  String get later => _get('later');
+  String get monthlyPrice => _get('monthly_price');
+  String get premiumComingSoon => _get('premium_coming_soon');
+  String get defaultImageStyleSetting => _get('default_image_style_setting');
+  String get imageStyleDescription => _get('image_style_description');
+  String defaultStyleSet(String style) => _get('default_style_set').replaceAll('{style}', style);
+  String get dataBackupTitle => _get('data_backup_title');
+  String get backupDescription => _get('backup_description');
+  String get backupIncludes => _get('backup_includes');
+  String get backupDiaryContent => _get('backup_diary_content');
+  String get backupDateTime => _get('backup_date_time');
+  String get backupEmotionAnalysis => _get('backup_emotion_analysis');
+  String get backupGeneratedImages => _get('backup_generated_images');
+  String get backupImageStyle => _get('backup_image_style');
+  String get backupStart => _get('backup_start');
+  String get backingUp => _get('backing_up');
+  String get backupComplete => _get('backup_complete');
+  String backupCompleted(String count) => _get('backup_completed').replaceAll('{count}', count);
+  String backupFailed(String error) => _get('backup_failed').replaceAll('{error}', error);
+  String get dataRestoreTitle => _get('data_restore_title');
+  String get restoreDescription => _get('restore_description');
+  String get restoreStart => _get('restore_start');
+  String get deleteAllTitle => _get('delete_all_title');
+  String get deleteAllWarning => _get('delete_all_warning');
+  String get deleteAllConfirm => _get('delete_all_confirm');
+  String get appName => _get('app_name');
+  String get appDescription => _get('app_description');
+  String get privacyPolicyTitle => _get('privacy_policy_title');
+  String get privacyPolicyContent => _get('privacy_policy_content');
+  String get termsTitle => _get('terms_title');
+  String get termsContent => _get('terms_content');
+  String get privacyPolicySubtitle => _get('privacy_policy_subtitle');
+  String get termsSubtitle => _get('terms_subtitle');
+  String get ok => _get('ok');
   
   // Subscription management getters
-  String get subscriptionManagementTest => _localizedValues[locale.languageCode]!['subscription_management_test']!;
-  String get premiumUser => _localizedValues[locale.languageCode]!['premium_user']!;
-  String get freeUser => _localizedValues[locale.languageCode]!['free_user']!;
-  String get imageGenerations => _localizedValues[locale.languageCode]!['image_generations']!;
-  String get imageModifications => _localizedValues[locale.languageCode]!['image_modifications']!;
-  String get setToFree => _localizedValues[locale.languageCode]!['set_to_free']!;
-  String get setToPremium => _localizedValues[locale.languageCode]!['set_to_premium']!;
-  String get setFreePlan => _localizedValues[locale.languageCode]!['set_free_plan']!;
-  String get setPremiumPlan => _localizedValues[locale.languageCode]!['set_premium_plan']!;
+  String get subscriptionManagementTest => _get('subscription_management_test');
+  String get premiumUser => _get('premium_user');
+  String get freeUser => _get('free_user');
+  String get imageGenerations => _get('image_generations');
+  String get imageModifications => _get('image_modifications');
+  String get setToFree => _get('set_to_free');
+  String get setToPremium => _get('set_to_premium');
+  String get setFreePlan => _get('set_free_plan');
+  String get setPremiumPlan => _get('set_premium_plan');
   
   // Image style getters
-  String get styleAuto => _localizedValues[locale.languageCode]!['style_auto']!;
-  String get styleRealistic => _localizedValues[locale.languageCode]!['style_realistic']!;
-  String get styleWatercolor => _localizedValues[locale.languageCode]!['style_watercolor']!;
-  String get styleIllustration => _localizedValues[locale.languageCode]!['style_illustration']!;
-  String get styleSketch => _localizedValues[locale.languageCode]!['style_sketch']!;
-  String get styleAnime => _localizedValues[locale.languageCode]!['style_anime']!;
-  String get styleImpressionist => _localizedValues[locale.languageCode]!['style_impressionist']!;
-  String get styleVintage => _localizedValues[locale.languageCode]!['style_vintage']!;
+  String get styleAuto => _get('style_auto');
+  String get styleRealistic => _get('style_realistic');
+  String get styleWatercolor => _get('style_watercolor');
+  String get styleIllustration => _get('style_illustration');
+  String get styleSketch => _get('style_sketch');
+  String get styleAnime => _get('style_anime');
+  String get styleImpressionist => _get('style_impressionist');
+  String get styleVintage => _get('style_vintage');
   
   // Advanced options getters
-  String get advancedOptions => _localizedValues[locale.languageCode]!['advanced_options']!;
-  String get lighting => _localizedValues[locale.languageCode]!['lighting']!;
-  String get mood => _localizedValues[locale.languageCode]!['mood']!;
-  String get color => _localizedValues[locale.languageCode]!['color']!;
-  String get composition => _localizedValues[locale.languageCode]!['composition']!;
-  String get none => _localizedValues[locale.languageCode]!['none']!;
-  String get clearAllOptions => _localizedValues[locale.languageCode]!['clear_all_options']!;
+  String get advancedOptions => _get('advanced_options');
+  String get lighting => _get('lighting');
+  String get mood => _get('mood');
+  String get color => _get('color');
+  String get composition => _get('composition');
+  String get none => _get('none');
+  String get clearAllOptions => _get('clear_all_options');
 
   // AI Prompts
   String aiEmotionAnalysisPrompt(String content) {
@@ -2419,7 +3181,7 @@ Emitte tantum perspicacitates, nulla alia explanatio necessaria.''',
         .replaceAll('{content}', content);
   }
 
-  String get aiPhotoAnalysisPrompt => _localizedValues[locale.languageCode]!['ai_photo_analysis_prompt']!;
+  String get aiPhotoAnalysisPrompt => _get('ai_photo_analysis_prompt');
 
   String aiImagePromptBase({
     required String style,
@@ -2460,244 +3222,325 @@ Emitte tantum perspicacitates, nulla alia explanatio necessaria.''',
         .replaceAll('{period}', period);
   }
 
-  String get aiFallbackInsight => _localizedValues[locale.languageCode]!['ai_fallback_insight']!;
+  String get aiFallbackInsight => _get('ai_fallback_insight');
 
   // Settings screen getters
-  String get personalizationSubtitle => _localizedValues[locale.languageCode]!['personalization_subtitle']!;
-  String get aiSettingsSubtitle => _localizedValues[locale.languageCode]!['ai_settings_subtitle']!;
-  String get backupAndRestore => _localizedValues[locale.languageCode]!['backup_and_restore']!;
-  String get deleteData => _localizedValues[locale.languageCode]!['delete_data']!;
-  String get deleteDataDescription => _localizedValues[locale.languageCode]!['delete_data_description']!;
-  String get premiumUpgradeDescription => _localizedValues[locale.languageCode]!['premium_upgrade_description']!;
-  String get unlimitedWithPremium => _localizedValues[locale.languageCode]!['unlimited_with_premium']!;
-  String get testMode => _localizedValues[locale.languageCode]!['test_mode']!;
-  String get currentPremiumUser => _localizedValues[locale.languageCode]!['current_premium_user']!;
-  String get currentFreeUser => _localizedValues[locale.languageCode]!['current_free_user']!;
-  String get switchedToPremium => _localizedValues[locale.languageCode]!['switched_to_premium']!;
-  String get switchedToFree => _localizedValues[locale.languageCode]!['switched_to_free']!;
-  String get free => _localizedValues[locale.languageCode]!['free']!;
-  String get logoutToLoginScreen => _localizedValues[locale.languageCode]!['logout_to_login_screen']!;
-  String get logout => _localizedValues[locale.languageCode]!['logout']!;
-  String get returnToLoginConfirmation => _localizedValues[locale.languageCode]!['return_to_login_confirmation']!;
+  String get personalizationSubtitle => _get('personalization_subtitle');
+  String get aiSettingsSubtitle => _get('ai_settings_subtitle');
+  String get backupAndRestore => _get('backup_and_restore');
+  String get deleteData => _get('delete_data');
+  String get deleteDataDescription => _get('delete_data_description');
+  String get premiumUpgradeDescription => _get('premium_upgrade_description');
+  String get unlimitedWithPremium => _get('unlimited_with_premium');
+  String get testMode => _get('test_mode');
+  String get currentPremiumUser => _get('current_premium_user');
+  String get currentFreeUser => _get('current_free_user');
+  String get switchedToPremium => _get('switched_to_premium');
+  String get switchedToFree => _get('switched_to_free');
+  String get free => _get('free');
+  String get logoutToLoginScreen => _get('logout_to_login_screen');
+  String get logout => _get('logout');
+  String get returnToLoginConfirmation => _get('return_to_login_confirmation');
   // Personalization settings screen
-  String get font => _localizedValues[locale.languageCode]!['font']!;
-  String get selectFontDescription => _localizedValues[locale.languageCode]!['select_font_description']!;
-  String get dateFormat => _localizedValues[locale.languageCode]!['date_format']!;
-  String get selectDateFormatDescription => _localizedValues[locale.languageCode]!['select_date_format_description']!;
-  String get timezone => _localizedValues[locale.languageCode]!['timezone']!;
-  String get selectTimezoneDescription => _localizedValues[locale.languageCode]!['select_timezone_description']!;
-  String get selectFont => _localizedValues[locale.languageCode]!['select_font']!;
-  String get premiumOnlyFont => _localizedValues[locale.languageCode]!['premium_only_font']!;
-  String get selectDateFormat => _localizedValues[locale.languageCode]!['select_date_format']!;
-  String get dateFormatYmd => _localizedValues[locale.languageCode]!['date_format_ymd']!;
-  String get dateFormatDmy => _localizedValues[locale.languageCode]!['date_format_dmy']!;
-  String get dateFormatMdy => _localizedValues[locale.languageCode]!['date_format_mdy']!;
-  String get dateFormatChanged => _localizedValues[locale.languageCode]!['date_format_changed']!;
-  String get selectTimezone => _localizedValues[locale.languageCode]!['select_timezone']!;
-  String get timezoneChangedFormat => _localizedValues[locale.languageCode]!['timezone_changed_format']!;
-  String get timezoneSeoul => _localizedValues[locale.languageCode]!['timezone_seoul']!;
-  String get timezoneTokyo => _localizedValues[locale.languageCode]!['timezone_tokyo']!;
-  String get timezoneBeijing => _localizedValues[locale.languageCode]!['timezone_beijing']!;
-  String get timezoneNewYork => _localizedValues[locale.languageCode]!['timezone_new_york']!;
-  String get timezoneLosAngeles => _localizedValues[locale.languageCode]!['timezone_los_angeles']!;
-  String get timezoneLondon => _localizedValues[locale.languageCode]!['timezone_london']!;
-  String get timezoneParis => _localizedValues[locale.languageCode]!['timezone_paris']!;
+  String get font => _get('font');
+  String get selectFontDescription => _get('select_font_description');
+  String get dateFormat => _get('date_format');
+  String get selectDateFormatDescription => _get('select_date_format_description');
+  String get timezone => _get('timezone');
+  String get selectTimezoneDescription => _get('select_timezone_description');
+  String get selectFont => _get('select_font');
+  String get premiumOnlyFont => _get('premium_only_font');
+  String get selectDateFormat => _get('select_date_format');
+  String get dateFormatYmd => _get('date_format_ymd');
+  String get dateFormatDmy => _get('date_format_dmy');
+  String get dateFormatMdy => _get('date_format_mdy');
+  String get dateFormatChanged => _get('date_format_changed');
+  String get selectTimezone => _get('select_timezone');
+  String get timezoneChangedFormat => _get('timezone_changed_format');
+  String get timezoneSeoul => _get('timezone_seoul');
+  String get timezoneTokyo => _get('timezone_tokyo');
+  String get timezoneBeijing => _get('timezone_beijing');
+  String get timezoneNewYork => _get('timezone_new_york');
+  String get timezoneLosAngeles => _get('timezone_los_angeles');
+  String get timezoneLondon => _get('timezone_london');
+  String get timezoneParis => _get('timezone_paris');
 
   // AI settings screen
-  String get autoAdvancedSettings => _localizedValues[locale.languageCode]!['auto_advanced_settings']!;
-  String get autoAdvancedSettingsDescription => _localizedValues[locale.languageCode]!['auto_advanced_settings_description']!;
-  String get autoAdvancedSettingsEnabled => _localizedValues[locale.languageCode]!['auto_advanced_settings_enabled']!;
-  String get autoAdvancedSettingsDisabled => _localizedValues[locale.languageCode]!['auto_advanced_settings_disabled']!;
-  String get premiumStylesAvailableFormat => _localizedValues[locale.languageCode]!['premium_styles_available_format']!;
+  String get autoAdvancedSettings => _get('auto_advanced_settings');
+  String get autoAdvancedSettingsDescription => _get('auto_advanced_settings_description');
+  String get autoAdvancedSettingsEnabled => _get('auto_advanced_settings_enabled');
+  String get autoAdvancedSettingsDisabled => _get('auto_advanced_settings_disabled');
+  String get premiumStylesAvailableFormat => _get('premium_styles_available_format');
 
   // Backup and restore screen
-  String get autoBackup => _localizedValues[locale.languageCode]!['auto_backup']!;
-  String get localBackupRestore => _localizedValues[locale.languageCode]!['local_backup_restore']!;
-  String get cloudBackupRestore => _localizedValues[locale.languageCode]!['cloud_backup_restore']!;
-  String get freeUserBackupDescription => _localizedValues[locale.languageCode]!['free_user_backup_description']!;
-  String get premiumBackupDescription => _localizedValues[locale.languageCode]!['premium_backup_description']!;
-  String get selectBackupLocation => _localizedValues[locale.languageCode]!['select_backup_location']!;
-  String get backupCanceled => _localizedValues[locale.languageCode]!['backup_canceled']!;
-  String get restoreWarning => _localizedValues[locale.languageCode]!['restore_warning']!;
-  String get selectFile => _localizedValues[locale.languageCode]!['select_file']!;
-  String get restoring => _localizedValues[locale.languageCode]!['restoring']!;
-  String get noRestoredDiaries => _localizedValues[locale.languageCode]!['no_restored_diaries']!;
-  String get restoreFailedFormat => _localizedValues[locale.languageCode]!['restore_failed_format']!;
-  String get includedContent => _localizedValues[locale.languageCode]!['included_content']!;
-  String get allDiaryContent => _localizedValues[locale.languageCode]!['all_diary_content']!;
-  String get emotionAnalysisResult => _localizedValues[locale.languageCode]!['emotion_analysis_result']!;
-  String get generatedImagesBase64 => _localizedValues[locale.languageCode]!['generated_images_base64']!;
-  String get imageStyleAndSettings => _localizedValues[locale.languageCode]!['image_style_and_settings']!;
-  String get uploadedPhotos => _localizedValues[locale.languageCode]!['uploaded_photos']!;
-  String get existingBackupWarning => _localizedValues[locale.languageCode]!['existing_backup_warning']!;
-  String get premiumBackupSuccessFormat => _localizedValues[locale.languageCode]!['premium_backup_success_format']!;
-  String get backupSuccessFormat => _localizedValues[locale.languageCode]!['backup_success_format']!;
-  String get cancelFileSelectionHint => _localizedValues[locale.languageCode]!['cancel_file_selection_hint']!;
-  String get restoreSuccessFormat => _localizedValues[locale.languageCode]!['restore_success_format']!;
-  String get googleDriveBackup => _localizedValues[locale.languageCode]!['google_drive_backup']!;
-  String get googleDriveBackupDescription => _localizedValues[locale.languageCode]!['google_drive_backup_description']!;
-  String get startBackup => _localizedValues[locale.languageCode]!['start_backup']!;
-  String get loginRequiredMessage => _localizedValues[locale.languageCode]!['login_required_message']!;
-  String get backingUpToGoogleDrive => _localizedValues[locale.languageCode]!['backing_up_to_google_drive']!;
-  String get backupCompleteTestMode => _localizedValues[locale.languageCode]!['backup_complete_test_mode']!;
-  String get backingUpToCloud => _localizedValues[locale.languageCode]!['backing_up_to_cloud']!;
-  String get cloudBackupComplete => _localizedValues[locale.languageCode]!['cloud_backup_complete']!;
-  String get cloudBackupFailed => _localizedValues[locale.languageCode]!['cloud_backup_failed']!;
-  String cloudBackupErrorFormat(String error) => _localizedValues[locale.languageCode]!['cloud_backup_error_format']!.replaceAll('{error}', error);
-  String get loginRequiredTitle => _localizedValues[locale.languageCode]!['login_required_title']!;
-  String get cloudRestoreLoginMessage => _localizedValues[locale.languageCode]!['cloud_restore_login_message']!;
-  String get testRestoreTitle => _localizedValues[locale.languageCode]!['test_restore_title']!;
-  String get testModeRestoreSimulation => _localizedValues[locale.languageCode]!['test_mode_restore_simulation']!;
-  String get realEnvironmentGoogleDriveRestore => _localizedValues[locale.languageCode]!['real_environment_google_drive_restore']!;
-  String get startButton => _localizedValues[locale.languageCode]!['start_button']!;
-  String get noBackupTitle => _localizedValues[locale.languageCode]!['no_backup_title']!;
-  String get noCloudBackupMessage => _localizedValues[locale.languageCode]!['no_cloud_backup_message']!;
-  String get premiumOnlyFeature => _localizedValues[locale.languageCode]!['premium_only_feature']!;
-  String get cloudRestoreTitle => _localizedValues[locale.languageCode]!['cloud_restore_title']!;
-  String get restoreFromFirebase => _localizedValues[locale.languageCode]!['restore_from_firebase']!;
-  String get allDataWillBeReplaced => _localizedValues[locale.languageCode]!['all_data_will_be_replaced']!;
-  String get cancelButton => _localizedValues[locale.languageCode]!['cancel_button']!;
-  String get startRestoreButton => _localizedValues[locale.languageCode]!['start_restore_button']!;
-  String get restoringFromCloud => _localizedValues[locale.languageCode]!['restoring_from_cloud']!;
-  String get cloudRestoreFailed => _localizedValues[locale.languageCode]!['cloud_restore_failed']!;
-  String cloudRestoreErrorFormat(String error) => _localizedValues[locale.languageCode]!['cloud_restore_error_format']!.replaceAll('{error}', error);
-  String get restoreCompleteTestMode => _localizedValues[locale.languageCode]!['restore_complete_test_mode']!;
-  String get cloudBackupRestorePremiumOnly => _localizedValues[locale.languageCode]!['cloud_backup_restore_premium_only']!;
-  String get autoCloudBackup => _localizedValues[locale.languageCode]!['auto_cloud_backup']!;
-  String get autoBackupEveryFiveMinutes => _localizedValues[locale.languageCode]!['auto_backup_every_5_minutes']!;
-  String get autoBackupEnabled => _localizedValues[locale.languageCode]!['auto_backup_enabled']!;
-  String get autoBackupDisabled => _localizedValues[locale.languageCode]!['auto_backup_disabled']!;
-  String lastBackupTimeFormat(String time) => _localizedValues[locale.languageCode]!['last_backup_time_format']!.replaceAll('{time}', time);
-  String errorFormat(String error) => _localizedValues[locale.languageCode]!['error_format']!.replaceAll('{error}', error);
-  String get autoCloudBackupFeature => _localizedValues[locale.languageCode]!['auto_cloud_backup_feature']!;
-  String get upgradeForAutoBackup => _localizedValues[locale.languageCode]!['upgrade_for_auto_backup']!;
-  String get cloudBackupFeature => _localizedValues[locale.languageCode]!['cloud_backup_feature']!;
-  String get cloudBackupToGoogleDrive => _localizedValues[locale.languageCode]!['cloud_backup_to_google_drive']!;
-  String get premiumFeatureShort => _localizedValues[locale.languageCode]!['premium_feature_short']!;
-  String get cloudRestoreFeature => _localizedValues[locale.languageCode]!['cloud_restore_feature']!;
-  String get cloudRestoreFromGoogleDrive => _localizedValues[locale.languageCode]!['cloud_restore_from_google_drive']!;
-  String get cloudBackupRestoreFeature => _localizedValues[locale.languageCode]!['cloud_backup_restore_feature']!;
-  String get upgradeForCloudBackupRestore => _localizedValues[locale.languageCode]!['upgrade_for_cloud_backup_restore']!;
+  String get autoBackup => _get('auto_backup');
+  String get localBackupRestore => _get('local_backup_restore');
+  String get cloudBackupRestore => _get('cloud_backup_restore');
+  String get freeUserBackupDescription => _get('free_user_backup_description');
+  String get premiumBackupDescription => _get('premium_backup_description');
+  String get selectBackupLocation => _get('select_backup_location');
+  String get backupCanceled => _get('backup_canceled');
+  String get restoreWarning => _get('restore_warning');
+  String get selectFile => _get('select_file');
+  String get restoring => _get('restoring');
+  String get noRestoredDiaries => _get('no_restored_diaries');
+  String get restoreFailedFormat => _get('restore_failed_format');
+  String get includedContent => _get('included_content');
+  String get allDiaryContent => _get('all_diary_content');
+  String get emotionAnalysisResult => _get('emotion_analysis_result');
+  String get generatedImagesBase64 => _get('generated_images_base64');
+  String get imageStyleAndSettings => _get('image_style_and_settings');
+  String get uploadedPhotos => _get('uploaded_photos');
+  String get existingBackupWarning => _get('existing_backup_warning');
+  String get premiumBackupSuccessFormat => _get('premium_backup_success_format');
+  String get backupSuccessFormat => _get('backup_success_format');
+  String get cancelFileSelectionHint => _get('cancel_file_selection_hint');
+  String get restoreSuccessFormat => _get('restore_success_format');
+  String get googleDriveBackup => _get('google_drive_backup');
+  String get googleDriveBackupDescription => _get('google_drive_backup_description');
+  String get startBackup => _get('start_backup');
+  String get loginRequiredMessage => _get('login_required_message');
+  String get backingUpToGoogleDrive => _get('backing_up_to_google_drive');
+  String get backupCompleteTestMode => _get('backup_complete_test_mode');
+  String get backingUpToCloud => _get('backing_up_to_cloud');
+  String get cloudBackupComplete => _get('cloud_backup_complete');
+  String get cloudBackupFailed => _get('cloud_backup_failed');
+  String cloudBackupErrorFormat(String error) => _get('cloud_backup_error_format').replaceAll('{error}', error);
+  String get loginRequiredTitle => _get('login_required_title');
+  String get cloudRestoreLoginMessage => _get('cloud_restore_login_message');
+  String get testRestoreTitle => _get('test_restore_title');
+  String get testModeRestoreSimulation => _get('test_mode_restore_simulation');
+  String get realEnvironmentGoogleDriveRestore => _get('real_environment_google_drive_restore');
+  String get startButton => _get('start_button');
+  String get noBackupTitle => _get('no_backup_title');
+  String get noCloudBackupMessage => _get('no_cloud_backup_message');
+  String get premiumOnlyFeature => _get('premium_only_feature');
+  String get premiumOnlyFeatureDesc => _get('premium_only_feature_desc');
+  String get premiumBenefitFonts => _get('premium_benefit_fonts');
+  String get premiumBenefitStyles => _get('premium_benefit_styles');
+  String get premiumBenefitUnlimited => _get('premium_benefit_unlimited');
+  String get premiumBenefitRegenerate => _get('premium_benefit_regenerate');
+  String get premiumBenefitAdvanced => _get('premium_benefit_advanced');
+  String get premiumBenefitAds => _get('premium_benefit_ads');
+  String get testModePremiumHint => _get('test_mode_premium_hint');
+  String premiumFeatureMessage(String feature) => _get('premium_feature_message').replaceAll('{feature}', feature);
+  String get premiumFeatureMessageDefault => _get('premium_feature_message_default');
+  String get cloudRestoreTitle => _get('cloud_restore_title');
+  String get restoreFromFirebase => _get('restore_from_firebase');
+  String get allDataWillBeReplaced => _get('all_data_will_be_replaced');
+  String get cancelButton => _get('cancel_button');
+  String get startRestoreButton => _get('start_restore_button');
+  String get restoringFromCloud => _get('restoring_from_cloud');
+  String get cloudRestoreFailed => _get('cloud_restore_failed');
+  String cloudRestoreErrorFormat(String error) => _get('cloud_restore_error_format').replaceAll('{error}', error);
+  String get restoreCompleteTestMode => _get('restore_complete_test_mode');
+  String get cloudBackupRestorePremiumOnly => _get('cloud_backup_restore_premium_only');
+  String get autoCloudBackup => _get('auto_cloud_backup');
+  String get autoBackupEveryFiveMinutes => _get('auto_backup_every_5_minutes');
+  String get autoBackupEnabled => _get('auto_backup_enabled');
+  String get autoBackupDisabled => _get('auto_backup_disabled');
+  String lastBackupTimeFormat(String time) => _get('last_backup_time_format').replaceAll('{time}', time);
+  String errorFormat(String error) => _get('error_format').replaceAll('{error}', error);
+  String get autoCloudBackupFeature => _get('auto_cloud_backup_feature');
+  String get upgradeForAutoBackup => _get('upgrade_for_auto_backup');
+  String get cloudBackupFeature => _get('cloud_backup_feature');
+  String get cloudBackupToGoogleDrive => _get('cloud_backup_to_google_drive');
+  String get premiumFeatureShort => _get('premium_feature_short');
+  String get cloudRestoreFeature => _get('cloud_restore_feature');
+  String get cloudRestoreFromGoogleDrive => _get('cloud_restore_from_google_drive');
+  String get cloudBackupRestoreFeature => _get('cloud_backup_restore_feature');
+  String get upgradeForCloudBackupRestore => _get('upgrade_for_cloud_backup_restore');
   // Delete settings screen getters
-  String get warningNotice => _localizedValues[locale.languageCode]!['warning_notice']!;
-  String get deleteWarningMessage => _localizedValues[locale.languageCode]!['delete_warning_message']!;
-  String get clearCache => _localizedValues[locale.languageCode]!['clear_cache']!;
-  String get clearCacheDescription => _localizedValues[locale.languageCode]!['clear_cache_description']!;
-  String get cacheZero => _localizedValues[locale.languageCode]!['cache_zero']!;
-  String get calculationFailed => _localizedValues[locale.languageCode]!['calculation_failed']!;
-  String get clearCacheConfirmMessage => _localizedValues[locale.languageCode]!['clear_cache_confirm_message']!;
-  String get clearingCache => _localizedValues[locale.languageCode]!['clearing_cache']!;
-  String get cacheDeletedSuccess => _localizedValues[locale.languageCode]!['cache_deleted_success']!;
-  String get cacheDeleteError => _localizedValues[locale.languageCode]!['cache_delete_error']!;
-  String get deleteButton => _localizedValues[locale.languageCode]!['delete_button']!;
-  String get allDataDeleted => _localizedValues[locale.languageCode]!['all_data_deleted']!;
-  String get deleteErrorFormat => _localizedValues[locale.languageCode]!['delete_error_format']!;
-  String get appInfoSubtitle => _localizedValues[locale.languageCode]!['app_info_subtitle']!;
+  String get warningNotice => _get('warning_notice');
+  String get deleteWarningMessage => _get('delete_warning_message');
+  String get clearCache => _get('clear_cache');
+  String get clearCacheDescription => _get('clear_cache_description');
+  String get cacheZero => _get('cache_zero');
+  String get calculationFailed => _get('calculation_failed');
+  String get clearCacheConfirmMessage => _get('clear_cache_confirm_message');
+  String get clearingCache => _get('clearing_cache');
+  String get cacheDeletedSuccess => _get('cache_deleted_success');
+  String get cacheDeleteError => _get('cache_delete_error');
+  String get deleteButton => _get('delete_button');
+  String get allDataDeleted => _get('all_data_deleted');
+  String get deleteErrorFormat => _get('delete_error_format');
+  String get appInfoSubtitle => _get('app_info_subtitle');
 
   // Diary detail screen
-  String get errorLoadingDiary => _localizedValues[locale.languageCode]!['error_loading_diary']!;
-  String get diaryDetailTitle => _localizedValues[locale.languageCode]!['diary_detail_title']!;
-  String get diaryNotFound => _localizedValues[locale.languageCode]!['diary_not_found']!;
-  String get writtenLabel => _localizedValues[locale.languageCode]!['written_label']!;
-  String get lastModifiedLabel => _localizedValues[locale.languageCode]!['last_modified_label']!;
-  String get noAiImageAvailable => _localizedValues[locale.languageCode]!['no_ai_image_available']!;
-  String get todaysEmotionLabel => _localizedValues[locale.languageCode]!['todays_emotion_label']!;
-  String get writtenDateLabel => _localizedValues[locale.languageCode]!['written_date_label']!;
-  String get hashtagAiDiary => _localizedValues[locale.languageCode]!['hashtag_ai_diary']!;
-  String get deleteDiaryTitle => _localizedValues[locale.languageCode]!['delete_diary_title']!;
-  String get deleteDiaryConfirmation => _localizedValues[locale.languageCode]!['delete_diary_confirmation']!;
-  String get diaryDeletedSuccess => _localizedValues[locale.languageCode]!['diary_deleted_success']!;
-  String get diaryDeleteError => _localizedValues[locale.languageCode]!['diary_delete_error']!;
-  String get aiGeneratedBadge => _localizedValues[locale.languageCode]!['ai_generated_badge']!;
-  String get userPhotoBadge => _localizedValues[locale.languageCode]!['user_photo_badge']!;
+  String get errorLoadingDiary => _get('error_loading_diary');
+  String get diaryDetailTitle => _get('diary_detail_title');
+  String get diaryNotFound => _get('diary_not_found');
+  String get writtenLabel => _get('written_label');
+  String get lastModifiedLabel => _get('last_modified_label');
+  String get noAiImageAvailable => _get('no_ai_image_available');
+  String get todaysEmotionLabel => _get('todays_emotion_label');
+  String get writtenDateLabel => _get('written_date_label');
+  String get hashtagAiDiary => _get('hashtag_ai_diary');
+  String get deleteDiaryTitle => _get('delete_diary_title');
+  String get deleteDiaryConfirmation => _get('delete_diary_confirmation');
+  String get diaryDeletedSuccess => _get('diary_deleted_success');
+  String get diaryDeleteError => _get('diary_delete_error');
+  String get aiGeneratedBadge => _get('ai_generated_badge');
+  String get userPhotoBadge => _get('user_photo_badge');
 
-  String get testModeMessage => _localizedValues[locale.languageCode]!['test_mode_message']!;
-  String get subscriptionCompleted => _localizedValues[locale.languageCode]!['subscription_completed']!;
-  String get subscribeTest => _localizedValues[locale.languageCode]!['subscribe_test']!;
+  String get testModeMessage => _get('test_mode_message');
+  String get subscriptionCompleted => _get('subscription_completed');
+  String get subscribeTest => _get('subscribe_test');
 
   // Date formats
-  String get dateFormatFull => _localizedValues[locale.languageCode]!['date_format_full']!;
-  String get adFreeUnlimited => _localizedValues[locale.languageCode]!['ad_free_unlimited']!;
-  String get adRemoval => _localizedValues[locale.languageCode]!['ad_removal']!;
-  String get adRemovalDesc => _localizedValues[locale.languageCode]!['ad_removal_desc']!;
-  String get advancedImageOptions => _localizedValues[locale.languageCode]!['advanced_image_options']!;
-  String get advancedImageOptionsDesc => _localizedValues[locale.languageCode]!['advanced_image_options_desc']!;
-  String get aiDrawnImage => _localizedValues[locale.languageCode]!['ai_drawn_image']!;
-  String get allPremiumFeatures => _localizedValues[locale.languageCode]!['all_premium_features']!;
-  String get alreadyPremium => _localizedValues[locale.languageCode]!['already_premium']!;
-  String get bestValue => _localizedValues[locale.languageCode]!['best_value']!;
-  String get cancelAnytime => _localizedValues[locale.languageCode]!['cancel_anytime']!;
-  String get cloudBackupAuto => _localizedValues[locale.languageCode]!['cloud_backup_auto']!;
-  String get cloudBackupAutoDesc => _localizedValues[locale.languageCode]!['cloud_backup_auto_desc']!;
-  String get confirmDeleteDiary => _localizedValues[locale.languageCode]!['confirm_delete_diary']!;
-  String get contentLabel => _localizedValues[locale.languageCode]!['content_label']!;
-  String get createAiDiaryButton => _localizedValues[locale.languageCode]!['create_ai_diary_button']!;
-  String get createNewDiary => _localizedValues[locale.languageCode]!['create_new_diary']!;
-  String get currentlySubscribed => _localizedValues[locale.languageCode]!['currently_subscribed']!;
-  String get delete => _localizedValues[locale.languageCode]!['delete']!;
-  String get deleteDiary => _localizedValues[locale.languageCode]!['delete_diary']!;
-  String get deleteFailed => _localizedValues[locale.languageCode]!['delete_failed']!;
-  String get diaryDeleted => _localizedValues[locale.languageCode]!['diary_deleted']!;
-  String get edit => _localizedValues[locale.languageCode]!['edit']!;
-  String get editDiaryOnly => _localizedValues[locale.languageCode]!['edit_diary_only']!;
-  String get editImageAndDiary => _localizedValues[locale.languageCode]!['edit_image_and_diary']!;
-  String get emotionAll => _localizedValues[locale.languageCode]!['emotion_all']!;
-  String get emotionStats => _localizedValues[locale.languageCode]!['emotion_stats']!;
-  String get errorOccurred => _localizedValues[locale.languageCode]!['error_occurred']!;
-  String get freeVersion1PhotoOnly => _localizedValues[locale.languageCode]!['free_version1_photo_only']!;
-  String get generating => _localizedValues[locale.languageCode]!['generating']!;
-  String get imageGallery => _localizedValues[locale.languageCode]!['image_gallery']!;
-  String get lifetimeAccess => _localizedValues[locale.languageCode]!['lifetime_access']!;
-  String get lifetimeSubscription => _localizedValues[locale.languageCode]!['lifetime_subscription']!;
-  String get makeDiarySpecial => _localizedValues[locale.languageCode]!['make_diary_special']!;
-  String get max3Photos => _localizedValues[locale.languageCode]!['max3_photos']!;
-  String get max3PhotosUpload => _localizedValues[locale.languageCode]!['max3_photos_upload']!;
-  String get monthly => _localizedValues[locale.languageCode]!['monthly']!;
-  String get monthlySubscription => _localizedValues[locale.languageCode]!['monthly_subscription']!;
-  String get myPhoto => _localizedValues[locale.languageCode]!['my_photo']!;
-  String get onboardingNext => _localizedValues[locale.languageCode]!['onboarding_next']!;
-  String get onboardingPage1Desc => _localizedValues[locale.languageCode]!['onboarding_page1_desc']!;
-  String get onboardingPage1Title => _localizedValues[locale.languageCode]!['onboarding_page1_title']!;
-  String get onboardingPage2Desc => _localizedValues[locale.languageCode]!['onboarding_page2_desc']!;
-  String get onboardingPage2Title => _localizedValues[locale.languageCode]!['onboarding_page2_title']!;
-  String get onboardingPage3Desc => _localizedValues[locale.languageCode]!['onboarding_page3_desc']!;
-  String get onboardingPage3Title => _localizedValues[locale.languageCode]!['onboarding_page3_title']!;
-  String get onboardingPage4Desc => _localizedValues[locale.languageCode]!['onboarding_page4_desc']!;
-  String get onboardingPage4Title => _localizedValues[locale.languageCode]!['onboarding_page4_title']!;
-  String get onboardingSkip => _localizedValues[locale.languageCode]!['onboarding_skip']!;
-  String get onboardingStart => _localizedValues[locale.languageCode]!['onboarding_start']!;
-  String get onePhoto => _localizedValues[locale.languageCode]!['one_photo']!;
-  String get oneTimePayment => _localizedValues[locale.languageCode]!['one_time_payment']!;
-  String get photoUpload => _localizedValues[locale.languageCode]!['photo_upload']!;
-  String get photoUploadMax3 => _localizedValues[locale.languageCode]!['photo_upload_max3']!;
-  String get photoUploadMax3Desc => _localizedValues[locale.languageCode]!['photo_upload_max3_desc']!;
-  String get pleaseSelectPhoto => _localizedValues[locale.languageCode]!['please_select_photo']!;
-  String get premiumArtStyles => _localizedValues[locale.languageCode]!['premium_art_styles']!;
-  String get premiumArtStylesDesc => _localizedValues[locale.languageCode]!['premium_art_styles_desc']!;
-  String get premiumFeatures => _localizedValues[locale.languageCode]!['premium_features']!;
-  String get premiumFonts => _localizedValues[locale.languageCode]!['premium_fonts']!;
-  String get premiumFontsDesc => _localizedValues[locale.languageCode]!['premium_fonts_desc']!;
-  String get regenerationComplete => _localizedValues[locale.languageCode]!['regeneration_complete']!;
-  String get retry => _localizedValues[locale.languageCode]!['retry']!;
-  String get sampleDiaryContent => _localizedValues[locale.languageCode]!['sample_diary_content']!;
-  String get sampleDiaryTitle => _localizedValues[locale.languageCode]!['sample_diary_title']!;
-  String get search => _localizedValues[locale.languageCode]!['search']!;
-  String get selectPhoto => _localizedValues[locale.languageCode]!['select_photo']!;
-  String get subscribe => _localizedValues[locale.languageCode]!['subscribe']!;
-  String get subscriptionFooter => _localizedValues[locale.languageCode]!['subscription_footer']!;
-  String get subscriptionOptions => _localizedValues[locale.languageCode]!['subscription_options']!;
-  String get timeWeatherSeasonSettings => _localizedValues[locale.languageCode]!['time_weather_season_settings']!;
-  String get timeWeatherSeasonSettingsDesc => _localizedValues[locale.languageCode]!['time_weather_season_settings_desc']!;
-  String get titleLabel => _localizedValues[locale.languageCode]!['title_label']!;
-  String get unlimitedImageGeneration => _localizedValues[locale.languageCode]!['unlimited_image_generation']!;
-  String get unlimitedImageGenerationDesc => _localizedValues[locale.languageCode]!['unlimited_image_generation_desc']!;
-  String get upgradeToPremiumUnlimited => _localizedValues[locale.languageCode]!['upgrade_to_premium_unlimited']!;
-  String get weekly => _localizedValues[locale.languageCode]!['weekly']!;
-  String get yearly => _localizedValues[locale.languageCode]!['yearly']!;
-  String get yearlySubscription => _localizedValues[locale.languageCode]!['yearly_subscription']!;
+  String get dateFormatFull => _get('date_format_full');
+  String get dateFormatMonthDayWeekday => _get('date_format_month_day_weekday');
+  String get adFreeUnlimited => _get('ad_free_unlimited');
+  String get adRemoval => _get('ad_removal');
+  String get adRemovalDesc => _get('ad_removal_desc');
+  String get advancedImageOptions => _get('advanced_image_options');
+  String get advancedImageOptionsDesc => _get('advanced_image_options_desc');
+  String get aiDrawnImage => _get('ai_drawn_image');
+  String get allPremiumFeatures => _get('all_premium_features');
+  String get alreadyPremium => _get('already_premium');
+  String get bestValue => _get('best_value');
+  String get cancelAnytime => _get('cancel_anytime');
+  String get cloudBackupAuto => _get('cloud_backup_auto');
+  String get cloudBackupAutoDesc => _get('cloud_backup_auto_desc');
+  String get confirmDeleteDiary => _get('confirm_delete_diary');
+  String get contentLabel => _get('content_label');
+  String get createAiDiaryButton => _get('create_ai_diary_button');
+  String get createNewDiary => _get('create_new_diary');
+  String get currentlySubscribed => _get('currently_subscribed');
+  String get delete => _get('delete');
+  String get deleteDiary => _get('delete_diary');
+  String get deleteFailed => _get('delete_failed');
+  String get diaryDeleted => _get('diary_deleted');
+  String get edit => _get('edit');
+  String get editDiaryOnly => _get('edit_diary_only');
+  String get editImageAndDiary => _get('edit_image_and_diary');
+  String get emotionAll => _get('emotion_all');
+  String get emotionStats => _get('emotion_stats');
+  String get errorOccurred => _get('error_occurred');
+  String get freeVersion1PhotoOnly => _get('free_version1_photo_only');
+  String get generating => _get('generating');
+  String get imageGallery => _get('image_gallery');
+  String get lifetimeAccess => _get('lifetime_access');
+  String get lifetimeSubscription => _get('lifetime_subscription');
+  String get makeDiarySpecial => _get('make_diary_special');
+  String get max3Photos => _get('max3_photos');
+  String get max3PhotosUpload => _get('max3_photos_upload');
+  String get monthly => _get('monthly');
+  String get monthlySubscription => _get('monthly_subscription');
+  String get myPhoto => _get('my_photo');
+  String get onboardingNext => _get('onboarding_next');
+  String get onboardingPage1Desc => _get('onboarding_page1_desc');
+  String get onboardingPage1Title => _get('onboarding_page1_title');
+  String get onboardingPage2Desc => _get('onboarding_page2_desc');
+  String get onboardingPage2Title => _get('onboarding_page2_title');
+  String get onboardingPage3Desc => _get('onboarding_page3_desc');
+  String get onboardingPage3Title => _get('onboarding_page3_title');
+  String get onboardingPage4Desc => _get('onboarding_page4_desc');
+  String get onboardingPage4Title => _get('onboarding_page4_title');
+  String get onboardingSkip => _get('onboarding_skip');
+  String get onboardingStart => _get('onboarding_start');
+  String get onePhoto => _get('one_photo');
+  String get oneTimePayment => _get('one_time_payment');
+  String get photoUpload => _get('photo_upload');
+  String get photoUploadMax3 => _get('photo_upload_max3');
+  String get photoUploadMax3Desc => _get('photo_upload_max3_desc');
+  String get pleaseSelectPhoto => _get('please_select_photo');
+  String get premiumArtStyles => _get('premium_art_styles');
+  String get premiumArtStylesDesc => _get('premium_art_styles_desc');
+  String get additionalOptions => _get('additional_options');
+  String get premiumStylesUpgradeMessage => _get('premium_styles_upgrade_message');
+  String get premiumFeatures => _get('premium_features');
+  String get premiumFonts => _get('premium_fonts');
+  String get premiumFontsDesc => _get('premium_fonts_desc');
+  String get regenerationComplete => _get('regeneration_complete');
+  String get retry => _get('retry');
+  String get sampleDiaryContent => _get('sample_diary_content');
+  String get sampleDiaryTitle => _get('sample_diary_title');
+  String get search => _get('search');
+  String get selectPhoto => _get('select_photo');
+  String get subscribe => _get('subscribe');
+  String get subscriptionFooter => _get('subscription_footer');
+  String get subscriptionOptions => _get('subscription_options');
+  String get timeWeatherSeasonSettings => _get('time_weather_season_settings');
+  String get timeWeatherSeasonSettingsDesc => _get('time_weather_season_settings_desc');
+  String get titleLabel => _get('title_label');
+  String get unlimitedImageGeneration => _get('unlimited_image_generation');
+  String get unlimitedImageGenerationDesc => _get('unlimited_image_generation_desc');
+  String get upgradeToPremiumUnlimited => _get('upgrade_to_premium_unlimited');
+  String get weekly => _get('weekly');
+  String get yearly => _get('yearly');
+  String get yearlySubscription => _get('yearly_subscription');
 
   // Premium subscription & onboarding
-  String get dateFormatMonth => _localizedValues[locale.languageCode]!['date_format_month']!;
+  String get dateFormatMonth => _get('date_format_month');
+
+  // Image Guide Screen
+  String get imageGuideEffectivePrompt => _get('image_guide_effective_prompt');
+  String get imageGuideDescribeDetail => _get('image_guide_describe_detail');
+  String get imageGuideDescribeDetailExample => _get('image_guide_describe_detail_example');
+  String get imageGuideEmotionMood => _get('image_guide_emotion_mood');
+  String get imageGuideEmotionMoodExample => _get('image_guide_emotion_mood_example');
+  String get imageGuideBackgroundEnv => _get('image_guide_background_env');
+  String get imageGuideBackgroundEnvExample => _get('image_guide_background_env_example');
+  String get imageGuideStyleUsage => _get('image_guide_style_usage');
+  String get imageGuideRealisticTitle => _get('image_guide_realistic_title');
+  String get imageGuideRealisticDesc => _get('image_guide_realistic_desc');
+  String get imageGuideRealisticExample => _get('image_guide_realistic_example');
+  String get imageGuideWatercolorTitle => _get('image_guide_watercolor_title');
+  String get imageGuideWatercolorDesc => _get('image_guide_watercolor_desc');
+  String get imageGuideWatercolorExample => _get('image_guide_watercolor_example');
+  String get imageGuideIllustrationTitle => _get('image_guide_illustration_title');
+  String get imageGuideIllustrationDesc => _get('image_guide_illustration_desc');
+  String get imageGuideIllustrationExample => _get('image_guide_illustration_example');
+  String get imageGuideAnimeTitle => _get('image_guide_anime_title');
+  String get imageGuideAnimeDesc => _get('image_guide_anime_desc');
+  String get imageGuideAnimeExample => _get('image_guide_anime_example');
+  String get imageGuideSketchTitle => _get('image_guide_sketch_title');
+  String get imageGuideSketchDesc => _get('image_guide_sketch_desc');
+  String get imageGuideSketchExample => _get('image_guide_sketch_example');
+  String get imageGuideImpressionistTitle => _get('image_guide_impressionist_title');
+  String get imageGuideImpressionistDesc => _get('image_guide_impressionist_desc');
+  String get imageGuideImpressionistExample => _get('image_guide_impressionist_example');
+  String get imageGuideVintageTitle => _get('image_guide_vintage_title');
+  String get imageGuideVintageDesc => _get('image_guide_vintage_desc');
+  String get imageGuideVintageExample => _get('image_guide_vintage_example');
+  String get imageGuidePremiumStyles => _get('image_guide_premium_styles');
+  String get imageGuidePremiumStylesDesc => _get('image_guide_premium_styles_desc');
+  String get imageGuideAdvancedTips => _get('image_guide_advanced_tips');
+  String get imageGuideCombineKeywords => _get('image_guide_combine_keywords');
+  String get imageGuideCombineKeywordsDesc => _get('image_guide_combine_keywords_desc');
+  String get imageGuideCombineKeywordsExample => _get('image_guide_combine_keywords_example');
+  String get imageGuideMoodWords => _get('image_guide_mood_words');
+  String get imageGuideMoodWordsDesc => _get('image_guide_mood_words_desc');
+  String get imageGuideMoodWordsExample => _get('image_guide_mood_words_example');
+  String get imageGuideTimeWeather => _get('image_guide_time_weather');
+  String get imageGuideTimeWeatherDesc => _get('image_guide_time_weather_desc');
+  String get imageGuideTimeWeatherExample => _get('image_guide_time_weather_example');
+  String get imageGuideAdvancedOptionsCompare => _get('image_guide_advanced_options_compare');
+  String get imageGuideAdvancedOptionsDesc => _get('image_guide_advanced_options_desc');
+  String get imageGuidePremiumOnlyOptions => _get('image_guide_premium_only_options');
+  String get imageGuideBackgroundStyle => _get('image_guide_background_style');
+  String get imageGuideBasicBackground => _get('image_guide_basic_background');
+  String get imageGuideAdvancedBackground => _get('image_guide_advanced_background');
+  String get imageGuideBackgroundChangeDesc => _get('image_guide_background_change_desc');
+  String get imageGuideColorAdjustment => _get('image_guide_color_adjustment');
+  String get imageGuideBasicColor => _get('image_guide_basic_color');
+  String get imageGuideAdvancedColor => _get('image_guide_advanced_color');
+  String get imageGuideColorChangeDesc => _get('image_guide_color_change_desc');
+  String get imageGuideAngleComposition => _get('image_guide_angle_composition');
+  String get imageGuideBasicAngle => _get('image_guide_basic_angle');
+  String get imageGuideAdvancedAngle => _get('image_guide_advanced_angle');
+  String get imageGuideAngleChangeDesc => _get('image_guide_angle_change_desc');
+  String get imageGuideLightingEffect => _get('image_guide_lighting_effect');
+  String get imageGuideBasicLighting => _get('image_guide_basic_lighting');
+  String get imageGuideAdvancedLighting => _get('image_guide_advanced_lighting');
+  String get imageGuideLightingChangeDesc => _get('image_guide_lighting_change_desc');
+  String get imageGuideUpgradePremium => _get('image_guide_upgrade_premium');
+  String get imageGuideUpgradeInSettings => _get('image_guide_upgrade_in_settings');
+  String get imageGuideTapToSettings => _get('image_guide_tap_to_settings');
+  String get imageGuideCaution => _get('image_guide_caution');
+  String get imageGuideCautionContent => _get('image_guide_caution_content');
+  String get imageGuideCannotLoadImage => _get('image_guide_cannot_load_image');
 
   // Emotion name helper method
   String getEmotionName(String? emotion) {
@@ -2729,6 +3572,156 @@ Emitte tantum perspicacitates, nulla alia explanatio necessaria.''',
       default: return styleRealistic;
     }
   }
+
+  // Diary Create Screen - Settings Sections
+  String get basicSettings => _get('basic_settings');
+  String get imageSettings => _get('image_settings');
+  String get advancedFeatures => _get('advanced_features');
+  String get noSelection => _get('no_selection');
+
+  // Image Options - Lighting
+  String get optionLighting => _get('option_lighting');
+  String get lightingNatural => _get('lighting_natural');
+  String get lightingDramatic => _get('lighting_dramatic');
+  String get lightingWarm => _get('lighting_warm');
+  String get lightingCool => _get('lighting_cool');
+  String get lightingSunset => _get('lighting_sunset');
+  String get lightingNight => _get('lighting_night');
+
+  // Image Options - Mood
+  String get optionMood => _get('option_mood');
+  String get moodPeaceful => _get('mood_peaceful');
+  String get moodEnergetic => _get('mood_energetic');
+  String get moodMysterious => _get('mood_mysterious');
+  String get moodNostalgic => _get('mood_nostalgic');
+  String get moodDreamy => _get('mood_dreamy');
+  String get moodMelancholic => _get('mood_melancholic');
+
+  // Image Options - Color
+  String get optionColor => _get('option_color');
+  String get colorVibrant => _get('color_vibrant');
+  String get colorPastel => _get('color_pastel');
+  String get colorMonochrome => _get('color_monochrome');
+  String get colorSepia => _get('color_sepia');
+  String get colorEarthTone => _get('color_earth_tone');
+  String get colorNeon => _get('color_neon');
+
+  // Image Options - Composition
+  String get optionComposition => _get('option_composition');
+  String get compositionCloseUp => _get('composition_close_up');
+  String get compositionWideAngle => _get('composition_wide_angle');
+  String get compositionBirdEye => _get('composition_bird_eye');
+  String get compositionLowAngle => _get('composition_low_angle');
+  String get compositionSymmetrical => _get('composition_symmetrical');
+  String get compositionRuleOfThirds => _get('composition_rule_of_thirds');
+
+  // Image Time Options
+  String get optionTimeLighting => _get('option_time_lighting');
+  String get timeMorning => _get('time_morning');
+  String get timeMorningDesc => _get('time_morning_desc');
+  String get timeNoon => _get('time_noon');
+  String get timeNoonDesc => _get('time_noon_desc');
+  String get timeGolden => _get('time_golden');
+  String get timeGoldenDesc => _get('time_golden_desc');
+  String get timeSunset => _get('time_sunset');
+  String get timeSunsetDesc => _get('time_sunset_desc');
+  String get timeNight => _get('time_night');
+  String get timeNightDesc => _get('time_night_desc');
+  String get timeIndoor => _get('time_indoor');
+  String get timeIndoorDesc => _get('time_indoor_desc');
+
+  // Image Weather Options
+  String get optionWeather => _get('option_weather');
+  String get weatherSunny => _get('weather_sunny');
+  String get weatherSunnyDesc => _get('weather_sunny_desc');
+  String get weatherCloudy => _get('weather_cloudy');
+  String get weatherCloudyDesc => _get('weather_cloudy_desc');
+  String get weatherRainy => _get('weather_rainy');
+  String get weatherRainyDesc => _get('weather_rainy_desc');
+  String get weatherSnowy => _get('weather_snowy');
+  String get weatherSnowyDesc => _get('weather_snowy_desc');
+
+  // Image Season Options
+  String get optionSeason => _get('option_season');
+  String get seasonSpring => _get('season_spring');
+  String get seasonSpringDesc => _get('season_spring_desc');
+  String get seasonSummer => _get('season_summer');
+  String get seasonSummerDesc => _get('season_summer_desc');
+  String get seasonAutumn => _get('season_autumn');
+  String get seasonAutumnDesc => _get('season_autumn_desc');
+  String get seasonWinter => _get('season_winter');
+  String get seasonWinterDesc => _get('season_winter_desc');
+
+  // Perspective Options
+  String get optionPerspective => _get('option_perspective');
+  String get perspectiveFirstPerson => _get('perspective_first_person');
+  String get perspectiveFirstPersonDesc => _get('perspective_first_person_desc');
+  String get perspectiveThirdPerson => _get('perspective_third_person');
+  String get perspectiveThirdPersonDesc => _get('perspective_third_person_desc');
+  String get optionCharacterGender => _get('option_character_gender');
+  String get genderMale => _get('gender_male');
+  String get genderFemale => _get('gender_female');
+  String get genderUnspecified => _get('gender_unspecified');
+
+  // Theme Presets
+  String get optionThemePreset => _get('option_theme_preset');
+  String get freePresets => _get('free_presets');
+  String get premiumPresets => _get('premium_presets');
+  String get presetNatural => _get('preset_natural');
+  String get presetNaturalDesc => _get('preset_natural_desc');
+  String get presetDreamy => _get('preset_dreamy');
+  String get presetDreamyDesc => _get('preset_dreamy_desc');
+  String get presetVintageNostalgia => _get('preset_vintage_nostalgia');
+  String get presetVintageNostalgiaDesc => _get('preset_vintage_nostalgia_desc');
+  String get presetAnimeFantasy => _get('preset_anime_fantasy');
+  String get presetAnimeFantasyDesc => _get('preset_anime_fantasy_desc');
+  String get presetImpressionistGarden => _get('preset_impressionist_garden');
+  String get presetImpressionistGardenDesc => _get('preset_impressionist_garden_desc');
+  String get presetPixelRetro => _get('preset_pixel_retro');
+  String get presetPixelRetroDesc => _get('preset_pixel_retro_desc');
+  String get presetPaperCraft => _get('preset_paper_craft');
+  String get presetPaperCraftDesc => _get('preset_paper_craft_desc');
+  String get presetChildInnocent => _get('preset_child_innocent');
+  String get presetChildInnocentDesc => _get('preset_child_innocent_desc');
+
+  // Auto Settings
+  String get autoAdvancedOptions => _get('auto_advanced_options');
+  String get autoAdvancedOptionsDesc => _get('auto_advanced_options_desc');
+  String get autoConfigApplied => _get('auto_config_applied');
+  String get pleaseWriteDiaryFirst => _get('please_write_diary_first');
+
+  // Premium Dialog Extra
+  String get premiumOnly => _get('premium_only');
+  String get aiImageRegeneration => _get('ai_image_regeneration');
+  String get premiumOnlyMessage => _get('premium_only_message');
+  String get premiumBenefitsTitle => _get('premium_benefits_title');
+  String get unlimitedRegenerationBenefit => _get('unlimited_regeneration_benefit');
+  String get unlimitedRegenerationDesc => _get('unlimited_regeneration_desc');
+  String get adFreeBenefit => _get('ad_free_benefit');
+  String get adFreeDesc => _get('ad_free_desc');
+  String get premiumStylesBenefit => _get('premium_styles_benefit');
+  String get premiumStylesDesc => _get('premium_styles_desc');
+  String get advancedControlBenefit => _get('advanced_control_benefit');
+  String get advancedControlDesc => _get('advanced_control_desc');
+  String get learnAboutPremium => _get('learn_about_premium');
+
+  // Edit Mode
+  String get imageEditPremiumOnly => _get('image_edit_premium_only');
+  String get upgradeForStyles => _get('upgrade_for_styles');
+
+  // Hybrid Ad Model
+  String get congratulations => _get('congratulations');
+  String get watchAdContinue => _get('watch_ad_continue');
+  String get fiveDiariesWritten => _get('five_diaries_written');
+  String get watchAdToCreate => _get('watch_ad_to_create');
+  String get watch30SecAd => _get('watch_30_sec_ad');
+  String get create1Diary => _get('create_1_diary');
+  String get unlimitedWithAds => _get('unlimited_with_ads');
+  String get watchAd => _get('watch_ad');
+  String get adWatchFailed => _get('ad_watch_failed');
+  String get adLoadFailedMessage => _get('ad_load_failed_message');
+  String get adWatchComplete => _get('ad_watch_complete');
+  String get startingDiaryCreation => _get('starting_diary_creation');
 
   static Future<void> setLocale(Locale locale) async {
     final prefs = await SharedPreferences.getInstance();

@@ -1,15 +1,51 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 
 enum ImageSeason {
-  spring('봄', '신록과 꽃이 피어나는 봄'),
-  summer('여름', '푸르고 생기 넘치는 여름'),
-  autumn('가을', '단풍과 따뜻한 색감의 가을'),
-  winter('겨울', '하얀 설경과 차가운 겨울');
+  spring,
+  summer,
+  autumn,
+  winter;
 
-  const ImageSeason(this.displayName, this.description);
+  // AI 프롬프트용 영어 displayName (ai_service.dart에서 사용)
+  String get displayName {
+    switch (this) {
+      case ImageSeason.spring:
+        return 'spring';
+      case ImageSeason.summer:
+        return 'summer';
+      case ImageSeason.autumn:
+        return 'autumn';
+      case ImageSeason.winter:
+        return 'winter';
+    }
+  }
 
-  final String displayName;
-  final String description;
+  String getLocalizedName(AppLocalizations l10n) {
+    switch (this) {
+      case ImageSeason.spring:
+        return l10n.seasonSpring;
+      case ImageSeason.summer:
+        return l10n.seasonSummer;
+      case ImageSeason.autumn:
+        return l10n.seasonAutumn;
+      case ImageSeason.winter:
+        return l10n.seasonWinter;
+    }
+  }
+
+  String getLocalizedDescription(AppLocalizations l10n) {
+    switch (this) {
+      case ImageSeason.spring:
+        return l10n.seasonSpringDesc;
+      case ImageSeason.summer:
+        return l10n.seasonSummerDesc;
+      case ImageSeason.autumn:
+        return l10n.seasonAutumnDesc;
+      case ImageSeason.winter:
+        return l10n.seasonWinterDesc;
+    }
+  }
 }
 
 class ImageSeasonSelector extends StatelessWidget {
@@ -26,6 +62,7 @@ class ImageSeasonSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -38,7 +75,7 @@ class ImageSeasonSelector extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              '계절',
+              l10n.optionSeason,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -83,7 +120,7 @@ class ImageSeasonSelector extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              season.displayName,
+                              season.getLocalizedName(l10n),
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
@@ -91,7 +128,7 @@ class ImageSeasonSelector extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              season.description,
+                              season.getLocalizedDescription(l10n),
                               style: TextStyle(
                                 fontSize: 11,
                                 color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,

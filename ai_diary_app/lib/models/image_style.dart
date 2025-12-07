@@ -3,7 +3,7 @@ import '../l10n/app_localizations.dart';
 
 enum ImageStyle {
   auto('자동 선택', 'analyze the diary content and automatically choose the most appropriate style that matches the mood and context'),
-  realistic('실사 스타일', 'ultra realistic photograph, DSLR camera quality, natural environment, soft natural lighting, documentary photography style, high detail, depth of field'),
+  realistic('실사 스타일', 'photorealistic, ultra realistic photograph, NOT illustration, NOT drawing, NOT painting, real photograph taken by DSLR camera, 8K resolution, natural lighting, professional photography, documentary style, sharp focus, high detail, depth of field, real world scene'),
   watercolor('수채화 스타일', 'traditional watercolor painting technique, paper texture visible, soft wet-on-wet bleeding effects, transparent layered colors, artistic brush marks, dreamy atmosphere'),
   illustration('일러스트 스타일', 'modern digital illustration, flat design, vector graphics, bold geometric shapes, contemporary art poster style, vibrant color palette, clean composition'),
   sketch('스케치 스타일', 'detailed pencil sketch on paper, crosshatching and shading technique, monochrome graphite drawing, hand-drawn illustration style'),
@@ -156,7 +156,7 @@ class ImageStyleSelector extends StatelessWidget {
             child: OutlinedButton.icon(
               onPressed: () => _showPremiumStylesDialog(context),
               icon: const Icon(Icons.add, size: 20),
-              label: const Text('추가 옵션'),
+              label: Text(AppLocalizations.of(context).additionalOptions),
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF667EEA),
                 side: const BorderSide(color: Color(0xFF667EEA)),
@@ -212,9 +212,10 @@ class ImageStyleSelector extends StatelessWidget {
   }
   
   void _showPremiumDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
@@ -222,16 +223,16 @@ class ImageStyleSelector extends StatelessWidget {
           children: [
             Icon(Icons.star, color: Colors.amber, size: 28),
             const SizedBox(width: 8),
-            const Text('프리미엄 전용 스타일'),
+            Text(l10n.premiumArtStyles),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '이 스타일은 프리미엄 구독자만 사용할 수 있어요.',
-              style: TextStyle(fontSize: 16),
+            Text(
+              l10n.premiumOnlyFeatureDesc,
+              style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 16),
             Container(
@@ -243,20 +244,20 @@ class ImageStyleSelector extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '프리미엄 혜택',
-                    style: TextStyle(
+                  Text(
+                    l10n.premiumBenefitsTitle,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 12),
-                  const Text('• 10가지 프리미엄 글꼴'),
-                  const Text('• 6가지 프리미엄 스타일'),
-                  const Text('• 무제한 이미지 생성'),
-                  const Text('• 수정 시 이미지도 재생성 (일기당 1회)'),
-                  const Text('• 고급 이미지 옵션 (조명, 분위기, 색상, 구도)'),
-                  const Text('• 광고 제거'),
+                  Text(l10n.premiumBenefitFonts),
+                  Text(l10n.premiumBenefitStyles),
+                  Text(l10n.premiumBenefitUnlimited),
+                  Text(l10n.premiumBenefitRegenerate),
+                  Text(l10n.premiumBenefitAdvanced),
+                  Text(l10n.premiumBenefitAds),
                 ],
               ),
             ),
@@ -264,22 +265,22 @@ class ImageStyleSelector extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('나중에'),
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l10n.later),
           ),
           FilledButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('설정 > 테스트 모드에서 프리미엄으로 전환할 수 있습니다'),
+                SnackBar(
+                  content: Text(l10n.testModePremiumHint),
                 ),
               );
             },
             style: FilledButton.styleFrom(
               backgroundColor: const Color(0xFF667EEA),
             ),
-            child: const Text('구독하기'),
+            child: Text(l10n.subscribe),
           ),
         ],
       ),
@@ -287,14 +288,15 @@ class ImageStyleSelector extends StatelessWidget {
   }
 
   void _showPremiumStylesDialog(BuildContext context) {
-    final premiumStyles = ImageStyle.values.where((style) => 
-      style != ImageStyle.realistic && 
-      style != ImageStyle.watercolor && 
+    final l10n = AppLocalizations.of(context);
+    final premiumStyles = ImageStyle.values.where((style) =>
+      style != ImageStyle.realistic &&
+      style != ImageStyle.watercolor &&
       style != ImageStyle.auto).toList();
-    
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
@@ -302,7 +304,7 @@ class ImageStyleSelector extends StatelessWidget {
           children: [
             Icon(Icons.star, color: Colors.amber, size: 28),
             const SizedBox(width: 8),
-            const Text('프리미엄 스타일'),
+            Text(l10n.premiumArtStyles),
           ],
         ),
         content: SizedBox(
@@ -311,9 +313,9 @@ class ImageStyleSelector extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                '프리미엄으로 업그레이드하면 다양한 스타일과 글꼴을 사용할 수 있어요!',
-                style: TextStyle(fontSize: 16),
+              Text(
+                l10n.premiumStylesUpgradeMessage,
+                style: const TextStyle(fontSize: 16),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -390,22 +392,22 @@ class ImageStyleSelector extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('나중에'),
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l10n.later),
           ),
           FilledButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('설정 > 테스트 모드에서 프리미엄으로 전환할 수 있습니다'),
+                SnackBar(
+                  content: Text(l10n.testModePremiumHint),
                 ),
               );
             },
             style: FilledButton.styleFrom(
               backgroundColor: Colors.amber,
             ),
-            child: const Text('구독하기'),
+            child: Text(l10n.subscribe),
           ),
         ],
       ),

@@ -1,36 +1,33 @@
 import 'package:flutter/material.dart';
 import '../screens/premium_subscription_screen.dart';
-import '../l10n/app_localizations.dart';
 
 /// 프리미엄 전용 기능 안내 다이얼로그
 void showPremiumRequiredDialog(BuildContext context, {String? featureName}) {
-  final l10n = AppLocalizations.of(context);
-
   showDialog(
     context: context,
-    builder: (dialogContext) => AlertDialog(
-      title: Row(
+    builder: (context) => AlertDialog(
+      title: const Row(
         children: [
-          const Icon(Icons.diamond, color: Colors.amber),
-          const SizedBox(width: 8),
-          Text(l10n.premiumOnlyFeature),
+          Icon(Icons.diamond, color: Colors.amber),
+          SizedBox(width: 8),
+          Text('프리미엄 전용 기능'),
         ],
       ),
       content: Text(
         featureName != null
-            ? l10n.premiumFeatureMessage(featureName)
-            : l10n.premiumFeatureMessageDefault,
+            ? '$featureName은(는) 프리미엄 사용자만 사용할 수 있습니다.'
+            : '이 기능은 프리미엄 사용자만 사용할 수 있습니다.',
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(dialogContext),
-          child: Text(l10n.confirm),
+          onPressed: () => Navigator.pop(context),
+          child: const Text('확인'),
         ),
         FilledButton(
           onPressed: () {
-            Navigator.pop(dialogContext);
+            Navigator.pop(context);
             Navigator.push(
-              dialogContext,
+              context,
               MaterialPageRoute(
                 builder: (context) => const PremiumSubscriptionScreen(),
               ),
@@ -40,7 +37,7 @@ void showPremiumRequiredDialog(BuildContext context, {String? featureName}) {
             backgroundColor: Colors.amber,
             foregroundColor: Colors.white,
           ),
-          child: Text(l10n.premiumUpgrade),
+          child: const Text('프리미엄 업그레이드'),
         ),
       ],
     ),

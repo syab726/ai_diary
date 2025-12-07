@@ -202,7 +202,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
 
       // 단계별 프로그레스 메시지 업데이트
       if (_selectedPhotos.isNotEmpty) {
-        setState(() => _progressMessage = '사진 분위기 분석 중...');
+        setState(() => _progressMessage = AppLocalizations.of(context).photoMoodAnalyzing);
         await Future.delayed(const Duration(milliseconds: 500));
       }
 
@@ -221,7 +221,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
       final Map<String, dynamic> result = await AIService.processEntry(
         context,
         _contentController.text.trim(),
-        selectedStyle.displayName,
+        selectedStyle.promptPrefix,
         subscription.isPremium ? effectiveAdvancedOptions : null,
         _perspectiveOptions,
         subscription.isPremium ? effectiveTime : null,
@@ -424,13 +424,13 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     setState(() {
       _isLoading = true;
       _isGeneratingImage = true;
-      _progressMessage = _selectedPhotos.isNotEmpty ? '사진 분석 중...' : '감정 분석 중...';
+      _progressMessage = _selectedPhotos.isNotEmpty ? AppLocalizations.of(context).photoAnalyzing : AppLocalizations.of(context).analyzingEmotion;
     });
 
     try{
       // 단계별 프로그레스 메시지 업데이트
       if (_selectedPhotos.isNotEmpty) {
-        setState(() => _progressMessage = '사진 분위기 분석 중...');
+        setState(() => _progressMessage = AppLocalizations.of(context).photoMoodAnalyzing);
         await Future.delayed(const Duration(milliseconds: 500));
       }
 
@@ -449,7 +449,7 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
       final Map<String, dynamic> result = await AIService.processEntry(
         context,
         _contentController.text.trim(),
-        style.displayName,
+        style.promptPrefix,
         subscription.isPremium ? advancedOptions : null,
         _perspectiveOptions,
         subscription.isPremium ? _selectedTime : null,
@@ -1390,16 +1390,6 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
     // 일기 내용을 분석해서 고급옵션 자동 설정
     final content = _contentController.text.trim();
 
-    if (content.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('일기 내용을 먼저 작성해주세요'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
     // AI 분석 기반 고급옵션 설정 (조명, 분위기, 색상, 구도만)
     setState(() {
       _advancedOptions = AdvancedImageOptions(
@@ -1414,9 +1404,10 @@ class _DiaryCreateScreenState extends ConsumerState<DiaryCreateScreen> {
       );
     });
 
+    final l10n = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('고급옵션이 자동으로 설정되었습니다 (조명, 분위기, 색상, 구도)'),
+        content: Text(l10n.autoConfigApplied),
         backgroundColor: Colors.green,
       ),
     );

@@ -8,6 +8,7 @@ import '../models/perspective_options.dart';
 import '../models/theme_preset.dart';
 import '../providers/image_style_provider.dart';
 import '../providers/theme_preset_provider.dart';
+import '../l10n/app_localizations.dart';
 
 class TabbedOptionSelector extends ConsumerStatefulWidget {
   final bool isPremium;
@@ -54,6 +55,7 @@ class TabbedOptionSelector extends ConsumerStatefulWidget {
 class _TabbedOptionSelectorState extends ConsumerState<TabbedOptionSelector> {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,7 +64,7 @@ class _TabbedOptionSelectorState extends ConsumerState<TabbedOptionSelector> {
           _buildExpansionTile(
             key: const ValueKey('basic_settings'),
             icon: Icons.auto_awesome,
-            title: '기본 설정',
+            title: l10n.basicSettings,
             isLocked: false,
             child: _buildBasicSettingsContent(),
           ),
@@ -73,7 +75,7 @@ class _TabbedOptionSelectorState extends ConsumerState<TabbedOptionSelector> {
           _buildExpansionTile(
             key: const ValueKey('image_settings'),
             icon: Icons.tune,
-            title: '이미지 설정',
+            title: l10n.imageSettings,
             isLocked: !widget.isPremium,
             child: _buildImageSettingsContent(),
           ),
@@ -84,7 +86,7 @@ class _TabbedOptionSelectorState extends ConsumerState<TabbedOptionSelector> {
           _buildExpansionTile(
             key: const ValueKey('advanced_features'),
             icon: Icons.settings,
-            title: '부가 기능',
+            title: l10n.advancedFeatures,
             isLocked: !widget.isPremium,
             child: _buildAdvancedFeaturesContent(),
           ),
@@ -152,14 +154,14 @@ class _TabbedOptionSelectorState extends ConsumerState<TabbedOptionSelector> {
                     color: Colors.amber,
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.lock, color: Colors.white, size: 12),
-                      SizedBox(width: 4),
+                      const Icon(Icons.lock, color: Colors.white, size: 12),
+                      const SizedBox(width: 4),
                       Text(
-                        '프리미엄',
-                        style: TextStyle(
+                        AppLocalizations.of(context).premium,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
@@ -240,9 +242,9 @@ class _TabbedOptionSelectorState extends ConsumerState<TabbedOptionSelector> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            '고급옵션 자동설정',
-                            style: TextStyle(
+                          Text(
+                            AppLocalizations.of(context).autoAdvancedOptions,
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: Color(0xFF2D3748),
@@ -250,7 +252,7 @@ class _TabbedOptionSelectorState extends ConsumerState<TabbedOptionSelector> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '아래 네 가지 옵션을 일기 내용에 맞게 자동 설정합니다',
+                            AppLocalizations.of(context).autoAdvancedOptionsDesc,
                             style: TextStyle(
                               fontSize: 13,
                               color: Colors.grey.shade600,
@@ -272,10 +274,10 @@ class _TabbedOptionSelectorState extends ConsumerState<TabbedOptionSelector> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildAutoConfigIcon(Icons.wb_sunny, '조명'),
-                      _buildAutoConfigIcon(Icons.mood, '분위기'),
-                      _buildAutoConfigIcon(Icons.palette, '색상'),
-                      _buildAutoConfigIcon(Icons.photo_size_select_large, '구도'),
+                      _buildAutoConfigIcon(Icons.wb_sunny, AppLocalizations.of(context).optionLighting),
+                      _buildAutoConfigIcon(Icons.mood, AppLocalizations.of(context).optionMood),
+                      _buildAutoConfigIcon(Icons.palette, AppLocalizations.of(context).optionColor),
+                      _buildAutoConfigIcon(Icons.photo_size_select_large, AppLocalizations.of(context).optionComposition),
                     ],
                   ),
                 ),
